@@ -1,0 +1,217 @@
+{
+    "permissions": [
+        {
+            "name": "View User",
+            "group_by": "user"
+        },
+        {
+            "name": "Add User",
+            "group_by": "user"
+        },
+        {
+            "name": "Edit User",
+            "group_by": "user"
+        },
+        {
+            "name": "User Income",
+            "group_by": "user"
+        },
+        {
+            "name": "User Expense",
+            "group_by": "user"
+        },
+        {
+            "name": "User Item",
+            "group_by": "user"
+        },
+        {
+            "name": "Delete User",
+            "group_by": "user"
+        },
+
+        {
+            "name": "View Category",
+            "group_by": "category"
+        },
+        {
+            "name": "Add Category",
+            "group_by": "category"
+        },
+        {
+            "name": "Edit Category",
+            "group_by": "category"
+        },
+        {
+            "name": "Delete Category",
+            "group_by": "category"
+        },
+
+        {
+            "name": "View Subscription",
+            "group_by": "subscription"
+        },
+        {
+            "name": "Add Subscription",
+            "group_by": "subscription"
+        },
+        {
+            "name": "Edit Subscription",
+            "group_by": "subscription"
+        },
+        {
+            "name": "Delete Subscription",
+            "group_by": "subscription"
+        },
+
+        {
+            "name": "View Item",
+            "group_by": "item"
+        },
+        {
+            "name": "Add Item",
+            "group_by": "item"
+        },
+        {
+            "name": "Edit Item",
+            "group_by": "item"
+        },
+        {
+            "name": "Delete Item",
+            "group_by": "item"
+        },
+
+        {
+            "name": "View CMS",
+            "group_by": "cms"
+        },
+        {
+            "name": "Add CMS",
+            "group_by": "cms"
+        },
+        {
+            "name": "Edit CMS",
+            "group_by": "cms"
+        },
+        {
+            "name": "Delete CMS",
+            "group_by": "cms"
+        },
+
+        {
+            "name": "View Role & Permission",
+            "group_by": "role_permission"
+        },
+        {
+            "name": "Add Role & Permission",
+            "group_by": "role_permission"
+        },
+        {
+            "name": "Edit Role & Permission",
+            "group_by": "role_permission"
+        },
+        {
+            "name": "Delete Role & Permission",
+            "group_by": "role_permission"
+        },
+
+        {
+            "name": "View Admin User",
+            "group_by": "admin-user"
+        },
+        {
+            "name": "Add Admin User",
+            "group_by": "admin-user"
+        },
+        {
+            "name": "Edit Admin User",
+            "group_by": "admin-user"
+        },
+        {
+            "name": "Delete Admin User",
+            "group_by": "admin-user"
+        },
+
+        {
+            "name": "View Help & Support",
+            "group_by": "help_support"
+        },
+        {
+            "name": "Reply Help & Support",
+            "group_by": "help_support"
+        },
+
+        {
+            "name": "View Broadcast",
+            "group_by": "broadcast"
+        },
+        {
+            "name": "Add Broadcast",
+            "group_by": "broadcast"
+        },
+        {
+            "name": "Edit Broadcast",
+            "group_by": "broadcast"
+        },
+        {
+            "name": "Send Broadcast",
+            "group_by": "broadcast"
+        },
+        {
+            "name": "Delete Broadcast",
+            "group_by": "broadcast"
+        },
+
+        {
+            "name": "View Service Frequency",
+            "group_by": "service_frequency"
+        },
+        {
+            "name": "Add Service Frequency",
+            "group_by": "service_frequency"
+        },
+        {
+            "name": "Edit Service Frequency",
+            "group_by": "service_frequency"
+        },
+        {
+            "name": "Delete Service Frequency",
+            "group_by": "service_frequency"
+        },
+
+        {
+            "name": "View FAQ",
+            "group_by": "faq"
+        },
+        {
+            "name": "Add FAQ",
+            "group_by": "faq"
+        },
+        {
+            "name": "Edit FAQ",
+            "group_by": "faq"
+        },
+        {
+            "name": "Delete FAQ",
+            "group_by": "faq"
+        },
+
+        {
+            "name": "View Transaction",
+            "group_by": "transaction"
+        },
+
+        {
+            "name": "View Setting",
+            "group_by": "setting"
+        },
+        {
+            "name": "Update Setting",
+            "group_by": "setting"
+        },
+
+        {
+            "name": "View Notification",
+            "group_by": "notification"
+        }
+    ]
+}

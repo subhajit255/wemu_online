@@ -1,0 +1,26 @@
+@font-face {
+    font-family: 'Glancyr';
+    src: url('Glancyr-SemiBold.eot');
+    src: url('Glancyr-SemiBold.eot?#iefix') format('embedded-opentype'),
+        url('Glancyr-SemiBold.woff2') format('woff2'),
+        url('Glancyr-SemiBold.woff') format('woff'),
+        url('Glancyr-SemiBold.ttf') format('truetype'),
+        url('Glancyr-SemiBold.svg#Glancyr-SemiBold') format('svg');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Glancyr';
+    src: url('Glancyr-Bold.eot');
+    src: url('Glancyr-Bold.eot?#iefix') format('embedded-opentype'),
+        url('Glancyr-Bold.woff2') format('woff2'),
+        url('Glancyr-Bold.woff') format('woff'),
+        url('Glancyr-Bold.ttf') format('truetype'),
+        url('Glancyr-Bold.svg#Glancyr-Bold') format('svg');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
