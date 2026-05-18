@@ -261,6 +261,11 @@
             $("#preloader").fadeOut(500);
         });
     </script>
+    @if(isset($verificationCode))
+    <script>
+        console.log("Verification Code:", "{{ $verificationCode }}");
+    </script>
+    @endif
 </body>
 
 </html>

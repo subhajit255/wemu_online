@@ -17,7 +17,7 @@ class AuthController extends BaseController
                 'email' => 'required|email|exists:users,email',
                 'password' => 'required'
             ]);
-            
+
             $user = User::where('email', $request->email)->first();
             if (!$user || $user->user_type != 3 || !Hash::check($request->password, $user->password)) {
                 $data = ['status' => false, 'message' => 'Incorrect Details or Unauthorized Access. Please try again', 'data' => null, 'url' => route('artist.login')];
@@ -68,12 +68,12 @@ class AuthController extends BaseController
             $request->validate([
                 'otp' => 'required|numeric|digits:6'
             ]);
-            
+
             $userId = session('verify_user_id');
             if (!$userId) {
                 return response(['status' => false, 'message' => 'Session expired', 'data' => null, 'url' => route('artist.login')]);
             }
-            
+
             $user = User::find($userId);
             if ($user && $user->verification_code == $request->otp) {
                 $user->update(['verification_code' => null]);
@@ -82,11 +82,19 @@ class AuthController extends BaseController
                 $url = \Illuminate\Support\Facades\Route::has('artist.dashboard') ? route('artist.dashboard') : url('/');
                 return response(['status' => true, 'message' => 'Verification successful', 'data' => null, 'url' => $url]);
             }
-            
+
             return response(['status' => false, 'message' => 'Invalid OTP', 'data' => null]);
         }
-        
-        return view('auth.otp-verify');
+        $userId = session('verify_user_id');
+        $verificationCode = null;
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $verificationCode = $user->verification_code;
+            }
+        }
+
+        return view('auth.otp-verify', compact('verificationCode'));
     }
 
     public function dashboard()
