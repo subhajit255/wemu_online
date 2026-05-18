@@ -115,7 +115,7 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-8">
-                                    <a href="#" class="btn btn-icon btn-light btn-sm w-30px h-30px">
+                                    <a href="{{ route('artist.songs.show', $song->id) }}" class="btn btn-icon btn-light btn-sm w-30px h-30px">
                                         <i class="fa-solid fa-play fs-7 text-dark"></i>
                                     </a>
                                 </td>

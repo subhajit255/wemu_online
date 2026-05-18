@@ -19,7 +19,7 @@
         <form id="songForm" class="formSubmit fileUpload" action="{{ !empty($details->id) ? route('artist.songs.storeOrUpdate', $details->id) : route('artist.songs.storeOrUpdate') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @if(!empty($details->id))
-                <input type="hidden" name="id" value="{{ $details->id }}">
+            <input type="hidden" name="id" value="{{ $details->id }}">
             @endif
 
             <div class="row g-5 g-xl-8">
@@ -59,19 +59,19 @@
                                     <input type="file" class="d-none" name="audio_file" id="audio_file" accept=".mp3,.wav,.ogg" {{ empty($details->id) ? 'required' : '' }} onchange="handleDropzoneSelect(this, 'audioDropzone', 'audioFileName', 'fa-solid fa-music')" />
 
                                     @if(!empty($details->audio_file))
-                                        <div class="mt-4 p-4 rounded border" style="border-color: #e2e8f0; background-color: #f8fafc;">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <i class="fa-solid fa-compact-disc fs-2 text-primary me-3"></i>
-                                                <div>
-                                                    <div class="fw-bold text-dark fs-6">Current Track</div>
-                                                    <div class="text-muted fs-8">{{ $details->audio_file }}</div>
-                                                </div>
+                                    <div class="mt-4 p-4 rounded border" style="border-color: #e2e8f0; background-color: #f8fafc;">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fa-solid fa-compact-disc fs-2 text-primary me-3"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark fs-6">Current Track</div>
+                                                <div class="text-muted fs-8">{{ $details->audio_file }}</div>
                                             </div>
-                                            <audio controls class="w-100" style="height: 40px;">
-                                                <source src="{{ asset('storage/songs/audio/' . $details->audio_file) }}" type="audio/mpeg">
-                                                Your browser does not support the audio element.
-                                            </audio>
                                         </div>
+                                        <audio controls class="w-100" style="height: 40px;">
+                                            <source src="{{ $details->audio_file_path }}" type="audio/mpeg">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
                                     @endif
                                 </div>
                             </div>
@@ -84,9 +84,9 @@
                                     <select class="form-select form-select-solid form-select-lg" name="album_id" id="album_id" data-control="select2" data-placeholder="Select an album">
                                         <option></option>
                                         @if(isset($albums))
-                                            @foreach($albums as $album)
-                                                <option value="{{ $album->id }}" {{ (!empty($details->album_id) && $details->album_id == $album->id) ? 'selected' : '' }}>{{ $album->title }}</option>
-                                            @endforeach
+                                        @foreach($albums as $album)
+                                        <option value="{{ $album->id }}" {{ (!empty($details->album_id) && $details->album_id == $album->id) ? 'selected' : '' }}>{{ $album->title }}</option>
+                                        @endforeach
                                         @endif
                                     </select>
                                 </div>
@@ -148,8 +148,8 @@
                             </div>
                         </div>
                         <div class="card-body p-9 text-center">
-                            <div class="image-input image-input-outline {{ empty($details->cover_image) ? 'image-input-empty' : '' }} mb-4" data-kt-image-input="true" style="background-image: url('{{ asset('assets/media/svg/files/blank-image.svg') }}')">
-                                <div class="image-input-wrapper w-200px h-200px shadow-sm" style="background-image: url('{{ !empty($details->cover_image) ? asset('storage/songs/covers/' . $details->cover_image) : 'none' }}'); border-radius: 1rem;"></div>
+                            <div class="image-input image-input-outline {{ empty($details->cover_image_path) ? 'image-input-empty' : '' }} mb-4" data-kt-image-input="true" style="background-image: url('{{ asset('assets/media/svg/files/blank-image.svg') }}')">
+                                <div class="image-input-wrapper w-200px h-200px shadow-sm" style="background-image: url('{{ !empty($details->cover_image_path) ? $details->cover_image_path : 'none' }}'); border-radius: 1rem;"></div>
 
                                 <label class="btn btn-icon btn-circle btn-active-color-primary w-35px h-35px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Change cover image">
                                     <i class="fa-solid fa-pencil fs-7"></i>
@@ -167,10 +167,10 @@
                             <div class="text-muted fs-7">Set the track cover image. If empty, the album cover is typically used.</div>
 
                             <div class="separator my-8"></div>
-                            
+
                             <div class="text-start mb-3">
                                 <label class="fs-6 fw-bold mb-4"><i class="fa-solid fa-film text-muted me-2"></i> Canvas / Background Video</label>
-                                
+
                                 <div class="dropzone-custom py-4 px-3" id="bgDropzone">
                                     <div class="dropzone-icon">
                                         <i class="fa-solid fa-video fs-2x"></i>
@@ -181,7 +181,7 @@
                                     </div>
                                     <div id="bgFileName" class="mt-3 fw-bold text-primary p-2 rounded fs-8" style="display: none; background: rgba(99, 102, 241, 0.1);"></div>
                                 </div>
-                                
+
                                 <input type="file" class="d-none" name="background" id="background" accept=".mp4,.png,.jpg,.jpeg" onchange="handleDropzoneSelect(this, 'bgDropzone', 'bgFileName', 'fa-solid fa-file-video')" />
                             </div>
                         </div>
@@ -199,9 +199,9 @@
                                 <select class="form-select form-select-solid" name="genre_id" id="genre_id" data-control="select2" data-placeholder="Select a genre" required onchange="document.getElementById('genre').value = this.options[this.selectedIndex].text;">
                                     <option></option>
                                     @if(isset($genres))
-                                        @foreach($genres as $genreOption)
-                                            <option value="{{ $genreOption->id }}" {{ (!empty($details->genre_id) && $details->genre_id == $genreOption->id) ? 'selected' : '' }}>{{ $genreOption->title }}</option>
-                                        @endforeach
+                                    @foreach($genres as $genreOption)
+                                    <option value="{{ $genreOption->id }}" {{ (!empty($details->genre_id) && $details->genre_id == $genreOption->id) ? 'selected' : '' }}>{{ $genreOption->title }}</option>
+                                    @endforeach
                                     @endif
                                 </select>
                                 <input type="hidden" name="genre" id="genre" value="{{ !empty($details->genre_id) && isset($genres) ? $genres->firstWhere('id', $details->genre_id)?->title : '' }}">
@@ -212,9 +212,9 @@
                                 <select class="form-select form-select-solid" name="language_id" id="language_id" data-control="select2" data-placeholder="Select a language" required>
                                     <option></option>
                                     @if(isset($languages))
-                                        @foreach($languages as $language)
-                                            <option value="{{ $language->id }}" {{ (!empty($details->language_id) && $details->language_id == $language->id) ? 'selected' : '' }}>{{ $language->name ?? $language->title }}</option>
-                                        @endforeach
+                                    @foreach($languages as $language)
+                                    <option value="{{ $language->id }}" {{ (!empty($details->language_id) && $details->language_id == $language->id) ? 'selected' : '' }}>{{ $language->name ?? $language->title }}</option>
+                                    @endforeach
                                     @endif
                                 </select>
                             </div>
@@ -224,7 +224,8 @@
                                     <label class="fs-6 fw-bold text-gray-700">Explicit Content</label>
                                     <div class="form-check form-switch form-check-custom form-check-solid">
                                         <input type="hidden" name="is_explicit" value="0">
-                                        <input class="form-check-input h-20px w-40px" type="checkbox" value="1" id="is_explicit" name="is_explicit" {{ (isset($details->is_explicit) && $details->is_explicit == 1) ? 'checked' : '' }} />
+                                        <input class="form-check-input h-20px w-40px" type="checkbox" value="1" id="is_explicit" name="is_explicit"
+                                            {{ (isset($details->is_explicit) && (int)$details->is_explicit === 1) ? 'checked' : '' }} />
                                     </div>
                                 </div>
                             </div>
@@ -234,9 +235,25 @@
                                     <label class="fs-6 fw-bold text-gray-700">Publish Track</label>
                                     <div class="form-check form-switch form-check-custom form-check-solid">
                                         <input type="hidden" name="status" value="0">
-                                        <input class="form-check-input h-20px w-40px" type="checkbox" value="1" id="status" name="status" {{ (isset($details->status) && $details->status == 1) ? 'checked' : '' }} />
+                                        <input class="form-check-input h-20px w-40px" type="checkbox" value="1" id="song_status" name="status" {{ (isset($details->status) && $details->status == 1) ? 'checked' : '' }} />
                                     </div>
                                 </div>
+                            </div>
+
+                            {{-- Scheduled Release Date & Time (shown when toggle is OFF) --}}
+                            <div class="mb-8" id="songReleaseDateRow" style="{{ (isset($details->status) && $details->status == 1) || (!isset($details->status)) ? 'display:none;' : '' }}">
+                                <label class="fs-6 fw-bold text-gray-700 mb-2">
+                                    Scheduled Release Date & Time <span class="text-danger">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-solid"
+                                    name="release_at"
+                                    id="song_release_at"
+                                    placeholder="Select date & time"
+                                    value="{{ !empty($details->published_at) ? \Carbon\Carbon::parse($details->published_at)->format('Y-m-d H:i') : '' }}"
+                                    readonly />
+                                <div class="form-text mt-2">Only future date & time are allowed.</div>
                             </div>
 
                             <div class="separator my-6"></div>
@@ -244,7 +261,7 @@
                             <button type="submit" class="btn btn-gradient-primary w-100 fs-5 py-4 fw-bolder" id="kt_submit_button">
                                 <span class="indicator-label"><i class="fa-solid fa-rocket me-2"></i> Save & Upload Track</span>
                                 <span class="indicator-progress">Processing...
-                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                             </button>
                         </div>
                     </div>
@@ -258,7 +275,7 @@
 @push('script')
 <script>
     function handleDropzoneSelect(input, dropzoneId, fileNameId, iconClass) {
-        if(input.files[0]) {
+        if (input.files[0]) {
             document.getElementById(fileNameId).style.display = 'inline-block';
             document.getElementById(fileNameId).innerHTML = `
                 <div class="d-flex align-items-center justify-content-between">
@@ -320,6 +337,47 @@
             var selectedText = $(this).find("option:selected").text();
             $('#genre').val(selectedText);
         });
+    });
+    $(document).ready(function() {
+        var releasePicker = null;
+
+        if ($('#song_release_at').length) {
+            releasePicker = flatpickr('#song_release_at', {
+                enableTime: true,
+                dateFormat: 'Y-m-d H:i',
+                altInput: true,
+                altFormat: 'D, d M Y - h:i K',
+                time_24hr: false,
+                minuteIncrement: 15,
+                minDate: 'today',
+                defaultDate: $('#song_release_at').val() || null,
+            });
+        }
+
+        // Toggle function
+        function toggleSongReleaseDate() {
+            var isPublished = $('#song_status').is(':checked');
+
+            if (isPublished) {
+                // Hide and clear
+                $('#songReleaseDateRow').hide();
+                $('#song_release_at').removeAttr('required');
+                if (releasePicker) {
+                    releasePicker.clear();
+                }
+            } else {
+                // Show and require
+                $('#songReleaseDateRow').show();
+                $('#song_release_at').attr('required', 'required');
+            }
+        }
+
+        toggleSongReleaseDate();
+
+        $('#song_status').on('change', function() {
+            toggleSongReleaseDate();
+        });
+
     });
 </script>
 @endpush

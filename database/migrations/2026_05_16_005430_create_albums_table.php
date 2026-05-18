@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('cover_image')->nullable();
             $table->tinyInteger('is_active')->default(1)->comment('1 = active, 0 = inactive');
             $table->tinyInteger('status')->default(0)->comment('0 = draft, 1 = published');
+            $table->date('release_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

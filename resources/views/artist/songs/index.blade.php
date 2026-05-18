@@ -30,7 +30,8 @@
                                 <th class="min-w-100px">Status</th>
                                 <th class="min-w-100px text-end">Streams</th>
                                 <th class="min-w-100px text-end">Duration</th>
-                                <th class="min-w-150px text-end pe-6 rounded-end">Date</th>
+                                <th class="min-w-150px text-end">Date</th>
+                                <th class="min-w-80px text-end pe-6 rounded-end">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -39,15 +40,21 @@
                                 <td class="ps-6">
                                     <div class="d-flex align-items-center">
                                         <div class="symbol symbol-40px me-3">
-                                            <img src="{{ $song->cover_image_path }}" alt="song Cover" class="w-40px h-40px" style="object-fit: cover;">
+                                            <a href="{{ route('artist.songs.show', $song->id) }}">
+                                                <img src="{{ $song->cover_image_path }}" alt="song Cover" class="w-40px h-40px" style="object-fit: cover;">
+                                            </a>
                                         </div>
                                         <div class="d-flex justify-content-start flex-column">
-                                            <span class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ $song->title }}</span>
+                                            <a href="{{ route('artist.songs.show', $song->id) }}" class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ $song->title }}</a>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="text-dark fw-semibold d-block fs-7">{{ $song->album->title ?? 'N/A' }}</span>
+                                    @if($song->album)
+                                    <a href="{{ route('artist.albums.show', $song->album->id) }}" class="text-dark fw-semibold text-hover-primary d-block fs-7">{{ $song->album->title }}</a>
+                                    @else
+                                    <span class="text-muted fw-semibold d-block fs-7">N/A</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="badge badge-light-{{ $song->status == 1 ? 'success' : 'warning' }} fw-bold px-4 py-2">{{ $song->status == 1 ? 'Published' : 'Draft' }}</span>
@@ -69,13 +76,18 @@
                                         {{ trim($durationStr) }}
                                     </span>
                                 </td>
-                                <td class="text-end pe-6">
+                                <td class="text-end">
                                     <span class="text-dark fw-semibold d-block fs-7">{{ $song->created_at->format('M d, Y') }}</span>
+                                </td>
+                                <td class="text-end pe-6">
+                                    <a href="{{ route('artist.songs.show', $song->id) }}" class="btn btn-icon btn-light btn-sm w-30px h-30px" title="Play / View Details">
+                                        <i class="fa-solid fa-play fs-7 text-dark"></i>
+                                    </a>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center">No songs found</td>
+                                <td colspan="7" class="text-center">No songs found</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -108,7 +120,7 @@
                 </div>
             </div>
             <div class="card-body p-6 pt-3">
-                <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
+                <!-- <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
                     <div class="d-flex align-items-center">
                         <div class="release-item-img me-4"></div>
                         <div class="release-item-info">
@@ -119,9 +131,42 @@
                     <div>
                         <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
                     </div>
-                </div>
-
+                </div> -->
+                @forelse ($upcomingReleases as $upcomingRelease)
                 <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="symbol symbol-40px me-3">
+                            <a href="{{ route('artist.songs.show', $upcomingRelease->id) }}">
+                                <img src="{{ $upcomingRelease->cover_image_path }}" alt="song Cover" class="w-40px h-40px" style="object-fit: cover;">
+                            </a>
+                        </div>
+                        <div class="release-item-info">
+                            <a href="{{ route('artist.songs.show', $upcomingRelease->id) }}" class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ $upcomingRelease->title }}</a>
+                            <p class="text-muted fs-7 m-0">{{ $upcomingRelease->album->title ?? 'Single' }} • Scheduled for {{ $upcomingRelease->published_at ? \Carbon\Carbon::parse($upcomingRelease->published_at)->format('M d, Y') : 'Not Set' }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
+                    </div>
+                </div>
+                @empty
+                <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
+                    <div class="d-flex align-items-center">
+                        <div class="release-item-img me-4">
+
+                        </div>
+                        <div class="release-item-info">
+                            <h4 class="fw-bold text-dark fs-5 mb-1">No upcoming releases</h4>
+                            <p class="text-muted fs-7 m-0">No upcoming releases</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
+                    </div>
+                </div>
+                @endforelse
+
+                <!-- <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
                     <div class="d-flex align-items-center">
                         <div class="release-item-img me-4"></div>
                         <div class="release-item-info">
@@ -145,7 +190,7 @@
                     <div>
                         <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 

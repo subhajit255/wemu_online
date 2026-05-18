@@ -26,9 +26,9 @@
                 <form id="albumForm" class="formSubmit fileUpload" action="{{ !empty($details->id) ? route('artist.albums.storeOrUpdate', $details->id) : route('artist.albums.storeOrUpdate') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @if(!empty($details->id))
-                        <input type="hidden" name="id" value="{{ $details->id }}">
+                    <input type="hidden" name="id" value="{{ $details->id }}">
                     @endif
-                    
+
                     <div class="row mb-8">
                         <div class="col-xl-3">
                             <div class="fs-6 fw-bold mt-2 mb-3">Cover Image {!! empty($details->id) ? '<span class="text-danger">*</span>' : '' !!}</div>
@@ -73,7 +73,7 @@
                             <select class="form-select form-select-solid form-select-lg" name="genre_id" id="genre_id" data-control="select2" data-placeholder="Select a genre" required onchange="document.getElementById('genre').value = this.options[this.selectedIndex].text;">
                                 <option></option>
                                 @foreach($genres as $genreOption)
-                                    <option value="{{ $genreOption->id }}" {{ (!empty($details->genre_id) && $details->genre_id == $genreOption->id) ? 'selected' : '' }}>{{ $genreOption->title }}</option>
+                                <option value="{{ $genreOption->id }}" {{ (!empty($details->genre_id) && $details->genre_id == $genreOption->id) ? 'selected' : '' }}>{{ $genreOption->title }}</option>
                                 @endforeach
                             </select>
                             <input type="hidden" name="genre" id="genre" value="{{ !empty($details->genre_id) ? $genres->firstWhere('id', $details->genre_id)?->title : '' }}">
@@ -106,14 +106,31 @@
                             <div class="form-text mt-3">Published albums will be visible to your audience. Draft albums remain hidden.</div>
                         </div>
                     </div>
-
+                    <div class="row mb-8" id="releaseDateRow" style="{{ (isset($details->status) && $details->status == 1) ? 'display:none;' : '' }}">
+                        <div class="col-xl-3">
+                            <div class="fs-6 fw-bold mt-2 mb-3">
+                                Scheduled Release Date <span class="text-danger">*</span>
+                            </div>
+                            <div class="text-muted fs-7">Pick a future date when this album should go live.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <input
+                                type="date"
+                                class="form-control form-control-solid datepicker"
+                                name="release_date"
+                                id="release_date"
+                                min="{{ now()->addDay()->format('Y-m-d') }}"
+                                value="{{ !empty($details->release_date) ? \Carbon\Carbon::parse($details->release_date)->format('Y-m-d') : '' }}" />
+                            <div class="form-text mt-3">Only future dates are allowed.</div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-xl-3"></div>
                         <div class="col-xl-9">
                             <button type="submit" class="btn btn-primary btn-lg me-3" id="kt_submit_button">
                                 <span class="indicator-label"><i class="fa-solid fa-check me-2"></i> Save Changes</span>
                                 <span class="indicator-progress">Please wait...
-                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                             </button>
                             <a href="{{ route('artist.albums.index') }}" class="btn btn-light btn-lg btn-active-light-primary">Discard</a>
                         </div>
@@ -132,6 +149,34 @@
             var selectedText = $(this).find("option:selected").text();
             $('#genre').val(selectedText);
         });
+    });
+    $(document).ready(function() {
+
+        // Genre hidden field sync
+        $('#genre_id').on('change', function() {
+            $('#genre').val($(this).find("option:selected").text());
+        });
+
+        // Toggle release date field
+        function toggleReleaseDate() {
+            const isPublished = $('#status').is(':checked');
+            if (isPublished) {
+                $('#releaseDateRow').hide();
+                $('#release_date').removeAttr('required').val('');
+            } else {
+                $('#releaseDateRow').show();
+                $('#release_date').attr('required', 'required');
+            }
+        }
+
+        // Run on page load (handles edit mode)
+        toggleReleaseDate();
+
+        // Run on toggle change
+        $('#status').on('change', function() {
+            toggleReleaseDate();
+        });
+
     });
 </script>
 @endpush

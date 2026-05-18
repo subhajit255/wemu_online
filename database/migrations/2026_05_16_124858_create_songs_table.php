@@ -28,10 +28,14 @@ return new class extends Migration
             $table->unsignedInteger('duration')->nullable();
             $table->boolean('is_explicit')->default(0);
             $table->unsignedBigInteger('play_count')->default(0);
+            $table->unsignedBigInteger('likes_count')->default(0);
+            $table->unsignedBigInteger('shares_count')->default(0);
+            $table->unsignedBigInteger('download_count')->default(0);
             $table->string('cover_image')->nullable();
             $table->string('audio_file')->nullable();
             $table->string('background')->nullable()->comment('image/video');
             $table->tinyInteger('status')->default(0)->comment('0=draft, 1=published');
+            $table->timestamp('published_at')->nullable()->comment('date time of song published');
             $table->timestamps();
         });
     }

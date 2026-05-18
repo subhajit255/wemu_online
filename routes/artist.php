@@ -28,6 +28,7 @@ Route::as('artist.')->group(function () {
         Route::controller(SongController::class)->group(function () {
             Route::get('songs', 'index')->name('songs.index');
             Route::match(['get', 'post'], 'songs/add-or-update/{id?}', 'storeOrUpdate')->name('songs.storeOrUpdate');
+            Route::get('songs/details/{id}', 'show')->name('songs.show');
         });
         Route::controller(AlbumController::class)->group(function () {
             Route::match(['get', 'post'], 'albums', 'index')->name('albums.index');

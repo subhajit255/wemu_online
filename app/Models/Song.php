@@ -35,6 +35,10 @@ class Song extends Model
     {
         return $this->belongsTo(Album::class);
     }
+    public function likedUsers()
+    {
+        return $this->belongsToMany(User::class, 'song_likes');
+    }
     public function getCoverImagePathAttribute()
     {
         $filePath = 'storage/song/images/' . $this->cover_image;
@@ -43,7 +47,7 @@ class Song extends Model
         }
         return asset($filePath);
     }
-    public function getAudioPathAttribute()
+    public function getAudioFilePathAttribute()
     {
         $filePath = 'storage/song/audio/' . $this->audio_file;
         if (!$this->audio_file || !file_exists(public_path($filePath))) {
@@ -51,7 +55,7 @@ class Song extends Model
         }
         return asset($filePath);
     }
-    public function getBackgroundPathAttribute()
+    public function getBackgroundFilePathAttribute()
     {
         $filePath = 'storage/song/images/' . $this->background;
         if (!$this->background || !file_exists(public_path($filePath))) {

@@ -17,8 +17,10 @@ class SongController extends BaseController
     use UploadAble;
     public function index()
     {
+        $currentDateTime = date('Y-m-d H:i:s');
         $songs = Song::latest()->paginate(10);
-        return view('artist.songs.index', compact('songs'));
+        $upcomingReleases = Song::where('published_at', '>', $currentDateTime)->get();
+        return view('artist.songs.index', compact('songs', 'upcomingReleases'));
     }
 
     public function storeOrUpdate(Request $request, $id = null)
@@ -75,6 +77,7 @@ class SongController extends BaseController
                     "lyrics"           => $request->lyrics,
                     "status"           => $request->status,
                     "is_explicit"      => $request->is_explicit,
+                    'published_at'     => $request->release_at ?? date('Y-m-d H:i:s'),
                 ];
 
                 // Handle cover image
@@ -159,5 +162,11 @@ class SongController extends BaseController
         $albums    = Album::where('user_id', auth()->id())->latest()->get();
 
         return view('artist.songs.form', compact('details', 'genres', 'languages', 'albums'));
+    }
+
+    public function show($id)
+    {
+        $song = Song::with(['album', 'genre', 'language'])->findOrFail($id);
+        return view('artist.songs.details', compact('song'));
     }
 }

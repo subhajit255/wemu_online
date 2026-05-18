@@ -19,4 +19,8 @@ class Genre extends Model
             $model->uuid = (string) Uuid::generate(4);
         });
     }
+    public function parent()
+    {
+        return $this->belongsTo(Genre::class, 'parent_id');
+    }
 }

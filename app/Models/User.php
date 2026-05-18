@@ -56,6 +56,18 @@ class User extends Authenticatable
         }
         return asset($filePath);
     }
+    public function likedSongs()
+    {
+        return $this->belongsToMany(Song::class, 'song_likes');
+    }
+    public function songs()
+    {
+        return $this->hasMany(Song::class)->latest();
+    }
+    public function albums()
+    {
+        return $this->hasMany(Album::class);
+    }
 
     public function userIncome(): HasMany
     {

@@ -29,6 +29,7 @@ class AlbumController extends BaseController
                     'genre_id' => 'required|exists:genres,id',
                     'status' => 'required|in:0,1', // 0: draft, 1: published
                     'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
+                    'release_date' => 'nullable|date',
                 ]);
                 $message = "Album Updated Successfully";
             } else {
@@ -36,6 +37,7 @@ class AlbumController extends BaseController
                     'title' => 'required|string',
                     'genre_id' => 'required|exists:genres,id',
                     'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
+                    'release_date' => 'nullable|date',
                 ]);
                 $message = "Album Created Successfully";
             }
@@ -51,6 +53,7 @@ class AlbumController extends BaseController
                     'language_id' => $isLanguage->id,
                     'user_id' => auth()->user()->id,
                     'status' => $request->status ?? 0, // 0: draft, 1: published
+                    'release_date' => $request->release_date ?? Date('Y-m-d'),
                 ];
                 if (!empty($request->file)) {
                     $image = $request->file;

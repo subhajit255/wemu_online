@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Song;
 use App\Models\Item;
 use App\Models\Role;
 use App\Models\User;
+use Twilio\Rest\Client;
 use App\Models\Category;
 use App\Models\UserBudget;
 use App\Models\UserIncome;
@@ -16,7 +18,7 @@ use App\Models\UserSubscription;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('isSluggable')) {
     function isSluggable($value)
@@ -291,6 +293,30 @@ if (!function_exists('getServiceFrequencies')) {
     }
 }
 
+if (!function_exists('increaseSongPlayCount')) {
+
+    function increaseSongPlayCount($songId, $userId = null)
+    {
+        // Unique cache key
+        $identifier = $userId ?? request()->ip();
+
+        $cacheKey = "song_play_{$songId}_{$identifier}";
+
+        // Prevent multiple increments within 30 seconds
+        if (Cache::has($cacheKey)) {
+            return false;
+        }
+
+        // Store cache
+        Cache::put($cacheKey, true, now()->addSeconds(5));
+
+        // Atomic DB increment
+        Song::where('id', $songId)
+            ->increment('play_count');
+
+        return true;
+    }
+}
 // if (!function_exists('userExpenseCategoryWise')) {
 //     function userExpenseCategoryWise($userId = null, $month = null)
 //     {
