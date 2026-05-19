@@ -37,12 +37,14 @@ use App\Http\Resources\Api\Auth\ServiceFrequencyCollection;
 use App\Http\Resources\Api\Auth\TodoCollection;
 use App\Http\Resources\AuthResource;
 use App\Models\Todo;
+use App\Traits\UploadAble;
 
 class AuthController extends BaseController
 {
     use CommonFunction;
     use SmsTrait;
     use NotificationTrait;
+    use UploadAble;
 
     public function signup(Request $request)
     {
@@ -185,7 +187,6 @@ class AuthController extends BaseController
             return $this->responseJson($status, $code, $message, $response);
         }
     }
-
     public function loginVerification(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -236,7 +237,56 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    public function myProfile()
+    {
+        try {
+            return $this->responseJson(true, 200, 'My Profile', new AuthResource(auth()->user()));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getFile() . '--' . $e->getLine());
+            return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG'), []);
+        }
+    }
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $user->id . ',id,deleted_at,NULL',
+                'mobile_number' => 'required|numeric|digits_between:8,13|unique:users,mobile_number,' . $user->id . ',id,deleted_at,NULL',
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
+            ]);
+            if ($validator->fails()) {
+                return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+            }
 
+            $updateData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'mobile_number' => $request->mobile_number,
+            ];
+
+            if ($request->hasFile('profile_image')) {
+                $image = $request->file('profile_image');
+                $fileName = uniqid() . '.' . $image->getClientOriginalExtension();
+                $uploaded = $this->uploadOne($image, config('constants.SITE_PROFILE_IMAGE_UPLOAD_PATH'), $fileName, 'public');
+                if ($uploaded) {
+                    // Delete old profile image if it exists
+                    if ($user->profile_image) {
+                        $this->deleteOne(config('constants.SITE_PROFILE_IMAGE_UPLOAD_PATH') . '/' . $user->profile_image);
+                    }
+                    $updateData['profile_image'] = $uploaded;
+                }
+            }
+
+            $user->update($updateData);
+
+            return $this->responseJson(true, 200, 'Profile updated successfully', new AuthResource($user));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getFile() . '--' . $e->getLine());
+            return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG'), (object)[]);
+        }
+    }
     public function logout(Request $request)
     {
         $token = auth()->user()->token();
@@ -276,16 +326,16 @@ class AuthController extends BaseController
                         'verification_code' => $otp
                     ]);
 
-                    try {
-                        Mail::send('mail.verify-otp', ['otp' => $otp], function ($message) use ($userDetails) {
-                            $message->to($userDetails->email);
-                            $message->subject('Verification OTP');
-                        });
-                        $mobileNumber = ($userDetails->phone_code ?? 61) . $userDetails->mobile_number;
-                        sendSms($mobileNumber, $otp);
-                    } catch (\Exception $e) {
-                        //skip mail error
-                    }
+                    // try {
+                    //     Mail::send('mail.verify-otp', ['otp' => $otp], function ($message) use ($userDetails) {
+                    //         $message->to($userDetails->email);
+                    //         $message->subject('Verification OTP');
+                    //     });
+                    //     $mobileNumber = ($userDetails->phone_code ?? 61) . $userDetails->mobile_number;
+                    //     sendSms($mobileNumber, $otp);
+                    // } catch (\Exception $e) {
+                    //     //skip mail error
+                    // }
                     DB::commit();
                     $status = true;
                     $code = 200;
@@ -607,7 +657,6 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
-
     public function forgotPin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -660,7 +709,6 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
-
     public function verifyPin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -702,7 +750,6 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
-
     public function changePin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -737,7 +784,6 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
-
     public function faq()
     {
         try {
@@ -761,7 +807,6 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
-
     public function todoAdd(Request $request)
     {
         $validator = Validator::make($request->all(), [

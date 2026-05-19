@@ -5,6 +5,8 @@ return [
     'SITE_ALBUM_UPLOAD_PATH' => 'album/',
     'SITE_SONG_COVER_IMAGE_UPLOAD_PATH' => 'song/images/',
     'SITE_SONG_UPLOAD_PATH' => 'song/audio/',
+    'SITE_OTHER_IMAGE_UPLOAD_PATH' => 'others/',
+    'SITE_PLAYLIST_COVER_IMAGE_UPLOAD_PATH' => 'playlist/',
     'SITE_GOAL_UPLOAD_PATH' => 'goal/',
     'SITE_BANNER_UPLOAD_PATH' => 'banner/',
     'SITE_NEWS_UPLOAD_PATH' => 'news/',

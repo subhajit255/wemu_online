@@ -29,131 +29,229 @@
             <div class="menu menu-column menu-rounded menu-sub-indention px-3" id="#kt_app_sidebar_menu"
                 data-kt-menu="true" data-kt-menu-expand="false">
 
-                <!-- Dashboard -->
-                <div class="menu-item">
-                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.dashboard') : route('admin.dashboard') }}">
-                        <span class="menu-link {{ request()->routeIs('*.dashboard') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-border-all fs-5"></i></span>
-                            <span class="menu-title">Dashboard</span>
-                        </span>
-                    </a>
-                </div>
+                @if(auth()->check() && in_array(auth()->user()->user_type, [1, 2]))
+                    <!-- ==========================================
+                         SUPER ADMIN & SUB ADMIN SIDEBAR
+                         ========================================== -->
+                    
+                    <!-- Dashboard -->
+                    <div class="menu-item">
+                        <a href="{{ route('admin.dashboard') }}">
+                            <span class="menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-border-all fs-5"></i></span>
+                                <span class="menu-title">Dashboard</span>
+                            </span>
+                        </a>
+                    </div>
 
-                <!-- Music -->
-                <div class="menu-item">
-                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.songs.index') : '#' }}">
-                        <span class="menu-link {{ request()->routeIs('artist.songs.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-music fs-5"></i></span>
-                            <span class="menu-title">Music</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Albums -->
-                <div class="menu-item">
-                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.albums.index') : '#' }}">
-                        <span class="menu-link {{ request()->routeIs('artist.albums.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-compact-disc fs-5"></i></span>
-                            <span class="menu-title">Albums</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Analytics -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
-                            <span class="menu-title">Analytics</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Audience -->
-                <div class="menu-item">
-                    <a href="#">
+                    <!-- Audience Accordion -->
+                    <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('admin.user.*') ? 'here show' : '' }}">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
                             <span class="menu-title">Audience</span>
+                            <span class="menu-arrow"></span>
                         </span>
-                    </a>
-                </div>
-
-                <!-- Royalties -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-sack-dollar fs-5"></i></span>
-                            <span class="menu-title">Royalties</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Promotion -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-bullhorn fs-5"></i></span>
-                            <span class="menu-title">Promotion</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Releases -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
-                            <span class="menu-title">Releases</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Messages -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-envelope fs-5"></i></span>
-                            <span class="menu-title">Messages</span>
-                        </span>
-                    </a>
-                </div>
-
-                <!-- Team -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
-                            <span class="menu-title">Team</span>
-                        </span>
-                    </a>
-                </div>
-
-                <div class="menu-item pt-5">
-                    <div class="menu-content">
-                        <span class="menu-heading fw-bold text-uppercase fs-7 text-muted">System</span>
+                        <div class="menu-sub menu-sub-accordion">
+                            <div class="menu-item">
+                                <a class="menu-link {{ request()->routeIs('admin.user.list') ? 'active' : '' }}" href="{{ route('admin.user.list') }}">
+                                    <span class="menu-bullet">
+                                        <span class="bullet bullet-dot"></span>
+                                    </span>
+                                    <span class="menu-title">Users</span>
+                                </a>
+                            </div>
+                            <div class="menu-item">
+                                <a class="menu-link" href="{{ route('admin.user.list') }}">
+                                    <span class="menu-bullet">
+                                        <span class="bullet bullet-dot"></span>
+                                    </span>
+                                    <span class="menu-title">Artists</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Settings -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
-                            <span class="menu-title">Settings</span>
-                        </span>
-                    </a>
-                </div>
+                    <!-- Subscription -->
+                    <div class="menu-item">
+                        <a href="{{ route('admin.subscription.list') }}">
+                            <span class="menu-link {{ request()->routeIs('admin.subscription.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
+                                <span class="menu-title">Subscription</span>
+                            </span>
+                        </a>
+                    </div>
 
-                <!-- Support -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-life-ring fs-5"></i></span>
-                            <span class="menu-title">Support</span>
-                        </span>
-                    </a>
-                </div>
+                    <!-- CMS -->
+                    <div class="menu-item">
+                        <a href="{{ route('admin.cms.list') }}">
+                            <span class="menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-file-lines fs-5"></i></span>
+                                <span class="menu-title">CMS</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- FAQs -->
+                    <div class="menu-item">
+                        <a href="{{ route('admin.faq.list') }}">
+                            <span class="menu-link {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-circle-question fs-5"></i></span>
+                                <span class="menu-title">FAQs</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Reports -->
+                    <div class="menu-item">
+                        <a href="{{ route('admin.transaction.list') }}">
+                            <span class="menu-link {{ request()->routeIs('admin.transaction.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-chart-pie fs-5"></i></span>
+                                <span class="menu-title">Reports</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
+                                <span class="menu-title">Analytics</span>
+                            </span>
+                        </a>
+                    </div>
+
+                @else
+                    <!-- ==========================================
+                         ARTIST SIDEBAR (KEEP AS IT WAS)
+                         ========================================== -->
+
+                    <!-- Dashboard -->
+                    <div class="menu-item">
+                        <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.dashboard') : route('admin.dashboard') }}">
+                            <span class="menu-link {{ request()->routeIs('*.dashboard') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-border-all fs-5"></i></span>
+                                <span class="menu-title">Dashboard</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Music -->
+                    <div class="menu-item">
+                        <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.songs.index') : '#' }}">
+                            <span class="menu-link {{ request()->routeIs('artist.songs.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-music fs-5"></i></span>
+                                <span class="menu-title">Music</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Albums -->
+                    <div class="menu-item">
+                        <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.albums.index') : '#' }}">
+                            <span class="menu-link {{ request()->routeIs('artist.albums.*') ? 'active' : '' }}">
+                                <span class="menu-icon"><i class="fa-solid fa-compact-disc fs-5"></i></span>
+                                <span class="menu-title">Albums</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
+                                <span class="menu-title">Analytics</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Audience -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
+                                <span class="menu-title">Audience</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Royalties -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-sack-dollar fs-5"></i></span>
+                                <span class="menu-title">Royalties</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Promotion -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-bullhorn fs-5"></i></span>
+                                <span class="menu-title">Promotion</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Releases -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
+                                <span class="menu-title">Releases</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-envelope fs-5"></i></span>
+                                <span class="menu-title">Messages</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Team -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
+                                <span class="menu-title">Team</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item pt-5">
+                        <div class="menu-content">
+                            <span class="menu-heading fw-bold text-uppercase fs-7 text-muted">System</span>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
+                                <span class="menu-title">Settings</span>
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Support -->
+                    <div class="menu-item">
+                        <a href="#">
+                            <span class="menu-link">
+                                <span class="menu-icon"><i class="fa-solid fa-life-ring fs-5"></i></span>
+                                <span class="menu-title">Support</span>
+                            </span>
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

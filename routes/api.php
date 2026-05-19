@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\SongController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +97,8 @@ Route::middleware('auth:api')->group(function () {
     // });
     Route::controller(AuthController::class)->group(function () {
         Route::post('/logout', 'logout')->name('logout');
+        Route::get('my-profile', 'myProfile')->name('my-profile');
+        Route::post('update-profile', 'updateProfile')->name('update-profile');
     });
     Route::controller(MasterController::class)->group(function () {
         Route::post('/song/add-play-history/{id}', 'songsPlayed')->name('song.add-play-history');
@@ -106,5 +109,13 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/liked-songs', 'likedSong')->name('liked.songs');
         Route::get('/made-for-you', 'madeForYouSongs')->name('made.for.you');
         Route::get('/toggle-artist-follow/{artistId}', 'toggleArtistFollow')->name('toggle.artist.follow');
+    });
+    Route::controller(SongController::class)->group(function () {
+        Route::post('/playlist/create-or-update', 'createUpdatePlaylist')->name('playlist.create-or-update');
+        Route::get('/playlist/my-playlists', 'myPlayLists')->name('playlist.my-playlists');
+        Route::post('/playlist/add-remove-song', 'songAddRemovePlayList')->name('playlist.add-remove-song');
+        Route::get('/playlist/details/{playlistId}', 'playListDetails')->name('playlist.details');
+        Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');
+        Route::post('/playlist/bulk-add-remove-song', 'bulkSongAddRemovePlayList')->name('playlist.bulk-add-remove-song');
     });
 });

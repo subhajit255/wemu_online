@@ -124,12 +124,12 @@ class User extends Authenticatable
         return $this->hasMany(UserGoal::class);
     }
 
-    public function hasActiveSubscription(): bool
-    {
-        return UserSubscription::where(['user_id' => $this->id, 'is_active' => 1])
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->where('remaining_activity_count', '>', 0)
-            ->exists();
-    }
+    // public function hasActiveSubscription(): bool
+    // {
+    //     return UserSubscription::where(['user_id' => $this->id, 'is_active' => 1])
+    //         ->where('start_date', '<=', now())
+    //         ->where('end_date', '>=', now())
+    //         ->where('remaining_activity_count', '>', 0)
+    //         ->exists();
+    // }
 }
