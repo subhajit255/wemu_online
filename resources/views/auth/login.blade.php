@@ -21,10 +21,10 @@
         }
 
         /* Artistic Login Styles */
-        body#kt_body {
+                body#kt_body {
             margin: 0;
             font-family: 'Inter', sans-serif;
-            background: #000;
+            background: #060608;
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
@@ -34,32 +34,25 @@
         }
 
         /* Abstract glowing background */
-        .bg-mesh {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+                .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
             background:
-                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.4), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(225, 29, 72, 0.4), transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(37, 99, 235, 0.4), transparent 50%);
-            background-color: #0a0a0a;
-            z-index: -1;
-            animation: breathe 10s ease-in-out infinite alternate;
+                radial-gradient(circle at 12% 20%, rgba(76,29,149,0.42) 0%, transparent 45%),
+                radial-gradient(circle at 88% 80%, rgba(225,29,72,0.36) 0%, transparent 45%),
+                radial-gradient(circle at 55% 50%, rgba(37,99,235,0.28) 0%, transparent 50%);
+            background-color: #060608;
+            animation: bgBreathe 16s ease-in-out infinite alternate;
         }
 
-        @keyframes breathe {
-            0% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
+        @keyframes bgBreathe {
+            0%   { opacity: 0.85; transform: scale(1); }
+            100% { opacity: 1;    transform: scale(1.07); }
         }
+
+        
 
         .login-card {
             background: rgba(255, 255, 255, 0.03);
@@ -306,7 +299,7 @@
                     @if(Route::currentRouteName() !== 'admin.login')
                     <span style="color: rgba(255,255,255,0.4);">
                         Don't have an account?
-                        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#register_form" style="color: #a5b4fc; font-weight: 600;">
+                        <a href="{{ route('artist.register') }}?reset=1" style="color: #a5b4fc; font-weight: 600;">
                             Register now
                         </a>
                     </span>

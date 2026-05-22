@@ -9,7 +9,7 @@
             <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
                 <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                     <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
-                        User Directory
+                        Artist Directory
                     </h1>
                     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
                         <li class="breadcrumb-item text-muted">
@@ -18,17 +18,15 @@
                         <li class="breadcrumb-item">
                             <span class="bullet bg-gray-400 w-5px h-2px"></span>
                         </li>
-                        <li class="breadcrumb-item text-muted">Users</li>
+                        <li class="breadcrumb-item text-muted">Artists</li>
                     </ul>
                 </div>
-                @can('add-user')
                 <div class="d-flex align-items-center gap-2 gap-lg-3">
                     <button type="button" class="btn wemu-btn-add-user goTo d-flex align-items-center gap-2"
-                        data-action="{{ route('admin.user.add') }}">
-                        <i class="fa-solid fa-user-plus fs-6"></i> Add User
+                        data-action="{{ route('admin.artist.add') }}">
+                        <i class="fa-solid fa-guitar fs-6"></i> Add Artist
                     </button>
                 </div>
-                @endcan
             </div>
         </div>
 
@@ -37,20 +35,20 @@
 
                 {{-- ===== Filter Bar ===== --}}
                 <div class="wemu-glass-card mb-6">
-                    <form action="{{ route('admin.user.list') }}" method="GET" id="searchFrm">
+                    <form action="{{ route('admin.artist.list') }}" method="GET" id="searchFrm">
                         <div class="row g-3 align-items-center">
                             <div class="col-md-5">
                                 <div class="wemu-search-bar">
                                     <i class="fa-solid fa-magnifying-glass text-muted"></i>
                                     <input type="text" class="wemu-search-input"
-                                        placeholder="Search users by name, email or mobile…" id="search" name="search"
+                                        placeholder="Search artists by name, email or mobile…" id="search" name="search"
                                         value="{{ Request::get('search') ?? '' }}">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <select name="type" id="type" class="form-select form-select-solid wemu-select actInActCls">
                                     <option value="3">All Statuses</option>
-                                    <option value="1" {{ Request::get('type') == 1 ? 'selected' : '' }}>Active Users</option>
+                                    <option value="1" {{ Request::get('type') == 1 ? 'selected' : '' }}>Active Artists</option>
                                     <option value="2" {{ Request::get('type') == 2 ? 'selected' : '' }}>Suspended</option>
                                 </select>
                             </div>
@@ -58,7 +56,7 @@
                                 <button class="btn wemu-btn-filter searchBtn" type="button" id="button-search">
                                     <i class="fa-solid fa-sliders me-2"></i> Apply
                                 </button>
-                                <button type="button" class="btn btn-light goTo px-5" data-action="{{ route('admin.user.list') }}">
+                                <button type="button" class="btn btn-light goTo px-5" data-action="{{ route('admin.artist.list') }}">
                                     Reset
                                 </button>
                             </div>
@@ -66,13 +64,13 @@
                     </form>
                 </div>
 
-                {{-- ===== User Table ===== --}}
+                {{-- ===== Artist Table ===== --}}
                 <div class="wemu-glass-card p-0">
                     {{-- Table header bar --}}
                     <div class="d-flex align-items-center justify-content-between px-7 py-5" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
                         <div class="d-flex align-items-center gap-3">
-                            <span class="fs-6 fw-bold text-gray-800">User Directory</span>
-                            <span class="badge badge-light-primary fw-semibold">{{ $details->total() }} users</span>
+                            <span class="fs-6 fw-bold text-gray-800">Artist Directory</span>
+                            <span class="badge badge-light-primary fw-semibold">{{ $details->total() }} artists</span>
                         </div>
                         <div class="d-flex align-items-center gap-2 text-muted fs-8">
                             <i class="fa-solid fa-arrow-rotate-right"></i> Live data
@@ -84,9 +82,10 @@
                             <thead>
                                 <tr>
                                     <th class="ps-7">#</th>
-                                    <th>User</th>
+                                    <th>Artist</th>
                                     <th>Contact</th>
-                                    <th class="text-center">Subscription</th>
+                                    <th class="text-center">Songs</th>
+                                    <th class="text-center">Albums</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-end pe-7">Actions</th>
                                 </tr>
@@ -95,20 +94,6 @@
                                 @forelse ($details as $detail)
                                 @php
                                 $rowNum = $loop->iteration + ($details->currentPage() - 1) * $details->perPage();
-                                $subType = strtolower($detail->subscription_type ?? 'individual');
-                                if ($subType === 'duo') {
-                                    $tierLabel = 'Duo';
-                                    $tierIcon = '👥';
-                                    $tierClass = 'wemu-tier-duo';
-                                } elseif ($subType === 'family') {
-                                    $tierLabel = 'Family';
-                                    $tierIcon = '🏠';
-                                    $tierClass = 'wemu-tier-family';
-                                } else {
-                                    $tierLabel = 'Individual';
-                                    $tierIcon = '👤';
-                                    $tierClass = 'wemu-tier-individual';
-                                }
                                 @endphp
                                 <tr class="wemu-listener-row">
 
@@ -124,9 +109,9 @@
                                                 <span class="wemu-avatar-dot {{ $detail->is_active == 1 ? 'wemu-dot-online' : 'wemu-dot-offline' }}"></span>
                                             </div>
                                             <div>
-                                                <a href="{{ route('admin.user.view', $detail->uuid) }}"
+                                                <a href="{{ route('admin.artist.view', $detail->uuid) }}"
                                                     class="fw-bold text-gray-900 text-hover-primary fs-6 d-block">
-                                                    {{ $detail->name ?? 'Unnamed User' }}
+                                                    {{ $detail->name ?? 'Unnamed Artist' }}
                                                 </a>
                                                 <span class="text-muted fs-8">Joined {{ \Carbon\Carbon::parse($detail->created_at)->format('M Y') }}</span>
                                             </div>
@@ -139,8 +124,8 @@
                                             <span class="d-flex align-items-center gap-2 fs-7 text-gray-800">
                                                 <i class="fa-solid fa-envelope text-gray-400 fs-9"></i>
                                                 {{ $detail->email ?? '—' }}
-                                                @if ($detail->email_verified == 1)
-                                                <span class="wemu-verified-badge">✓</span>
+                                                @if ($detail->email_verified == 1 || $detail->is_verified == 1)
+                                                <span class="wemu-verified-badge" style="background: #3b82f6;">✓</span>
                                                 @endif
                                             </span>
                                             <span class="d-flex align-items-center gap-2 fs-8 text-muted">
@@ -150,10 +135,17 @@
                                         </div>
                                     </td>
 
-                                    {{-- Subscription (Dynamic) --}}
+                                    {{-- Songs Count --}}
                                     <td class="text-center">
-                                        <span class="wemu-tier-pill {{ $tierClass }}">
-                                            {{ $tierIcon }} {{ $tierLabel }}
+                                        <span class="badge badge-light-success fw-bold px-3 py-2 fs-7">
+                                            <i class="fa-solid fa-music me-1"></i> {{ $detail->songs_count ?? 0 }}
+                                        </span>
+                                    </td>
+
+                                    {{-- Albums Count --}}
+                                    <td class="text-center">
+                                        <span class="badge badge-light-primary fw-bold px-3 py-2 fs-7">
+                                            📀 {{ $detail->albums_count ?? 0 }}
                                         </span>
                                     </td>
 
@@ -183,18 +175,15 @@
                                         <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4"
                                             data-kt-menu="true">
                                             <div class="menu-item px-3">
-                                                <a class="menu-link px-3" href="{{ route('admin.user.view', $detail->uuid) }}">
+                                                <a class="menu-link px-3" href="{{ route('admin.artist.view', $detail->uuid) }}">
                                                     <i class="fa-solid fa-eye me-2 text-primary"></i> View Profile
                                                 </a>
                                             </div>
-                                            @can('edit-user')
                                             <div class="menu-item px-3">
-                                                <a class="menu-link px-3" href="{{ route('admin.user.edit', $detail->uuid) }}">
+                                                <a class="menu-link px-3" href="{{ route('admin.artist.edit', $detail->uuid) }}">
                                                     <i class="fa-solid fa-pen me-2 text-warning"></i> Edit Details
                                                 </a>
                                             </div>
-                                            @endcan
-                                            @can('delete-user')
                                             <div class="separator my-1"></div>
                                             <div class="menu-item px-3">
                                                 <a href="javascript:void(0)" data-table="users"
@@ -204,18 +193,17 @@
                                                     <i class="fa-solid fa-trash me-2"></i> Remove
                                                 </a>
                                             </div>
-                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-16">
+                                    <td colspan="7" class="text-center py-16">
                                         <div class="d-flex flex-column align-items-center gap-4">
-                                            <div class="wemu-empty-icon">
-                                                <i class="fa-solid fa-user-slash text-gray-300 fs-1"></i>
+                                            <div class="wemu-empty-icon" style="background: rgba(59, 130, 246, 0.05);">
+                                                <i class="fa-solid fa-guitar text-primary fs-1"></i>
                                             </div>
-                                            <p class="text-gray-500 fw-bold fs-5 m-0">No users found</p>
+                                            <p class="text-gray-500 fw-bold fs-5 m-0">No artists found</p>
                                             <p class="text-muted fs-7 m-0">Try adjusting your search or filter</p>
                                         </div>
                                     </td>
@@ -229,7 +217,7 @@
                     @if ($details->hasPages())
                     <div class="d-flex align-items-center justify-content-between px-7 py-5" style="border-top: 1px solid rgba(0,0,0,0.04);">
                         <span class="fs-7 text-muted fw-semibold">
-                            Showing {{ $details->firstItem() }}–{{ $details->lastItem() }} of {{ $details->total() }} users
+                            Showing {{ $details->firstItem() }}–{{ $details->lastItem() }} of {{ $details->total() }} artists
                         </span>
                         <div>
                             {!! $details->withQueryString()->links('pagination::bootstrap-5') !!}

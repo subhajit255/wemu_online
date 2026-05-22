@@ -237,6 +237,72 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    public function loginViaEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), []);
+        }
+
+        DB::beginTransaction();
+        try {
+            if (auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
+                $user = auth()->user();
+                $userRole = Role::where('slug', 'user')->first();
+
+                if ($user->user_type != $userRole->id) {
+                    $status = false;
+                    $code = 200;
+                    $response = [];
+                    $message = 'Account not found';
+                    return $this->responseJson($status, $code, $message, $response);
+                }
+
+                if ($user->is_active == 0) {
+                    $status = false;
+                    $code = 200;
+                    $response = [];
+                    $message = "Your account is not active. Contact to admin";
+                    return $this->responseJson($status, $code, $message, $response);
+                }
+
+                $user->update([
+                    'fcm_token' => $request->fcm_token ?? null,
+                    'device_type' => $request->device_type ?? 1,
+                ]);
+
+                DB::commit();
+                $token = $user->createToken('Login Successfully')->accessToken;
+
+                if ($token) {
+                    $status = true;
+                    $code = 200;
+                    $response = ['token' => $token, 'user' => new AuthResource($user)];
+                    $message = 'Login Successfully';
+                } else {
+                    $status = false;
+                    $code = 500;
+                    $response = [];
+                    $message = 'Something went wrong';
+                }
+            } else {
+                $status = false;
+                $code = 422;
+                $response = [];
+                $message = 'Invalid email or password';
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            $status = false;
+            $code = 500;
+            $response = ['Message' => $th->getMessage(), 'File Path' => $th->getFile(), 'Line Number' => $th->getLine()];
+            $message = config('constants.CATCH_ERROR_MSG');
+        }
+        return $this->responseJson($status, $code, $message, $response);
+    }
     public function myProfile()
     {
         try {

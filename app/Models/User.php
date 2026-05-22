@@ -124,6 +124,26 @@ class User extends Authenticatable
         return $this->hasMany(UserGoal::class);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(ArtistProfile::class);
+    }
+
+    public function preference()
+    {
+        return $this->hasOne(ArtistPreference::class);
+    }
+
+    public function verification()
+    {
+        return $this->hasOne(ArtistVerification::class);
+    }
+
+    public function socialLink()
+    {
+        return $this->hasOne(SocialLink::class);
+    }
+
     // public function hasActiveSubscription(): bool
     // {
     //     return UserSubscription::where(['user_id' => $this->id, 'is_active' => 1])

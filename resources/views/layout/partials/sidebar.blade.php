@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- Audience Accordion -->
-                    <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ request()->routeIs('admin.user.*') ? 'here show' : '' }}">
+                    <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.user.*') || request()->routeIs('admin.artist.*')) ? 'here show' : '' }}">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
                             <span class="menu-title">Audience</span>
@@ -61,7 +61,7 @@
                                 </a>
                             </div>
                             <div class="menu-item">
-                                <a class="menu-link" href="{{ route('admin.user.list') }}">
+                                <a class="menu-link {{ request()->routeIs('admin.artist.list') ? 'active' : '' }}" href="{{ route('admin.artist.list') }}">
                                     <span class="menu-bullet">
                                         <span class="bullet bullet-dot"></span>
                                     </span>

@@ -16,11 +16,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/cdn/toastr.css') }}" />
     <script src="{{ asset('assets/js/custom_js/cdn/jquery.min.js') }}"></script>
-    <style>
-        .w-md-600px {
-            width: 100% !important;
-        }
-    </style>
+    
 </head>
 
 <body id="kt_body" class="app-blank bgi-size-cover bgi-position-center">
@@ -28,11 +24,7 @@
         document.documentElement.setAttribute("data-bs-theme", 'light');
     </script>
     <div class="d-flex flex-column flex-root" id="kt_app_root">
-        <style>
-            body {
-                background-image: url({{ asset('assets/media/auth/bg10.jpeg') }});
-            }
-        </style>
+        
         <div class="d-flex flex-column flex-lg-row flex-column-fluid">
             <div class="d-flex flex-lg-row-fluid login_left">
                 <div class="d-flex flex-column flex-center pb-0 pb-lg-10 p-10 w-100">

@@ -6,7 +6,7 @@
                 <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
                     <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                         <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
-                            Customer {{ !empty($details) ? 'Edit' : 'Add' }}</h1>
+                            Artist {{ !empty($details) ? 'Edit' : 'Add' }}</h1>
                         <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
                             <li class="breadcrumb-item text-muted">
                                 <a href="{{ route('admin.dashboard') }}" class="text-muted text-hover-primary">Dashboard</a>
@@ -15,7 +15,7 @@
                                 <span class="bullet bg-gray-400 w-5px h-2px"></span>
                             </li>
                             <li class="breadcrumb-item text-muted">
-                                <a href="{{ route('admin.user.list') }}" class="text-muted text-hover-primary">Customer</a>
+                                <a href="{{ route('admin.artist.list') }}" class="text-muted text-hover-primary">Artist</a>
                             </li>
                         </ul>
                     </div>
@@ -26,14 +26,13 @@
                     <div class="card">
                         <div class="card-body pt-6">
                             <div class="container">
-                                <form id="userForm" action="{{ route('admin.user.add') }}" method="POST"
+                                <form id="userForm" action="{{ route('admin.artist.add') }}" method="POST"
                                     class="formSubmit fileUpload" enctype="multipart/form-data">
                                     <input type="hidden" name="id" name="id" value="{{ $details->id ?? null }}">
                                     <div class="row pt-2">
                                         <div class="col-md-6">
                                             <label>
-                                                <span class="label_title">User Image</span>
-                                                {{-- <span class="text-danger">*</span> --}}
+                                                <span class="label_title">Artist Profile Image</span>
                                             </label>
                                             <div class="fv-row">
                                                 @if (!empty($details->profile_image))
@@ -85,8 +84,7 @@
                                                     </span>
                                                 </div>
                                                 <div class="form-text" style="font-size: 10px; color: #000 !important;">
-                                                    Allowed file
-                                                    types: png, jpg, jpeg.
+                                                    Allowed file types: png, jpg, jpeg.
                                                 </div>
                                             </div>
                                         </div>
@@ -94,18 +92,18 @@
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="name" class="label-style">Name</label>
+                                                        <label for="name" class="label-style">Artist Name</label>
                                                         <span class="text-danger">*</span>
                                                         <input type="text" class="form-control fromAlias"
-                                                            placeholder="Enter Name" name="name" id="name"
+                                                            placeholder="Enter Artist Name" name="name" id="name"
                                                             value="{{ $details->name ?? null }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 pt-4">
                                                     <div class="form-group">
-                                                        <label for="username" class="label-style">Username</label>
+                                                        <label for="username" class="label-style">Username / Handle</label>
                                                         <input type="text" class="form-control toAlias"
-                                                            placeholder="Enter Slug" name="username" id="username"
+                                                            placeholder="Enter username handle" name="username" id="username"
                                                             value="{{ $details->username ?? null }}">
                                                     </div>
                                                 </div>
@@ -125,23 +123,10 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="email" class="label-style">Email</label>
+                                                <label for="email" class="label-style">Email Address</label>
                                                 <span class="text-danger">*</span>
-                                                <input type="text" class="form-control" placeholder="Enter Email"
+                                                <input type="text" class="form-control" placeholder="Enter Email Address"
                                                     name="email" id="email" value="{{ $details->email ?? null }}">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row pt-4">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="subscription_type" class="label-style">Subscription Type</label>
-                                                <select name="subscription_type" id="subscription_type" class="form-select form-select-solid wemu-select">
-                                                    <option value="individual" {{ (!empty($details) && ($details->subscription_type ?? 'individual') == 'individual') ? 'selected' : '' }}>👤 Individual</option>
-                                                    <option value="duo" {{ (!empty($details) && ($details->subscription_type ?? '') == 'duo') ? 'selected' : '' }}>👥 Duo</option>
-                                                    <option value="family" {{ (!empty($details) && ($details->subscription_type ?? '') == 'family') ? 'selected' : '' }}>🏠 Family</option>
-                                                </select>
                                             </div>
                                         </div>
                                     </div>

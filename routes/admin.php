@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ArtistController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CouponController;
@@ -66,6 +67,14 @@ Route::as('admin.')->group(function () {
             Route::any('income/{uuid?}', 'income')->name('income')->can('user-income');
             Route::any('expense/{uuid?}', 'expense')->name('expense')->can('user-expense');
             Route::any('item/{uuid?}', 'item')->name('item')->can('user-item');
+        });
+        Route::controller(ArtistController::class)->as('artist.')->prefix('artist')->group(function () {
+            Route::get('list', 'index')->name('list');
+            Route::get('view/{uuid}', 'view')->name('view');
+            Route::any('add', 'add')->name('add');
+            Route::any('edit/{uuid}', 'add')->name('edit');
+            Route::post('approve/{uuid}', 'approve')->name('approve');
+            Route::post('reject/{uuid}', 'reject')->name('reject');
         });
         Route::controller(CmsController::class)->as('cms.')->prefix('cms')->group(function () {
             Route::get('list', 'index')->name('list')->can('view-cms');

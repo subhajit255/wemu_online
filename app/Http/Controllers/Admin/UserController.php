@@ -19,7 +19,7 @@ class UserController extends BaseController
     use UploadAble;
     public function index(Request $request)
     {
-        $query = User::where('user_type', 3)->latest();
+        $query = User::where('user_type', 4)->latest();
         if (($request->type == 1 || $request->type == 2) && $request->type != null) {
             $query->where('is_active', $request->type == 2 ? 0 : 1);
         }
@@ -42,6 +42,7 @@ class UserController extends BaseController
                     'email' => 'required|email|unique:users,email,' . $id,
                     'mobile_number' => 'required|numeric|unique:users,mobile_number,' . $id,
                     'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
+                    'subscription_type' => 'nullable|string|in:individual,duo,family',
                 ]);
                 $message = "User Updated Successfully";
             } else {
@@ -50,6 +51,7 @@ class UserController extends BaseController
                     'email' => 'required|email|unique:users,email',
                     'mobile_number' => 'required|numeric|digits:10|unique:users,mobile_number',
                     'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000',
+                    'subscription_type' => 'nullable|string|in:individual,duo,family',
                 ]);
                 $message = "User Created Successfully";
             }
@@ -62,7 +64,8 @@ class UserController extends BaseController
                     'username' => $request->username,
                     "mobile_number" => $request->mobile_number,
                     "email" => $request->email,
-                    'user_type' => 3,
+                    'user_type' => 4, // Customers are user_type = 4
+                    'subscription_type' => $request->subscription_type ?? 'individual',
                     'is_approve' => 1,
                     'is_verified' => 1,
                     "password" => bcrypt($password)
