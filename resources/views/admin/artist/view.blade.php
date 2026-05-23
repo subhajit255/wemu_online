@@ -860,7 +860,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@push('script')
     <script>
         // High fidelity document zoom viewer
         function openLightbox(imgSrc, captionText) {

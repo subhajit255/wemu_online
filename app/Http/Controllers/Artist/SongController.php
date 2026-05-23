@@ -18,8 +18,8 @@ class SongController extends BaseController
     public function index()
     {
         $currentDateTime = date('Y-m-d H:i:s');
-        $songs = Song::latest()->paginate(10);
-        $upcomingReleases = Song::where('published_at', '>', $currentDateTime)->get();
+        $songs = Song::where('user_id', auth()->user()->id)->latest()->paginate(10);
+        $upcomingReleases = Song::where('user_id', auth()->user()->id)->where('published_at', '>', $currentDateTime)->get();
         return view('artist.songs.index', compact('songs', 'upcomingReleases'));
     }
 

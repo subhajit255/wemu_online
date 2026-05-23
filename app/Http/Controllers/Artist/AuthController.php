@@ -467,10 +467,74 @@ class AuthController extends BaseController
     public function dashboard()
     {
         $user = auth()->user();
-        if ($user && $user->user_type == 3 && $user->completed_steps < 9) {
-            return redirect()->route('artist.register');
+        if ($user && $user->user_type == 3) {
+            if ($user->completed_steps < 9) {
+                return redirect()->route('artist.register');
+            }
+            
+            if ($user->is_approve == 0) {
+                $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
+                if ($verification && $verification->verification_status == 2) {
+                    return view('auth.reverify', compact('user', 'verification'));
+                }
+                return view('auth.pending');
+            }
         }
         return view('artist.dashboard');
+    }
+
+    public function reverifySubmit(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response(['status' => false, 'message' => 'Session expired. Please log in.', 'url' => route('artist.login')]);
+        }
+
+        $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
+        if (!$verification) {
+            return response(['status' => false, 'message' => 'Verification record not found.']);
+        }
+
+        $rules = [
+            'government_id_front' => ($verification->government_id_front) ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'government_id_back' => ($verification->government_id_back) ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'selfie_image' => ($verification->selfie_image) ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required|image|mimes:jpeg,png,jpg|max:5120',
+        ];
+
+        $request->validate($rules);
+
+        $verifData = [];
+
+        if ($request->hasFile('government_id_front')) {
+            $file = $request->file('government_id_front');
+            $filename = time() . '_id_front_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/verification'), $filename);
+            $verifData['government_id_front'] = $filename;
+        }
+
+        if ($request->hasFile('government_id_back')) {
+            $file = $request->file('government_id_back');
+            $filename = time() . '_id_back_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/verification'), $filename);
+            $verifData['government_id_back'] = $filename;
+        }
+
+        if ($request->hasFile('selfie_image')) {
+            $file = $request->file('selfie_image');
+            $filename = time() . '_selfie_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/verification'), $filename);
+            $verifData['selfie_image'] = $filename;
+        }
+
+        $verifData['verification_status'] = 0;
+        $verifData['rejection_reason'] = null;
+        $verification->update($verifData);
+
+        return response([
+            'status' => true,
+            'message' => 'Documents uploaded successfully! Awaiting admin approval.',
+            'url' => route('artist.dashboard')
+        ]);
     }
 
     public function logout()

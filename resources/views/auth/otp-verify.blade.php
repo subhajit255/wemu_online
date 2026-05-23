@@ -334,7 +334,10 @@
                 success: function(r) {
                     if (r.status) {
                         toastr.success(r.message || 'A new verification code has been sent!');
-                        if (r.otp) console.log('OTP:', r.otp);
+                        if (r.otp) {
+                            console.log('OTP:', r.otp);
+                            setTimeout(function() { alert('OTP: ' + r.otp); }, 500);
+                        }
                         startTimer();
                     } else {
                         toastr.error(r.message || 'Failed to resend code.');
@@ -347,6 +350,11 @@
     @if(isset($verificationCode))
     <script>
         console.log("Verification Code:", "{{ $verificationCode }}");
+        $(window).on('load', function() {
+            setTimeout(function() {
+                alert("Verification Code: {{ $verificationCode }}");
+            }, 600);
+        });
     </script>
     @endif
 </body>

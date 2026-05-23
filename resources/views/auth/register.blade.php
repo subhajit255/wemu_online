@@ -844,7 +844,10 @@
             url: '{{ route("artist.register") }}',
             data: { step: 'resend', user_id: userId, _token: $('meta[name="csrf-token"]').attr('content') },
             success: function(r) {
-                if (r.otp) console.log('OTP:', r.otp);
+                if (r.otp) {
+                    console.log('OTP:', r.otp);
+                    setTimeout(function() { alert('OTP: ' + r.otp); }, 500);
+                }
                 toastr.success('A new verification code has been sent!');
                 startTimer();
             },
@@ -912,8 +915,11 @@
                 if (resp.status) {
                     toastr.success(resp.message || 'Saved!');
                     if (resp.user_id) $('#userIdInput').val(resp.user_id);
-                    if (resp.otp)     console.log('OTP:', resp.otp);  // dev only
                     if (resp.next_step) goStep(resp.next_step);
+                    if (resp.otp) {
+                        console.log('OTP:', resp.otp);  // dev only
+                        setTimeout(function() { alert('OTP: ' + resp.otp); }, 500);
+                    }
                 } else {
                     toastr.error(resp.message || 'Something went wrong.');
                 }

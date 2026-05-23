@@ -23,6 +23,7 @@ Route::as('artist.')->group(function () {
         Route::match(['get', 'post'], 'otp-verify', 'otpVerify')->name('otp.verify');
         Route::match(['get', 'post'], 'logout', 'logout')->name('logout');
         Route::get('dashboard', 'dashboard')->name('dashboard');
+        Route::post('reverify', 'reverifySubmit')->name('reverify.submit');
     });
     Route::middleware(['auth'])->group(function () {
         Route::controller(SongController::class)->group(function () {
