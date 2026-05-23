@@ -753,17 +753,17 @@ if (!function_exists('increaseSongPlayCount')) {
 //         ]);
 //     }
 // }
-// if (!function_exists('isActiveSubscription')) {
-//     function isActiveSubscription($subscriptionId)
-//     {
-//         $returnData = true;
-//         $userActiveSubscription = UserSubscription::where('subscription_id', $subscriptionId)->where('start_date', '<=', Carbon::now()->format('Y-m-d'))->where('end_date', '>=', Carbon::now()->format('Y-m-d'))->first();
-//         if ($userActiveSubscription) {
-//             $returnData = false;
-//         }
-//         return $returnData;
-//     }
-// }
+if (!function_exists('isActiveSubscription')) {
+    function isActiveSubscription($subscriptionId)
+    {
+        $returnData = true;
+        $userActiveSubscription = UserSubscription::where('subscription_id', $subscriptionId)->where('started_on', '<=', Carbon::now()->format('Y-m-d'))->where('ended_at', '>=', Carbon::now()->format('Y-m-d'))->first();
+        if ($userActiveSubscription) {
+            $returnData = false;
+        }
+        return $returnData;
+    }
+}
 
 // if (!function_exists('addFreeSubscription')) {
 //     function addFreeSubscription($userId)

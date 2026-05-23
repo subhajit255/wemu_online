@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use App\Models\Subscription;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
@@ -25,39 +27,45 @@ class SubscriptionController extends BaseController
             if (!empty($id)) {
                 $message = "Subscription Updated Successfully";
                 $request->validate([
-                    'title' => 'required|string|unique:subscriptions,title,' . $id,
-                    'type' => 'required|string|digits_between:1,4',
-                    'activity_count' => 'required|numeric',
-                    'mrp' => 'required|numeric'
+                    'name' => [
+                        'required',
+                        'string',
+                        Rule::unique('subscriptions', 'name')->ignore($id)->whereNull('deleted_at')
+                    ],
+                    'available_for' => 'required|numeric|in:1,2',
+                    'interval' => 'required|numeric|in:1,2',
+                    'price' => 'required|numeric',
+                    'currency' => 'required|string',
                 ]);
             } else {
                 $message = "Subscription Created Successfully";
                 $request->validate([
-                    'title' => 'required|string|unique:subscriptions,title',
-                    'type' => 'required|string|digits_between:1,4',
-                    'activity_count' => 'required|numeric',
-                    'mrp' => 'required|numeric'
+                    'name' => [
+                        'required',
+                        'string',
+                        Rule::unique('subscriptions', 'name')->whereNull('deleted_at')
+                    ],
+                    'available_for' => 'required|numeric|in:1,2',
+                    'interval' => 'required|numeric|in:1,2',
+                    'price' => 'required|numeric',
+                    'currency' => 'required|string',
                 ]);
             }
 
             DB::beginTransaction();
             try {
-                $price = $request->mrp;
-                if (!empty($request->discount)) {
-                    $price = (float)$request->mrp - ((float)$request->mrp * (int) $request->discount / 100);
-                }
                 $postData = [
-                    "title" => $request->title,
-                    "type" => $request->type,
-                    "activity_count" => $request->activity_count,
-                    "mrp" => $request->mrp,
-                    "discount" => $request->discount,
-                    "price" => $price ?? $request->mrp,
+                    "name" => $request->name,
+                    "slug" => Str::slug($request->name),
+                    "available_for" => $request->available_for,
+                    "interval" => $request->interval,
+                    "price" => $request->price,
+                    "currency" => $request->currency,
                     "description" => $request->description,
+                    "features" => $request->features,
                 ];
                 $details = Subscription::updateOrCreate(['id' => $id], $postData);
                 DB::Commit();
-
             } catch (\Throwable $th) {
                 DB::rollback();
                 $status = false;

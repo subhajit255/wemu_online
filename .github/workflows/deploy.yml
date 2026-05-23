@@ -27,7 +27,7 @@ jobs:
             git pull origin main
 
             echo "🔧 Installing dependencies..."
-            composer install --no-dev --optimize-autoloader
+            composer update --ignore-platform-reqs
 
             echo "⚙️ Caching config, routes, views..."
             php artisan config:clear

@@ -1,130 +1,95 @@
 @extends('layout.app')
 @section('content')
-    <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
-        <div class="d-flex flex-column flex-column-fluid">
-            <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
-                <div id="kt_app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
+
+
+<div class="app-main flex-column flex-row-fluid" id="kt_app_main">
+    <div class="d-flex flex-column flex-column-fluid">
+        <div id="kt_app_content" class="app-content flex-column-fluid">
+            <div id="kt_app_content_container" class="app-container container-xxl" style="padding-top: 30px;">
+                
+                <!-- Header -->
+                <div class="d-flex flex-stack mb-8">
                     <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                         <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
-                            Subscription {{ !empty($details) ? 'Edit' : 'Add' }}</h1>
+                            {{ !empty($details) ? 'Edit Subscription' : 'Add Subscription' }}
+                        </h1>
                         <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
-                            <li class="breadcrumb-item text-muted">
-                                <a href="{{ route('admin.dashboard') }}" class="text-muted text-hover-primary">Dashboard</a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <span class="bullet bg-gray-400 w-5px h-2px"></span>
-                            </li>
-                            <li class="breadcrumb-item text-muted">
-                                <a href="{{ route('admin.subscription.list') }}"
-                                    class="text-muted text-hover-primary">Subscription</a>
-                            </li>
+                            <li class="breadcrumb-item text-muted">Dashboard</li>
+                            <li class="breadcrumb-item"><span class="bullet bg-gray-400 w-5px h-2px"></span></li>
+                            <li class="breadcrumb-item text-muted"><a href="{{ route('admin.subscription.list') }}" class="text-muted text-hover-primary">Subscriptions</a></li>
+                            <li class="breadcrumb-item"><span class="bullet bg-gray-400 w-5px h-2px"></span></li>
+                            <li class="breadcrumb-item text-muted">{{ !empty($details) ? 'Edit' : 'Add' }}</li>
                         </ul>
                     </div>
                 </div>
-            </div>
-            <div id="kt_app_content" class="app-content flex-column-fluid">
-                <div id="kt_app_content_container" class="app-container container-xxl">
-                    <div class="card">
-                        <div class="card-body pt-6">
-                            <div class="container">
-                                <form id="subscriptionForm" action="{{ route('admin.subscription.add') }}" method="POST"
-                                    class="formSubmit fileUpload" enctype="multipart/form-data">
-                                    <input type="hidden" name="id" name="id" value="{{ $details->id ?? null }}">
-                                    <div class="row pt-2">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="title" class="label-style">Title</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <input type="text" class="form-control" placeholder="Enter Title"
-                                                    name="title" id="title" value="{{ $details->title ?? null }}">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="type" class="label-style">Type</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <select name="type" id="type" class="form-control">
-                                                    <option value="">--- Select Type ---</option>
-                                                    <option value="1" {{ !empty($details) && $details->type == 1 ? 'selected' : null }}>Monthly</option>
-                                                    <option value="2" {{ !empty($details) && $details->type == 2 ? 'selected' : null }}>Quarterly</option>
-                                                    <option value="3" {{ !empty($details) && $details->type == 3 ? 'selected' : null }}>Half Yearly</option>
-                                                    <option value="4" {{ !empty($details) && $details->type == 4 ? 'selected' : null }}>Yearly</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="activity_count" class="label-style">Activity Count</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <input type="text" class="form-control number-only"
-                                                    placeholder="Enter Activity Count" name="activity_count"
-                                                    id="activity_count" value="{{ $details->activity_count ?? null }}"
-                                                    maxlength="4">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row pt-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="mrp" class="label-style">Actual Price</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="text" class="form-control number-only calculateDiscount"
-                                                        placeholder="Enter Actual Price" name="mrp" id="mrp"
-                                                        value="{{ $details->mrp ?? null }}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="discount" class="label-style">Discount (%)</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <input type="text" class="form-control number-only calculateDiscount"
-                                                    placeholder="Enter Discount" name="discount" id="discount"
-                                                    value="{{ $details->discount ?? null }}" maxlength="2">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="price" class="label-style">Purchase Price</label>
-                                                <span class="asterisk_sign">*</span>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="text" class="form-control" placeholder="Enter Purchase Price"
-                                                        name="price" id="price" value="{{ $details->price ?? null }}"
-                                                        readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="row pt-4">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label for="description" class="label-style">Description</label>
-                                                <textarea class="form-control" name="description" id="description" cols="30" rows="4">{{ $details->description ?? null }}</textarea>
-                                            </div>
-                                        </div>
-                                    </div>
+                <!-- Form Card -->
+                <div class="form-card">
+                    <form id="subscriptionForm" action="{{ route('admin.subscription.add') }}" method="POST" class="formSubmit fileUpload" enctype="multipart/form-data">
+                        <input type="hidden" name="id" name="id" value="{{ $details->id ?? null }}">
+                        
+                        <div class="row g-5">
+                            <div class="col-md-6 modern-form-group">
+                                <label for="name">Plan Name <span class="text-danger">*</span></label>
+                                <input type="text" class="modern-input" placeholder="e.g. Pro Artist Monthly" name="name" id="name" value="{{ $details->name ?? null }}">
+                            </div>
+                            <div class="col-md-3 modern-form-group">
+                                <label for="available_for">Audience <span class="text-danger">*</span></label>
+                                <select name="available_for" id="available_for" class="modern-input modern-select">
+                                    <option value="">Select Audience</option>
+                                    <option value="1" {{ !empty($details) && $details->available_for == 1 ? 'selected' : null }}>User</option>
+                                    <option value="2" {{ !empty($details) && $details->available_for == 2 ? 'selected' : null }}>Artist</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 modern-form-group">
+                                <label for="interval">Billing Interval <span class="text-danger">*</span></label>
+                                <select name="interval" id="interval" class="modern-input modern-select">
+                                    <option value="">Select Interval</option>
+                                    <option value="1" {{ !empty($details) && $details->interval == 1 ? 'selected' : null }}>Monthly</option>
+                                    <option value="2" {{ !empty($details) && $details->interval == 2 ? 'selected' : null }}>Yearly</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 modern-form-group">
+                                <label for="price">Price <span class="text-danger">*</span></label>
+                                <div class="modern-input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="text" class="modern-input number-only" placeholder="0.00" name="price" id="price" value="{{ $details->price ?? null }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 modern-form-group">
+                                <label for="currency">Currency <span class="text-danger">*</span></label>
+                                <select name="currency" id="currency" class="modern-input modern-select">
+                                    <option value="USD" {{ !empty($details) && $details->currency == 'USD' ? 'selected' : null }}>USD ($)</option>
+                                    <option value="EUR" {{ !empty($details) && $details->currency == 'EUR' ? 'selected' : null }}>EUR (€)</option>
+                                    <option value="GBP" {{ !empty($details) && $details->currency == 'GBP' ? 'selected' : null }}>GBP (£)</option>
+                                    <option value="INR" {{ !empty($details) && $details->currency == 'INR' ? 'selected' : null }}>INR (₹)</option>
+                                </select>
+                            </div>
 
-                                    <div class="button add-btn-div-save-style">
-                                        <button type="submit" id="submitBtn" class="btn btn-dark">
-                                            <span
-                                                class="indicator-label">{{ !empty($details) ? 'Update' : 'Save' }}</span>
-                                            <span class="indicator-progress">Please wait...
-                                                <span
-                                                    class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
-                                        </button>
-                                    </div>
-                                </form>
+                            <div class="col-12 modern-form-group mt-6">
+                                <label for="description">Short Description</label>
+                                <textarea class="modern-input" placeholder="A brief summary of the plan..." name="description" id="description" cols="30" rows="3">{{ $details->description ?? null }}</textarea>
+                            </div>
+                            
+                            <div class="col-12 modern-form-group mt-6">
+                                <label for="features">Features & Perks</label>
+                                <textarea class="modern-input" name="features" id="features" cols="30" rows="6">{{ $details->features ?? null }}</textarea>
                             </div>
                         </div>
-                    </div>
+
+                        <div class="mt-8 d-flex justify-content-end">
+                            <button type="submit" id="submitBtn" class="btn-purple-glow">
+                                <span class="indicator-label"><i class="fa-solid fa-check-circle"></i> {{ !empty($details) ? 'Update Plan' : 'Create Plan' }}</span>
+                                <span class="indicator-progress">Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
     @push('script')
         <script src="{{ asset('assets/js/custom_js/cdn/ckeditor.js') }}"></script>
         <script>
@@ -139,17 +104,20 @@
                 .catch(err => {
                     console.error(err.stack);
                 });
-
-            $(document).on("keyup", ".calculateDiscount", function() {
-                const mrp = parseFloat($('#mrp').val());
-                const discount = parseFloat($('#discount').val());
-                if($.isNumeric(mrp) && $.isNumeric(discount)) {
-                    const price = parseFloat(mrp) - (parseFloat(mrp) * (parseFloat(discount) / 100));
-                    $('#price').val(price.toFixed(2));
-                } else {
-                    $('#price').val('');
-                }
-            });
+                
+            ClassicEditor
+                .create(document.querySelector('#features'), {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo']
+                })
+                .then(editor => {
+                    editor.model.document.on('change:data', () => {
+                        let editorData = editor.getData();
+                        $('#features').val(editorData);
+                    });
+                })
+                .catch(err => {
+                    console.error(err.stack);
+                });
         </script>
     @endpush
 @endsection
