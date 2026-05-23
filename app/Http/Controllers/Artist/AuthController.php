@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Artist;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Genre;
+use App\Models\ArtistProfile;
+use App\Models\SocialLink;
+use App\Models\ArtistVerification;
+use App\Models\ArtistPreference;
 use App\Http\Controllers\BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -41,8 +46,8 @@ class AuthController extends BaseController
 
     public function register(Request $request)
     {
-        $genres = \App\Models\Genre::where('is_active', 1)->get();
-        
+        $genres = Genre::where('is_active', 1)->get();
+
         if ($request->isMethod('get')) {
             if ($request->has('reset') || $request->query('reset') == 1) {
                 if (auth()->check()) {
@@ -56,22 +61,22 @@ class AuthController extends BaseController
                 if ($user->completed_steps >= 9) {
                     return redirect()->route('artist.dashboard');
                 }
-                
-                $profile = \App\Models\ArtistProfile::firstOrCreate(['user_id' => $user->id]);
-                $socials = \App\Models\SocialLink::firstOrCreate(['user_id' => $user->id]);
-                $verification = \App\Models\ArtistVerification::firstOrCreate(['user_id' => $user->id]);
-                $preferences = \App\Models\ArtistPreference::firstOrCreate(['user_id' => $user->id]);
-                
+
+                $profile = ArtistProfile::firstOrCreate(['user_id' => $user->id]);
+                $socials = SocialLink::firstOrCreate(['user_id' => $user->id]);
+                $verification = ArtistVerification::firstOrCreate(['user_id' => $user->id]);
+                $preferences = ArtistPreference::firstOrCreate(['user_id' => $user->id]);
+
                 $activeStep = $user->completed_steps ? ($user->completed_steps + 1) : 3;
                 if ($activeStep > 10) $activeStep = 10;
-                
+
                 return view('auth.register', compact('genres', 'user', 'profile', 'socials', 'verification', 'preferences', 'activeStep'));
             }
-            
+
             $verifyUserId = session('verify_user_id');
             $verifyUser = $verifyUserId ? User::find($verifyUserId) : null;
             $activeStep = ($verifyUser && !$verifyUser->email_verified) ? 2 : 1;
-            
+
             return view('auth.register', compact('genres', 'activeStep', 'verifyUser'));
         }
 
@@ -100,7 +105,7 @@ class AuthController extends BaseController
                         'mobile'     => 'required|unique:users,mobile_number',
                         'password'   => 'required|string|min:6|confirmed',
                         'country'    => 'required|string|max:100',
-                        'agree_terms'=> 'required|accepted',
+                        'agree_terms' => 'required|accepted',
                         'own_rights' => 'required|accepted',
                     ]);
 
@@ -124,8 +129,8 @@ class AuthController extends BaseController
                         if ($artistRole) {
                             $user->roles()->sync($artistRole);
                         }
-                        
-                        \App\Models\ArtistProfile::create([
+
+                        ArtistProfile::create([
                             'user_id'      => $user->id,
                             'display_name' => $request->stage_name,
                             'country'      => $request->country,  // stored properly here
@@ -157,7 +162,7 @@ class AuthController extends BaseController
                             'email_verified' => 1,
                             'completed_steps' => 2
                         ]);
-                        
+
                         auth()->login($user);
                         session()->forget('verify_user_id');
 
@@ -184,7 +189,7 @@ class AuthController extends BaseController
                         'years_of_active' => 'required|integer|min:0'
                     ]);
 
-                    \App\Models\ArtistProfile::updateOrCreate(
+                    ArtistProfile::updateOrCreate(
                         ['user_id' => $user->id],
                         [
                             'bio' => $request->bio,
@@ -216,8 +221,8 @@ class AuthController extends BaseController
                         'cover_banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
                     ]);
 
-                    $profile = \App\Models\ArtistProfile::firstOrCreate(['user_id' => $user->id]);
-                    
+                    $profile = ArtistProfile::firstOrCreate(['user_id' => $user->id]);
+
                     $profileData = [
                         'display_name' => $request->display_name,
                         'website' => $request->website,
@@ -225,7 +230,7 @@ class AuthController extends BaseController
 
                     if ($request->hasFile('profile_image')) {
                         $file = $request->file('profile_image');
-                        $filename = time() . '_profile_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+                        $filename = time() . '_profile_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('storage/profile'), $filename);
                         $profileData['profile_image'] = $filename;
                         $user->update(['profile_image' => $filename]);
@@ -233,7 +238,7 @@ class AuthController extends BaseController
 
                     if ($request->hasFile('cover_banner')) {
                         $file = $request->file('cover_banner');
-                        $filename = time() . '_banner_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+                        $filename = time() . '_banner_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('storage/banner'), $filename);
                         $profileData['cover_banner'] = $filename;
                     }
@@ -263,7 +268,7 @@ class AuthController extends BaseController
                         'apple_music_url' => 'nullable|url|max:255',
                     ]);
 
-                    \App\Models\SocialLink::updateOrCreate(
+                    SocialLink::updateOrCreate(
                         ['user_id' => $user->id],
                         [
                             'instagram_url' => $request->instagram_url,
@@ -290,8 +295,8 @@ class AuthController extends BaseController
                         return response(['status' => false, 'message' => 'Session expired. Please log in.', 'url' => route('artist.login')]);
                     }
 
-                    $verification = \App\Models\ArtistVerification::firstOrCreate(['user_id' => $user->id]);
-                    
+                    $verification = ArtistVerification::firstOrCreate(['user_id' => $user->id]);
+
                     $rules = [
                         'government_id_front' => ($verification->government_id_front) ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required|image|mimes:jpeg,png,jpg|max:5120',
                         'government_id_back' => ($verification->government_id_back) ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required|image|mimes:jpeg,png,jpg|max:5120',
@@ -304,21 +309,21 @@ class AuthController extends BaseController
 
                     if ($request->hasFile('government_id_front')) {
                         $file = $request->file('government_id_front');
-                        $filename = time() . '_id_front_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+                        $filename = time() . '_id_front_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('storage/verification'), $filename);
                         $verifData['government_id_front'] = $filename;
                     }
 
                     if ($request->hasFile('government_id_back')) {
                         $file = $request->file('government_id_back');
-                        $filename = time() . '_id_back_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+                        $filename = time() . '_id_back_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('storage/verification'), $filename);
                         $verifData['government_id_back'] = $filename;
                     }
 
                     if ($request->hasFile('selfie_image')) {
                         $file = $request->file('selfie_image');
-                        $filename = time() . '_selfie_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+                        $filename = time() . '_selfie_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
                         $file->move(public_path('storage/verification'), $filename);
                         $verifData['selfie_image'] = $filename;
                     }
@@ -347,7 +352,7 @@ class AuthController extends BaseController
                         'artist_type' => 'required|in:INDEPENDENT,SIGNED',
                     ]);
 
-                    \App\Models\ArtistPreference::updateOrCreate(
+                    ArtistPreference::updateOrCreate(
                         ['user_id' => $user->id],
                         [
                             'favorite_genres' => $request->favorite_genres,
@@ -356,7 +361,7 @@ class AuthController extends BaseController
                         ]
                     );
 
-                    $profile = \App\Models\ArtistProfile::firstOrCreate(['user_id' => $user->id]);
+                    $profile = ArtistProfile::firstOrCreate(['user_id' => $user->id]);
                     $profile->update([
                         'artist_type' => $request->artist_type,
                         'release_frequency' => $request->release_frequency,
@@ -471,7 +476,7 @@ class AuthController extends BaseController
             if ($user->completed_steps < 9) {
                 return redirect()->route('artist.register');
             }
-            
+
             if ($user->is_approve == 0) {
                 $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
                 if ($verification && $verification->verification_status == 2) {
@@ -507,21 +512,21 @@ class AuthController extends BaseController
 
         if ($request->hasFile('government_id_front')) {
             $file = $request->file('government_id_front');
-            $filename = time() . '_id_front_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $filename = time() . '_id_front_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('storage/verification'), $filename);
             $verifData['government_id_front'] = $filename;
         }
 
         if ($request->hasFile('government_id_back')) {
             $file = $request->file('government_id_back');
-            $filename = time() . '_id_back_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $filename = time() . '_id_back_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('storage/verification'), $filename);
             $verifData['government_id_back'] = $filename;
         }
 
         if ($request->hasFile('selfie_image')) {
             $file = $request->file('selfie_image');
-            $filename = time() . '_selfie_' . rand(100,999) . '.' . $file->getClientOriginalExtension();
+            $filename = time() . '_selfie_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('storage/verification'), $filename);
             $verifData['selfie_image'] = $filename;
         }

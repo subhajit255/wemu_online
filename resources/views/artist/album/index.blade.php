@@ -38,7 +38,7 @@
                             {{ $album->description }}
                         </p>
                         <div class="d-flex align-items-center justify-content-between">
-                            <span class="badge badge-light-secondary fw-bold px-3 py-1">14 Songs</span>
+                            <span class="badge badge-light-secondary fw-bold px-3 py-1">{{ $album->songs?->count() ?? 0 }} Tracks</span>
                             <a href="#" class="btn btn-sm btn-icon btn-light-primary w-30px h-30px" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" data-kt-menu-flip="top-end" title="Manage Album">
                                 <i class="fa-solid fa-gear fs-7"></i>
                             </a>
@@ -62,16 +62,22 @@
             </div>
             @empty
             <div class="col-12">
-                <div class="alert alert-light d-flex align-items-center justify-content-center" role="alert">
-                    <i class="fa-solid fa-compact-disc fs-2tx text-muted opacity-25"></i>
-                    <span class="ms-3">No albums found</span>
+                <div class="card w-100 border-0 shadow-sm bg-body h-400px d-flex justify-content-center align-items-center">
+                    <div class="card-body d-flex flex-column flex-center justify-content-center text-center">
+                        <i class="fa-solid fa-compact-disc text-muted mb-5" style="font-size: 5rem; opacity: 0.2;"></i>
+                        <h2 class="fw-bold text-dark mb-2">No Albums Found</h2>
+                        <p class="text-muted fs-6 mb-6">You haven't created any albums or EPs yet.</p>
+                        <a href="{{ route('artist.albums.storeOrUpdate') }}" class="btn btn-dark fw-bold px-6 py-3">
+                            <i class="fa-solid fa-plus me-2"></i>Create Your First Album
+                        </a>
+                    </div>
                 </div>
             </div>
             @endforelse
         </div>
 
         <!-- Pagination -->
-        <div class="d-flex justify-content-center py-10 mt-5">
+        <div class="d-flex justify-content-end py-10 mt-5">
             <div class="custom-pagination-wrapper">
                 {!! $albums->withQueryString()->links('pagination::bootstrap-5') !!}
             </div>
@@ -86,43 +92,54 @@
         gap: 8px;
         border: none;
     }
+
     .custom-pagination-wrapper .page-item {
         margin: 0;
     }
+
     .custom-pagination-wrapper .page-item .page-link {
         border: 1px solid #e5e7eb;
-        border-radius: 10px !important;
-        width: 42px;
-        height: 42px;
+        border-radius: 12px !important;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #4b5563;
+        color: #6b7280;
         font-weight: 600;
-        font-size: 0.9rem;
-        transition: all 0.2s ease;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
         background: #ffffff;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
+
     .custom-pagination-wrapper .page-item.active .page-link {
-        background-color: #111827;
-        border-color: #111827;
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        border-color: transparent;
         color: #ffffff;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .custom-pagination-wrapper .page-item .page-link:hover:not(.active) {
-        background-color: #f9fafb;
-        border-color: #d1d5db;
-        color: #111827;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
         transform: translateY(-2px);
     }
+
+    .custom-pagination-wrapper .page-item .page-link:hover:not(.active) {
+        background-color: #f5f3ff;
+        border-color: #c4b5fd;
+        color: #7c3aed;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
     .custom-pagination-wrapper .page-item.disabled .page-link {
-        background-color: #fefefe;
+        background-color: #f9fafb;
+        border-color: #f3f4f6;
         color: #d1d5db;
         opacity: 0.7;
+        pointer-events: none;
+        box-shadow: none;
     }
-    .custom-pagination-wrapper .page-link focus {
-        box-shadow: 0 0 0 0.25 red !important; /* using brand focus if needed */
+
+    .custom-pagination-wrapper .page-link:focus {
+        box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25) !important;
         outline: 0;
     }
 </style>

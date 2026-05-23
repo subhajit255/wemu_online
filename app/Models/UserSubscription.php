@@ -19,4 +19,13 @@ class UserSubscription extends Model
             $model->uuid = (string) Uuid::generate(4);
         });
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class);
+    }
 }

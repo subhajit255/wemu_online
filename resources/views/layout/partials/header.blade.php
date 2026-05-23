@@ -17,10 +17,9 @@
     <meta property="og:url" content="//keenthemes.com/metronic" />
     <meta property="og:site_name" content="Keenthemes | Metronic" />
     <link rel="canonical" href="//preview.keenthemes.com/metronic8" />
-    <link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.png') }}" />
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
-    <link rel="shortcut icon" href="{{ asset('assets/css/cdn/jquery-ui.min.css') }}" />
-    <link rel="shortcut icon" href="{{ asset('assets/css/cdn/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cdn/jquery-ui.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cdn/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-multiselect.css') }}" />
     <link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet"
         type="text/css" />
@@ -29,9 +28,9 @@
     <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link rel="shortcut icon" href="{{ asset('assets/css/cdn/jquery.dataTables.min.css') }}" />
-    <link rel="shortcut icon" href="{{ asset('assets/css/cdn/responsive.dataTables.min.css') }}" />
-    <link rel="shortcut icon" href="{{ asset('assets/css/cdn/bootstrap-datepicker.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cdn/jquery.dataTables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cdn/responsive.dataTables.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/cdn/bootstrap-datepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/cdn/toastr.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     {{-- api key --}}

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SongController;
+use App\Http\Controllers\Api\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,9 @@ Route::controller(MasterController::class)->group(function () {
     Route::get('/genres', 'genres')->name('genres');
     Route::post('/song/increase-play-count/{id}', 'songsCountIncrease')->name('song.increase-play-count');
     Route::get('/songs-by-album/{albumId}', 'songsByAlbum')->name('songs.by.album');
+});
+Route::controller(SubscriptionController::class)->group(function () {
+    Route::get('/subscriptions', 'subscriptions')->name('subscriptions');
 });
 
 Route::controller(ArtistController::class)->group(function () {
@@ -118,5 +122,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/playlist/details/{playlistId}', 'playListDetails')->name('playlist.details');
         Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');
         Route::post('/playlist/bulk-add-remove-song', 'bulkSongAddRemovePlayList')->name('playlist.bulk-add-remove-song');
+    });
+    Route::controller(SubscriptionController::class)->group(function () {
+        Route::get('/my-current-subscription', 'myCurrentSubscription')->name('my-current-subscription');
     });
 });

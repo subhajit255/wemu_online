@@ -87,7 +87,16 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center">No songs found</td>
+                                <td colspan="7" class="text-center py-10">
+                                    <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                                        <i class="fa-solid fa-music text-muted mb-4" style="font-size: 3rem; opacity: 0.2;"></i>
+                                        <h4 class="fw-bold text-dark mb-1">No Songs Found</h4>
+                                        <p class="text-muted fs-7 mb-4">You haven't uploaded any songs yet.</p>
+                                        <a href="{{ route('artist.songs.storeOrUpdate') }}" class="btn btn-sm btn-dark fw-bold px-5 py-2">
+                                            <i class="fa-solid fa-plus me-1"></i>Upload Song
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -95,16 +104,10 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="d-flex justify-content-center py-6">
-                    <ul class="pagination custom-pagination m-0">
-                        <li class="page-item previous disabled"><a href="#" class="page-link"><i class="fa-solid fa-angle-left"></i></a></li>
-                        <li class="page-item active"><a href="#" class="page-link">1</a></li>
-                        <li class="page-item"><a href="#" class="page-link">2</a></li>
-                        <li class="page-item"><a href="#" class="page-link">3</a></li>
-                        <li class="page-item disabled"><span class="page-link">...</span></li>
-                        <li class="page-item"><a href="#" class="page-link">10</a></li>
-                        <li class="page-item next"><a href="#" class="page-link"><i class="fa-solid fa-angle-right"></i></a></li>
-                    </ul>
+                <div class="d-flex justify-content-end py-6 pe-6">
+                    <div class="custom-pagination-wrapper">
+                        {!! $songs->withQueryString()->links('pagination::bootstrap-5') !!}
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,18 +123,6 @@
                 </div>
             </div>
             <div class="card-body p-6 pt-3">
-                <!-- <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
-                    <div class="d-flex align-items-center">
-                        <div class="release-item-img me-4"></div>
-                        <div class="release-item-info">
-                            <h4 class="fw-bold text-dark fs-5 mb-1">My Dear Melancholy,</h4>
-                            <p class="text-muted fs-7 m-0">EP • Scheduled for Jun 15, 2024</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
-                    </div>
-                </div> -->
                 @forelse ($upcomingReleases as $upcomingRelease)
                 <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
                     <div class="d-flex align-items-center">
@@ -195,5 +186,63 @@
         </div>
 
     </div>
-</div>
-@endsection
+    @push('style')
+    <style>
+        .custom-pagination-wrapper .pagination {
+            display: flex;
+            gap: 8px;
+            border: none;
+        }
+
+        .custom-pagination-wrapper .page-item {
+            margin: 0;
+        }
+
+        .custom-pagination-wrapper .page-item .page-link {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px !important;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .custom-pagination-wrapper .page-item.active .page-link {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .custom-pagination-wrapper .page-item .page-link:hover:not(.active) {
+            background-color: #f5f3ff;
+            border-color: #c4b5fd;
+            color: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-pagination-wrapper .page-item.disabled .page-link {
+            background-color: #f9fafb;
+            border-color: #f3f4f6;
+            color: #d1d5db;
+            opacity: 0.7;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .custom-pagination-wrapper .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25) !important;
+            outline: 0;
+        }
+    </style>
+    @endpush
+    @endsection

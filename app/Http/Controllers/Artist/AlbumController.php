@@ -16,7 +16,7 @@ class AlbumController extends BaseController
     use UploadAble;
     public function index(Request $request)
     {
-        $albums = Album::where('user_id', auth()->user()->id)->latest()->paginate(10);
+        $albums = Album::where('user_id', auth()->user()->id)->latest()->paginate(12);
         return view('artist.album.index', compact('albums'));
     }
     public function StoreOrUpdate(Request $request)

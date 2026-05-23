@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Api\User;
+namespace App\Http\Resources\Api;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,15 +21,16 @@ class SubscriptionCollection extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'uuid' => $this->uuid,
+            'id' => $this->id,
+            'uuid' => $this->uuid ?? null,
             'since' => Carbon::parse($this->created_at)->diffForHumans(),
-            'title' => $this->title,
-            'mrp' => $this->mrp,
-            'discount' => $this->discount,
+            'name' => $this->subscription?->name,
+            'description' => $this->subscription?->description,
+            'features' => $this->subscription?->features,
             'price' => $this->price,
-            'type' => $this->type,
-            'activity_count' => $this->activity_count,
-            'description' => $this->description,
+            'interval' => $this->subscription?->interval,
+            'started_on' => Carbon::parse($this->started_on)->diffForHumans(),
+            'ended_at' => Carbon::parse($this->ended_at)->diffForHumans(),
         ];
     }
 }
