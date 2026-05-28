@@ -159,6 +159,15 @@ class UserController extends BaseController
             } else {
                 $albums = $query->paginate(10);
             }
+
+            if ($albums->isEmpty()) {
+                $fallbackQuery = Album::with('songs')->where('status', 1)->latest();
+                if ($request->has('dashboard')) {
+                    $albums = $fallbackQuery->take(6)->get();
+                } else {
+                    $albums = $fallbackQuery->paginate(10);
+                }
+            }
             return $this->responseJson(
                 true,
                 200,

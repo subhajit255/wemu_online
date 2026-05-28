@@ -25,6 +25,7 @@ class MasterResource extends JsonResource
                 'description' => $this->description ?? '',
                 'image' => $this->image_path ?? '',
                 'status' => $this->status ?? '',
+                'songs' => \App\Http\Resources\Api\SongResource::collection($this->whenLoaded('songs')),
                 'created_by' => new AuthResource($this->user ?? null),
             ];
             return $dataArray;

@@ -290,7 +290,7 @@ class SongController extends BaseController
             $keywords = $request->keywords;
 
             // Log search history
-            \App\Models\SearchHistory::create([
+            SearchHistory::create([
                 'user_id' => auth()->check() ? auth()->id() : null,
                 'keyword' => trim($keywords),
             ]);
