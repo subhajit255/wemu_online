@@ -21,7 +21,7 @@
 <script>
     $(document).ready(function() {
         const pageHeading = $('.page-heading').html();
-        if (pageHeading != '') {
+        if (pageHeading !== undefined && pageHeading !== '') {
             $('.title').html(`${pageHeading} | WEMU`);
         } else {
             $('.title').html(`WEMU`);

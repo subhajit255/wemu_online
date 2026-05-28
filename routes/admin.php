@@ -142,5 +142,17 @@ Route::as('admin.')->group(function () {
             Route::any('notify', 'notify')->name('notify');
             Route::any('notify/send', 'notifySend')->name('notify.send');
         });
+        
+        Route::controller(\App\Http\Controllers\Admin\SongController::class)->as('songs.')->prefix('songs')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::match(['get', 'post'], 'add-or-update/{id?}', 'storeOrUpdate')->name('storeOrUpdate');
+            Route::get('details/{id}', 'show')->name('show');
+        });
+        
+        Route::controller(\App\Http\Controllers\Admin\AlbumController::class)->as('albums.')->prefix('albums')->group(function () {
+            Route::match(['get', 'post'], '/', 'index')->name('index');
+            Route::match(['get', 'post'], 'add-or-update/{id?}', 'storeOrUpdate')->name('storeOrUpdate');
+            Route::get('{id}', 'show')->name('show');
+        });
     });
 });

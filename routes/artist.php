@@ -39,6 +39,7 @@ Route::as('artist.')->group(function () {
         });
         Route::controller(AnalyticsController::class)->group(function () {
             Route::get('analytics', 'index')->name('analytics.index');
+            Route::get('analytics/streams', 'streamsChart')->name('analytics.streams');
         });
         Route::controller(AudienceController::class)->group(function () {
             Route::get('audience', 'index')->name('audience.index');

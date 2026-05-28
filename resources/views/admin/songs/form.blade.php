@@ -9,14 +9,14 @@
             <span class="text-muted fs-7 my-1 pt-1">{{ !empty($details->id) ? 'Update the details of your track' : 'Add a new track to your catalog' }}</span>
         </div>
         <div class="d-flex align-items-center gap-2 gap-lg-3">
-            <a href="{{ route('artist.songs.index') }}" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;">Cancel</a>
+            <a href="{{ route('admin.songs.index') }}" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;">Cancel</a>
         </div>
     </div>
 </div>
 
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-fluid">
-        <form id="songForm" class="formSubmit fileUpload" action="{{ !empty($details->id) ? route('artist.songs.storeOrUpdate', $details->id) : route('artist.songs.storeOrUpdate') }}" method="POST" enctype="multipart/form-data">
+        <form id="songForm" class="formSubmit fileUpload" action="{{ !empty($details->id) ? route('admin.songs.storeOrUpdate', $details->id) : route('admin.songs.storeOrUpdate') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @if(!empty($details->id))
             <input type="hidden" name="id" value="{{ $details->id }}">
@@ -76,7 +76,21 @@
                                 </div>
                             </div>
 
-
+                            <div class="row mb-8">
+                                <div class="col-xl-3">
+                                    <div class="fs-6 fw-bold mt-2 mb-3"><i class="fa-solid fa-user text-muted me-2"></i> Select Artist <span class="text-danger">*</span></div>
+                                </div>
+                                <div class="col-xl-9">
+                                    <select class="form-select form-select-solid form-select-lg" name="user_id" id="user_id" data-control="select2" data-placeholder="Select an artist" required>
+                                        <option></option>
+                                        @if(isset($artists))
+                                        @foreach($artists as $artist)
+                                        <option value="{{ $artist->id }}" {{ (!empty($details->user_id) && $details->user_id == $artist->id) ? 'selected' : '' }}>{{ $artist->name ?? 'Artist '.$artist->id }}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="row mb-8">
                                 <div class="col-xl-3">

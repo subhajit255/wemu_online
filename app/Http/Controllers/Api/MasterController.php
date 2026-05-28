@@ -69,6 +69,11 @@ class MasterController extends BaseController
             return $this->responseJson(false, 422, $validator->errors()->first(), []);
         }
         try {
+            $song = Song::find($id);
+            if ($song) {
+                logAudience($song->user_id, $song->album_id, $song->id);
+            }
+
             // Update or create play history
             $history = PlayHistory::where(['user_id' => auth()->user()->id, 'song_id' => $id])->first();
             if ($history) {

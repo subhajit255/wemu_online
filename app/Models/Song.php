@@ -21,7 +21,7 @@ class Song extends Model
 
     public function artist()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function genre()
     {

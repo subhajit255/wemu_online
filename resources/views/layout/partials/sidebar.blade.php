@@ -5,10 +5,10 @@
     <!-- Logo -->
     <div class="app-sidebar-logo px-6 sideHead" id="kt_app_sidebar_logo" style="border-bottom: 1px solid #f3f4f6;">
         <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center" style="text-decoration: none;">
-            <div class="bg-dark rounded d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
+            <div class="rounded d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px; background-color: #6366f1;">
                 <span class="text-white fw-bold fs-4" style="line-height: 1;">W</span>
             </div>
-            <h3 class="app-sidebar-logo-default m-0 ms-3 fw-bolder" style="font-size: 22px; color: #111827; letter-spacing: -0.5px;">Wemu</h3>
+            <h3 class="app-sidebar-logo-default m-0 ms-3 fw-bolder" style="font-size: 22px; color: #6366f1; letter-spacing: -0.5px;">Wemu</h3>
         </a>
         <div id="kt_app_sidebar_toggle"
             class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary body-bg h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"
@@ -91,6 +91,26 @@
                     </a>
                 </div>
 
+                <!-- Music -->
+                <div class="menu-item">
+                    <a href="{{ route('admin.songs.index') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.songs.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-music fs-5"></i></span>
+                            <span class="menu-title">Music</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Albums -->
+                <div class="menu-item">
+                    <a href="{{ route('admin.albums.index') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.albums.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-compact-disc fs-5"></i></span>
+                            <span class="menu-title">Albums</span>
+                        </span>
+                    </a>
+                </div>
+
                 <!-- FAQs -->
                 <div class="menu-item">
                     <a href="{{ route('admin.faq.list') }}">
@@ -103,8 +123,8 @@
 
                 <!-- Reports -->
                 <div class="menu-item">
-                    <a href="{{ route('admin.transaction.list') }}">
-                        <span class="menu-link {{ request()->routeIs('admin.transaction.*') ? 'active' : '' }}">
+                    <a href="#">
+                        <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-chart-pie fs-5"></i></span>
                             <span class="menu-title">Reports</span>
                         </span>
@@ -234,11 +254,11 @@
 
                 <!-- Settings -->
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.settings.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.settings.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
-                        <span class="menu-title">Settings</span>
-                    </span>
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.settings.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.settings.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
+                            <span class="menu-title">Settings</span>
+                        </span>
                     </a>
                 </div>
 

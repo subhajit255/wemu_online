@@ -1861,18 +1861,19 @@ body,
 }
 
 .wemu-btn-filter {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    background: #8b5cf6 !important;
     color: white !important;
     border: none !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     font-weight: 700 !important;
-    padding: 11px 22px !important;
+    padding: 11px 26px !important;
     transition: all 0.25s ease !important;
 }
 
 .wemu-btn-filter:hover {
+    background: #7c3aed !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3) !important;
     color: white !important;
 }
 

@@ -9,9 +9,8 @@
             <span class="text-muted fs-7 my-1 pt-1">Detailed performance insights</span>
         </div>
         <div class="d-flex align-items-center gap-2 gap-lg-3">
-            <select class="form-select form-select-sm form-select-solid dashboard-select">
+            <select id="time_filter" class="form-select form-select-sm form-select-solid dashboard-select">
                 <option value="1">This Month</option>
-                <option value="2">Last Month</option>
                 <option value="3">This Year</option>
             </select>
         </div>
@@ -28,40 +27,15 @@
                         <h3 class="card-title flex-column">
                             <span class="card-label fw-bold fs-6 text-muted mb-2">Streams</span>
                             <div class="d-flex align-items-center">
-                                <span class="fs-1 fw-bold text-dark me-3">2.4M</span>
-                                <span class="trend-up fs-7 fw-semibold">
-                                    <i class="fa fa-arrow-up"></i> 12.3%
+                                <span id="total_streams_count" class="fs-1 fw-bold text-dark me-3">0</span>
+                                <span id="growth_percentage" class="trend-up fs-7 fw-semibold">
+                                    <i class="fa fa-arrow-up"></i> +0.0%
                                 </span>
                             </div>
                         </h3>
                     </div>
                     <div class="card-body p-6">
-                        <div class="chart-placeholder position-relative w-100" style="height: 250px;">
-                            <svg viewBox="0 0 1000 250" style="width:100%; height:100%;">
-                                <!-- Grid lines -->
-                                <line x1="0" y1="50" x2="1000" y2="50" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="100" x2="1000" y2="100" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="150" x2="1000" y2="150" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="200" x2="1000" y2="200" stroke="#f3f4f6" stroke-width="1" />
-
-                                <!-- Line -->
-                                <path d="M 0 180 L 150 170 L 300 130 L 450 130 L 600 50 L 750 110 L 900 80 L 1000 50" fill="none" stroke="#8b5cf6" stroke-width="3" />
-
-                                <!-- Points -->
-                                <circle cx="150" cy="170" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-                                <circle cx="300" cy="130" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-                                <circle cx="450" cy="130" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-                                <circle cx="600" cy="50" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-                                <circle cx="750" cy="110" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-                                <circle cx="900" cy="80" r="4" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
-
-                                <!-- Labels -->
-                                <text x="150" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">Apr 26</text>
-                                <text x="300" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 3</text>
-                                <text x="450" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 10</text>
-                                <text x="600" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 17</text>
-                                <text x="750" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 24</text>
-                            </svg>
+                        <div id="streams_chart" class="chart-placeholder position-relative w-100" style="height: 250px;">
                         </div>
                     </div>
                 </div>
@@ -185,3 +159,84 @@
     </div>
 </div>
 @endsection
+@push('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var chart = null;
+
+        function renderChart(labels, data) {
+            if (chart) {
+                chart.destroy();
+            }
+
+            var options = {
+                series: [{
+                    name: "Streams",
+                    data: data
+                }],
+                chart: {
+                    height: 250,
+                    type: 'area',
+                    toolbar: { show: false }
+                },
+                colors: ['#8b5cf6'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: labels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: { style: { colors: '#9ca3af', fontSize: '12px' } }
+                },
+                yaxis: {
+                    labels: { style: { colors: '#9ca3af', fontSize: '12px' } }
+                },
+                grid: {
+                    borderColor: '#f3f4f6',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.3,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                }
+            };
+
+            chart = new ApexCharts(document.querySelector("#streams_chart"), options);
+            chart.render();
+        }
+
+        function fetchChartData() {
+            let filter = document.getElementById('time_filter').value;
+            fetch("{{ route('artist.analytics.streams') }}?filter=" + filter)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status) {
+                        document.getElementById('total_streams_count').innerText = res.data.total_streams;
+                        
+                        let growthHtml = '';
+                        if (res.data.is_positive) {
+                            growthHtml = '<span class="text-success"><i class="fa fa-arrow-up text-success"></i> ' + res.data.growth_percentage + '</span>';
+                        } else {
+                            growthHtml = '<span class="text-danger"><i class="fa fa-arrow-down text-danger"></i> ' + res.data.growth_percentage + '</span>';
+                        }
+                        document.getElementById('growth_percentage').innerHTML = growthHtml;
+                        
+                        renderChart(res.data.chart.labels, res.data.chart.data);
+                    }
+                })
+                .catch(error => console.error("Error fetching analytics data:", error));
+        }
+
+        document.getElementById('time_filter').addEventListener('change', fetchChartData);
+        
+        // Initial load
+        fetchChartData();
+    });
+</script>
+@endpush

@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Twilio\Rest\Client;
 use App\Models\Category;
+use App\Models\StreamLog;
 use App\Models\UserBudget;
 use App\Models\UserIncome;
 use App\Models\UserExpense;
@@ -313,6 +314,15 @@ if (!function_exists('increaseSongPlayCount')) {
         // Atomic DB increment
         Song::where('id', $songId)
             ->increment('play_count');
+
+        $song = Song::find($songId);
+        if ($song) {
+            StreamLog::create([
+                'user_id' => $userId,
+                'artist_id' => $song->user_id, // assuming artist is user_id of the song
+                'song_id' => $songId,
+            ]);
+        }
 
         return true;
     }
@@ -854,3 +864,40 @@ if (!function_exists('isActiveSubscription')) {
 //         }
 //     }
 // }
+
+if (!function_exists('logAudience')) {
+    function logAudience($artistId = null, $albumId = null, $songId = null)
+    {
+        $request = request();
+        $ip = $request->header('X-Forwarded-For') ?? $request->ip();
+
+        if (str_contains($ip, ',')) {
+            $ip = trim(explode(',', $ip)[0]);
+        }
+        
+        if ($ip !== '127.0.0.1' && $ip !== '::1') {
+            $locationData = \Illuminate\Support\Facades\Cache::remember('ip_location_' . $ip, 86400, function () use ($ip) {
+                $response = \Illuminate\Support\Facades\Http::get("http://ip-api.com/json/{$ip}?fields=status,country,regionName,city,lat,lon");
+                if ($response->successful() && $response->json('status') === 'success') {
+                    return $response->json();
+                }
+                return null;
+            });
+
+            \App\Models\AudienceLog::create([
+                'ip_address' => $ip,
+                'country' => $locationData['country'] ?? null,
+                'city' => $locationData['city'] ?? null,
+                'region' => $locationData['regionName'] ?? null,
+                'latitude' => $locationData['lat'] ?? null,
+                'longitude' => $locationData['lon'] ?? null,
+                'user_id' => auth()->check() ? auth()->id() : null,
+                'artist_id' => $artistId,
+                'album_id' => $albumId,
+                'song_id' => $songId,
+                'user_agent' => $request->userAgent(),
+                'url' => $request->fullUrl(),
+            ]);
+        }
+    }
+}

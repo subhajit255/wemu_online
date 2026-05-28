@@ -60,7 +60,10 @@ Route::controller(ArtistController::class)->group(function () {
     Route::get('/artists', 'artists')->name('artists');
     Route::get('/artist/details/{id}', 'artistDetails')->name('artist.details');
 });
+
 Route::middleware('auth:api')->group(function () {
+    Route::get('/artist/analytics/streams', [\App\Http\Controllers\Api\AnalyticsController::class, 'artistStreamsChart'])->name('artist.analytics.streams');
+
     // Route::controller(UserController::class)->group(function () {
     //     Route::post('/user/list', 'userList')->name('user.list');
     //     Route::get('/user/get/profile', 'profileDetails')->name('user.get.profile');
@@ -122,6 +125,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/playlist/details/{playlistId}', 'playListDetails')->name('playlist.details');
         Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');
         Route::post('/playlist/bulk-add-remove-song', 'bulkSongAddRemovePlayList')->name('playlist.bulk-add-remove-song');
+        Route::post('/search', 'searchSongs')->name('search.songs');
+        Route::get('/trending-search-items', 'trendingSearches')->name('trending.search.items');
     });
     Route::controller(SubscriptionController::class)->group(function () {
         Route::get('/my-current-subscription', 'myCurrentSubscription')->name('my-current-subscription');
