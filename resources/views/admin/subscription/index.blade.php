@@ -27,25 +27,27 @@
 
                 <!-- Search/Filter Bar -->
                 <div class="search-card">
-                    <div class="row g-4 align-items-center">
-                        <div class="col-md-5">
-                            <div class="search-wrapper">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" class="modern-input" placeholder="Search subscriptions by name...">
+                    <form action="{{ route('admin.subscription.list') }}" method="GET">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-5">
+                                <div class="search-wrapper">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" name="search" value="{{ request('search') }}" class="modern-input" placeholder="Search subscriptions by name...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="status" class="modern-input">
+                                    <option value="">All Statuses</option>
+                                    <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center justify-content-end gap-4">
+                                <button type="submit" class="btn-purple-glow px-5"><i class="fa-solid fa-sliders me-2"></i> Apply</button>
+                                <a href="{{ route('admin.subscription.list') }}" class="text-muted fw-semibold text-hover-primary">Reset</a>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <select class="modern-input">
-                                <option>All Statuses</option>
-                                <option>Active</option>
-                                <option>Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-center justify-content-end gap-4">
-                            <button class="btn-purple-glow px-5"><i class="fa-solid fa-sliders me-2"></i> Apply</button>
-                            <a href="#" class="text-muted fw-semibold text-hover-primary">Reset</a>
-                        </div>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Table Card -->
@@ -55,7 +57,7 @@
                             Subscription Directory
                             <span class="count-pill">{{ count($details) }} plans</span>
                         </h2>
-                        <div class="live-data">
+                        <div class="live-data" style="cursor: pointer;" onclick="window.location.reload()">
                             <i class="fa-solid fa-rotate-right"></i> Live data
                         </div>
                     </div>
@@ -97,10 +99,12 @@
 
                                             <span class="text-muted fw-bold">/</span>
 
-                                            @if($detail->interval == 1)
-                                            <span class="pill-blue"><i class="fa-solid fa-calendar-days"></i> Monthly</span>
+                                            @if($detail->interval == 'month')
+                                            <span class="pill-blue"><i class="fa-solid fa-calendar-days"></i> {{ $detail->interval_count > 1 ? $detail->interval_count . ' Months' : 'Monthly' }}</span>
+                                            @elseif($detail->interval == 'year')
+                                            <span class="pill-purple"><i class="fa-solid fa-calendar-days"></i> {{ $detail->interval_count > 1 ? $detail->interval_count . ' Years' : 'Yearly' }}</span>
                                             @else
-                                            <span class="pill-purple"><i class="fa-solid fa-calendar-days"></i> Yearly</span>
+                                            <span class="pill-green"><i class="fa-solid fa-calendar-days"></i> {{ $detail->interval_count > 1 ? $detail->interval_count . ' Weeks' : 'Weekly' }}</span>
                                             @endif
                                         </div>
                                     </td>

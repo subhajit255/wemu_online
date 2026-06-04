@@ -353,7 +353,6 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
     }
-
     public function trendingSearches()
     {
         try {

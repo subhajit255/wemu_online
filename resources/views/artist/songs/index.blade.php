@@ -112,28 +112,28 @@
             </div>
         </div>
 
-        <!-- Upcoming Releases Card -->
+        <!-- Post Releases Card -->
         <div class="card clean-metric-card mb-5 mb-xl-10">
             <div class="card-header border-0 pt-5">
                 <h3 class="card-title align-items-start flex-column">
-                    <span class="card-label fw-bold fs-4 text-dark">Upcoming Releases</span>
+                    <span class="card-label fw-bold fs-4 text-dark">Post Releases</span>
                 </h3>
                 <div class="card-toolbar">
-                    <a href="#" class="text-muted fs-7 text-hover-primary">See all</a>
+                    <a href="{{ route('artist.releases.index') }}" class="text-muted fs-7 text-hover-primary">See all</a>
                 </div>
             </div>
             <div class="card-body p-6 pt-3">
-                @forelse ($upcomingReleases as $upcomingRelease)
+                @forelse ($postReleases as $release)
                 <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
                     <div class="d-flex align-items-center">
                         <div class="symbol symbol-40px me-3">
-                            <a href="{{ route('artist.songs.show', $upcomingRelease->id) }}">
-                                <img src="{{ $upcomingRelease->cover_image_path }}" alt="song Cover" class="w-40px h-40px" style="object-fit: cover;">
+                            <a href="{{ route('artist.songs.show', $release->id) }}">
+                                <img src="{{ $release->cover_image_path }}" alt="song Cover" class="w-40px h-40px" style="object-fit: cover;">
                             </a>
                         </div>
                         <div class="release-item-info">
-                            <a href="{{ route('artist.songs.show', $upcomingRelease->id) }}" class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ $upcomingRelease->title }}</a>
-                            <p class="text-muted fs-7 m-0">{{ $upcomingRelease->album->title ?? 'Single' }} • Scheduled for {{ $upcomingRelease->published_at ? \Carbon\Carbon::parse($upcomingRelease->published_at)->format('M d, Y') : 'Not Set' }}</p>
+                            <a href="{{ route('artist.songs.show', $release->id) }}" class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ $release->title }}</a>
+                            <p class="text-muted fs-7 m-0">{{ $release->album->title ?? 'Single' }} • Scheduled for {{ $release->published_at ? \Carbon\Carbon::parse($release->published_at)->format('M d, Y') : 'Not Set' }}</p>
                         </div>
                     </div>
                     <div>
@@ -147,41 +147,15 @@
 
                         </div>
                         <div class="release-item-info">
-                            <h4 class="fw-bold text-dark fs-5 mb-1">No upcoming releases</h4>
-                            <p class="text-muted fs-7 m-0">No upcoming releases</p>
+                            <h4 class="fw-bold text-dark fs-5 mb-1">No post releases</h4>
+                            <p class="text-muted fs-7 m-0">You have no upcoming post releases.</p>
                         </div>
                     </div>
                     <div>
-                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
+                        <span class="badge badge-light-secondary fw-bold px-4 py-2">N/A</span>
                     </div>
                 </div>
                 @endforelse
-
-                <!-- <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between pb-4 mb-4">
-                    <div class="d-flex align-items-center">
-                        <div class="release-item-img me-4"></div>
-                        <div class="release-item-info">
-                            <h4 class="fw-bold text-dark fs-5 mb-1">Hurry Up Tomorrow</h4>
-                            <p class="text-muted fs-7 m-0">Album • Scheduled for Aug 10, 2024</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
-                    </div>
-                </div>
-
-                <div class="release-item upcoming-release-item d-flex align-items-center justify-content-between border-0 pb-0 mb-0">
-                    <div class="d-flex align-items-center">
-                        <div class="release-item-img me-4"></div>
-                        <div class="release-item-info">
-                            <h4 class="fw-bold text-dark fs-5 mb-1">Live at SoFi Stadium</h4>
-                            <p class="text-muted fs-7 m-0">Album • Scheduled for Oct 5, 2024</p>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge badge-light-secondary fw-bold px-4 py-2">Scheduled</span>
-                    </div>
-                </div> -->
             </div>
         </div>
 

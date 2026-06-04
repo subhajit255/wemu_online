@@ -31,10 +31,8 @@ class ContactController extends BaseController
             $enquiry = $contact->enquiry;
             $replySend = $contact->update(['reply' => $request->reply, 'is_replied' => 2]);
             if ($replySend) {
-                // Mail::send('mail.enquiry-reply', ['enquiry' => $enquiry, 'reply' => $request->reply], function ($message) use ($toContactEmail) {
-                //     $message->to($toContactEmail);
-                //     $message->subject('Your Enquiry Feedback');
-                // });
+                Mail::to($toContactEmail)->send(new \App\Mail\EnquiryReplyMail($enquiry, $request->reply));
+                
                 DB::commit();
                 $message = 'Reply sent successfully';
             } else {

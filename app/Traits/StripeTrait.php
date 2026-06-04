@@ -56,4 +56,53 @@ trait StripeTrait
 
         return $subscription;
     }
+
+    /**
+     * Create a Stripe Price and Product.
+     *
+     * @param string $name
+     * @param float $amount
+     * @param string $currency
+     * @param string $interval
+     * @param int $intervalCount
+     * @return \Stripe\Price
+     */
+    public function createStripePrice(string $name, float $amount, string $currency, string $interval, int $intervalCount = 1, array $metadata = [])
+    {
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+
+        $price = $stripe->prices->create([
+            'currency' => $currency,
+            'unit_amount' => (int) ($amount * 100), // Stripe expects amounts in cents
+            'recurring' => [
+                'interval' => $interval,
+                'interval_count' => $intervalCount,
+            ],
+            'product_data' => [
+                'name' => $name,
+                'metadata' => $metadata,
+            ],
+            'metadata' => $metadata,
+        ]);
+
+        return $price;
+    }
+    public function attachPaymentMethodToCustomer(string $customerId, string $paymentMethodId)
+    {
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+
+        // Attach Payment Method
+        $paymentMethod = $stripe->paymentMethods->attach(
+            $paymentMethodId,
+            ['customer' => $customerId]
+        );
+
+        // Set Default Payment Method
+        $stripe->customers->update(
+            $customerId,
+            ['invoice_settings' => ['default_payment_method' => $paymentMethod->id]]
+        );
+        
+        return $paymentMethod;
+    }
 }

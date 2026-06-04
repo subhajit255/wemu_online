@@ -15,12 +15,35 @@ use App\Traits\UploadAble;
 class SongController extends BaseController
 {
     use UploadAble;
+    
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $user = auth()->user();
+            if ($user && $user->added_by) {
+                $perms = $user->permissions ? json_decode($user->permissions, true) : [];
+                if (!is_array($perms)) $perms = [];
+                if (!in_array('songs', $perms)) {
+                    abort(403, 'Unauthorized access.');
+                }
+            }
+            return $next($request);
+        });
+    }
     public function index()
     {
         $currentDateTime = date('Y-m-d H:i:s');
-        $songs = Song::where('user_id', auth()->user()->id)->latest()->paginate(10);
-        $upcomingReleases = Song::where('user_id', auth()->user()->id)->where('published_at', '>', $currentDateTime)->get();
-        return view('artist.songs.index', compact('songs', 'upcomingReleases'));
+        $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
+        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
+        $songs = Song::whereIn('user_id', $teamIds)->latest()->paginate(10);
+        $postReleases = Song::whereIn('user_id', $teamIds)
+            ->where('status', 0)
+            ->where('published_at', '>', $currentDateTime)
+            ->orderBy('published_at', 'asc')
+            ->take(3)
+            ->get();
+        return view('artist.songs.index', compact('songs', 'postReleases'));
     }
 
     public function storeOrUpdate(Request $request, $id = null)
@@ -168,5 +191,11 @@ class SongController extends BaseController
     {
         $song = Song::with(['album', 'genre', 'language'])->findOrFail($id);
         return view('artist.songs.details', compact('song'));
+    }
+
+    public function play($id)
+    {
+        $song = Song::with(['album', 'genre', 'language'])->findOrFail($id);
+        return view('artist.songs.play', compact('song'));
     }
 }

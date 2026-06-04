@@ -6,6 +6,7 @@ use App\Http\Resources\Api\PaginateSongCollection;
 use App\Models\Album;
 use App\Models\Genre;
 use App\Models\Song;
+use App\Models\StreamLog;
 use App\Models\PlayHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController;
@@ -87,6 +88,11 @@ class MasterController extends BaseController
                     'song_id' => $id,
                     'play_count' => 1,
                     'last_played_at' => now(),
+                ]);
+                StreamLog::create([
+                    'user_id' => auth()->user()->id,
+                    'artist_id' => $song->user_id,
+                    'song_id' => $song->id,
                 ]);
             }
             return $this->responseJson(true, 200, 'Song played', []);

@@ -73,23 +73,15 @@
 
                 <!-- Subscription -->
                 <div class="menu-item">
-                    <a href="{{ route('admin.subscription.list') }}">
-                        <span class="menu-link {{ request()->routeIs('admin.subscription.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
-                            <span class="menu-title">Subscription</span>
-                        </span>
+                    <!-- <a href="{{ route('admin.subscription.list') }}"> -->
+                    <span class="menu-link {{ request()->routeIs('admin.subscription.*') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
+                        <span class="menu-title">Subscription</span>
+                    </span>
                     </a>
                 </div>
 
-                <!-- CMS -->
-                <div class="menu-item">
-                    <a href="{{ route('admin.cms.list') }}">
-                        <span class="menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-file-lines fs-5"></i></span>
-                            <span class="menu-title">CMS</span>
-                        </span>
-                    </a>
-                </div>
+
 
                 <!-- Music -->
                 <div class="menu-item">
@@ -113,12 +105,39 @@
 
                 <!-- FAQs -->
                 <div class="menu-item">
-                    <a href="{{ route('admin.faq.list') }}">
-                        <span class="menu-link {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-circle-question fs-5"></i></span>
-                            <span class="menu-title">FAQs</span>
-                        </span>
+                    <!-- <a href="{{ route('admin.faq.list') }}"> -->
+                    <span class="menu-link {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-circle-question fs-5"></i></span>
+                        <span class="menu-title">FAQs</span>
+                    </span>
                     </a>
+                </div>
+
+                <!-- Help & Support -->
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.help.support') || request()->routeIs('admin.cms.*')) ? 'here show' : '' }}">
+                    <span class="menu-link">
+                        <span class="menu-icon"><i class="fa-solid fa-life-ring fs-5"></i></span>
+                        <span class="menu-title">Help & Support</span>
+                        <span class="menu-arrow"></span>
+                    </span>
+                    <div class="menu-sub menu-sub-accordion">
+                        <div class="menu-item">
+                            <!-- <a class="menu-link {{ request()->routeIs('admin.help.support') ? 'active' : '' }}" href="{{ route('admin.help.support') }}"> -->
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">User Queries</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <!-- <a class="menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="{{ route('admin.cms.list') }}"> -->
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">CMS Pages</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Reports -->
@@ -133,18 +152,25 @@
 
                 <!-- Analytics -->
                 <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
-                            <span class="menu-title">Analytics</span>
-                        </span>
+                    <!-- <a href="{{ route('admin.analytics') }}"> -->
+                    <span class="menu-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
+                        <span class="menu-title">Analytics</span>
+                    </span>
                     </a>
                 </div>
 
                 @else
                 <!-- ==========================================
-                         ARTIST SIDEBAR (KEEP AS IT WAS)
-                         ========================================== -->
+                    ARTIST SIDEBAR (KEEP AS IT WAS)
+                    ========================================== -->
+
+                @php
+                $sidebarUser = auth()->user();
+                $isMainOrAdmin = !$sidebarUser || $sidebarUser->user_type != 3 || !$sidebarUser->added_by;
+                $perms = $sidebarUser && $sidebarUser->permissions ? json_decode($sidebarUser->permissions, true) : [];
+                if (!is_array($perms)) $perms = [];
+                @endphp
 
                 <!-- Dashboard -->
                 <div class="menu-item">
@@ -156,6 +182,7 @@
                     </a>
                 </div>
 
+                @if($isMainOrAdmin || in_array('songs', $perms))
                 <!-- Music -->
                 <div class="menu-item">
                     <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.songs.index') : '#' }}">
@@ -165,7 +192,9 @@
                         </span>
                     </a>
                 </div>
+                @endif
 
+                @if($isMainOrAdmin || in_array('albums', $perms))
                 <!-- Albums -->
                 <div class="menu-item">
                     <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.albums.index') : '#' }}">
@@ -175,7 +204,9 @@
                         </span>
                     </a>
                 </div>
+                @endif
 
+                @if($isMainOrAdmin || in_array('analytics', $perms))
                 <!-- Analytics -->
                 <div class="menu-item">
                     <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.analytics.index') : '#' }}"> -->
@@ -185,7 +216,9 @@
                     </span>
                     </a>
                 </div>
+                @endif
 
+                @if($isMainOrAdmin || in_array('audience', $perms))
                 <!-- Audience -->
                 <div class="menu-item">
                     <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.audience.index') : '#' }}"> -->
@@ -195,56 +228,61 @@
                     </span>
                     </a>
                 </div>
+                @endif
 
                 <!-- Royalties -->
-                <div class="menu-item">
+                <!-- <div class="menu-item">
                     <a href="#">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-sack-dollar fs-5"></i></span>
                             <span class="menu-title">Royalties</span>
                         </span>
                     </a>
-                </div>
+                </div> -->
 
                 <!-- Promotion -->
+                <!-- <div class="menu-item">
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.promotion.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.promotion.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-bullhorn fs-5"></i></span>
+                            <span class="menu-title">Promotion</span>
+                        </span>
+                    </a>
+                </div> -->
+
+                @if($isMainOrAdmin || in_array('releases', $perms))
+                <!-- Releases -->
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.promotion.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.promotion.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-bullhorn fs-5"></i></span>
-                        <span class="menu-title">Promotion</span>
+                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.releases.index') : '#' }}"> -->
+                    <span class="menu-link {{ request()->routeIs('artist.releases.*') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
+                        <span class="menu-title">Releases</span>
                     </span>
                     </a>
                 </div>
-
-                <!-- Releases -->
-                <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
-                            <span class="menu-title">Releases</span>
-                        </span>
-                    </a>
-                </div>
+                @endif
 
                 <!-- Messages -->
-                <div class="menu-item">
+                <!-- <div class="menu-item">
                     <a href="#">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-envelope fs-5"></i></span>
                             <span class="menu-title">Messages</span>
                         </span>
                     </a>
-                </div>
+                </div> -->
 
                 <!-- Team -->
+                @if(!auth()->user()->added_by)
                 <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
-                            <span class="menu-title">Team</span>
-                        </span>
+                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.team.index') : '#' }}"> -->
+                    <span class="menu-link {{ request()->routeIs('artist.team.*') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
+                        <span class="menu-title">Team</span>
+                    </span>
                     </a>
                 </div>
+                @endif
 
                 <div class="menu-item pt-5">
                     <div class="menu-content">
@@ -263,14 +301,14 @@
                 </div>
 
                 <!-- Support -->
-                <div class="menu-item">
+                <!-- <div class="menu-item">
                     <a href="#">
                         <span class="menu-link">
                             <span class="menu-icon"><i class="fa-solid fa-life-ring fs-5"></i></span>
                             <span class="menu-title">Support</span>
                         </span>
                     </a>
-                </div>
+                </div> -->
                 @endif
             </div>
         </div>

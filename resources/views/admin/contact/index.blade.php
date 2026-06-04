@@ -51,7 +51,14 @@
                                                 </td>
                                                 <td> +{{ $detail->phone_code ?? '61' }} {{ $detail->mobile_number ?? 'N/A' }}
                                                 </td>
-                                                <td>{!! Str::limit($detail->enquiry, 150, '...') ?? 'N/A' !!}</td>
+                                                <td>
+                                                    <a href="javascript:void(0)" class="viewQuery text-dark text-hover-primary"
+                                                        data-bs-toggle="modal" data-bs-target="#viewModal"
+                                                        data-subject="{{ $detail->subject ?? 'N/A' }}"
+                                                        data-enquiry="{{ $detail->enquiry }}">
+                                                        {!! Str::limit($detail->enquiry, 150, '...') ?? 'N/A' !!}
+                                                    </a>
+                                                </td>
                                                 @can('reply-help-support')
                                                     <td>
                                                         <a href="javascript:void(0)" class="sendReply" aria-hidden="true"
@@ -87,12 +94,20 @@
                         $('#reply').val(reply);
                     }
                 });
+
+                $(document).on('click', '.viewQuery', function() {
+                    var subject = $(this).data('subject');
+                    var enquiry = $(this).data('enquiry');
+                    $('#view_subject').html(subject);
+                    $('#view_enquiry').html(enquiry);
+                });
             });
         </script>
     @endpush
 @endsection
 
 @section('pageModal')
+    <!-- Reply Modal -->
     <div class="modal fade modal-xl" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -122,6 +137,33 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal fade modal-xl" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewModalLabel">Query Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="form-label fw-bold">Subject:</label>
+                            <p id="view_subject" class="form-control bg-light" readonly></p>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Enquiry:</label>
+                            <div id="view_enquiry" class="form-control bg-light" style="min-height: 100px; height: auto;" readonly></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>

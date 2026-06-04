@@ -14,9 +14,27 @@ use App\Traits\UploadAble;
 class AlbumController extends BaseController
 {
     use UploadAble;
-    public function index(Request $request)
+    
+    public function __construct()
     {
-        $albums = Album::where('user_id', auth()->user()->id)->latest()->paginate(12);
+        $this->middleware(function ($request, $next) {
+            $user = auth()->user();
+            if ($user && $user->added_by) {
+                $perms = $user->permissions ? json_decode($user->permissions, true) : [];
+                if (!is_array($perms)) $perms = [];
+                if (!in_array('albums', $perms)) {
+                    abort(403, 'Unauthorized access.');
+                }
+            }
+            return $next($request);
+        });
+    }
+    public function index()
+    {
+        $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
+        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
+        $albums = Album::whereIn('user_id', $teamIds)->latest()->paginate(12);
         return view('artist.album.index', compact('albums'));
     }
     public function StoreOrUpdate(Request $request)

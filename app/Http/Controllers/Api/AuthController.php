@@ -38,6 +38,7 @@ use App\Http\Resources\Api\Auth\TodoCollection;
 use App\Http\Resources\AuthResource;
 use App\Models\Todo;
 use App\Traits\UploadAble;
+use App\Traits\StripeTrait;
 
 class AuthController extends BaseController
 {
@@ -45,6 +46,7 @@ class AuthController extends BaseController
     use SmsTrait;
     use NotificationTrait;
     use UploadAble;
+    use StripeTrait;
 
     public function signup(Request $request)
     {
@@ -73,6 +75,13 @@ class AuthController extends BaseController
                 'verification_code' => $otp,
                 'registration_ip' => request()->ip(),
             ]);
+
+            try {
+                $customer = $this->createCustomer($user->email, $user->name);
+                $user->update(['stripe_id' => $customer->id]);
+            } catch (\Exception $e) {
+                logger('Stripe customer creation failed during signup: ' . $e->getMessage());
+            }
 
             if ($user) {
                 $user->roles()->sync($userRole);

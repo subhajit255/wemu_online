@@ -31,6 +31,7 @@ Route::as('artist.')->group(function () {
             Route::get('songs', 'index')->name('songs.index');
             Route::match(['get', 'post'], 'songs/add-or-update/{id?}', 'storeOrUpdate')->name('songs.storeOrUpdate');
             Route::get('songs/details/{id}', 'show')->name('songs.show');
+            Route::get('songs/play/{id}', 'play')->name('songs.play');
         });
         Route::controller(AlbumController::class)->group(function () {
             Route::match(['get', 'post'], 'albums', 'index')->name('albums.index');
@@ -50,6 +51,20 @@ Route::as('artist.')->group(function () {
         });
         Route::controller(\App\Http\Controllers\Artist\PromotionController::class)->group(function () {
             Route::get('promotion', 'index')->name('promotion.index');
+        });
+        Route::controller(\App\Http\Controllers\Artist\TeamController::class)->group(function () {
+            Route::get('team', 'index')->name('team.index');
+            Route::match(['get', 'post'], 'team/add-or-update/{id?}', 'storeOrUpdate')->name('team.storeOrUpdate');
+            Route::post('team/update-permissions/{id}', 'updatePermissions')->name('team.updatePermissions');
+            Route::post('team/delete/{id}', 'destroy')->name('team.destroy');
+        });
+        Route::controller(\App\Http\Controllers\Artist\ReleaseController::class)->group(function () {
+            Route::get('releases', 'index')->name('releases.index');
+        });
+        Route::controller(\App\Http\Controllers\Artist\FaqController::class)->group(function () {
+            Route::get('faq', 'index')->name('faq.index');
+            Route::post('faq/add', 'add')->name('faq.add');
+            Route::post('faq/delete/{id}', 'destroy')->name('faq.destroy');
         });
     });
 });

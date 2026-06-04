@@ -4,9 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Api\CmsController;
+use App\Http\Controllers\Api\HelpAndSupportController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\StripeWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +47,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/todo/list', 'todoList')->name('todo.list');
     Route::post('/todo/add', 'todoAdd')->name('todo.add');
     Route::post('/todo/delete', 'todoDelete')->name('todo.delete');
+});
+Route::controller(CmsController::class)->group(function () {
+    Route::get('/pages', 'cmsPages')->name('pages');
 });
 
 Route::controller(MasterController::class)->group(function () {
@@ -103,6 +109,10 @@ Route::middleware('auth:api')->group(function () {
 
     //     Route::post('/account/delete', 'deleteAccount')->name('account.delete');
     // });
+
+    Route::controller(SubscriptionController::class)->group(function () {
+        Route::post('/user/subscription/purchase', 'purchase')->name('user.subscription.purchase');
+    });
     Route::controller(AuthController::class)->group(function () {
         Route::post('/logout', 'logout')->name('logout');
         Route::get('my-profile', 'myProfile')->name('my-profile');
@@ -131,4 +141,10 @@ Route::middleware('auth:api')->group(function () {
     Route::controller(SubscriptionController::class)->group(function () {
         Route::get('/my-current-subscription', 'myCurrentSubscription')->name('my-current-subscription');
     });
+    Route::controller(HelpAndSupportController::class)->group(function () {
+        Route::get('/support-articles', 'supportArticles')->name('support.articles');
+        Route::post('/raise-help', 'raiseHelp')->name('raise.help');
+    });
 });
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');

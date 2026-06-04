@@ -72,7 +72,7 @@
                             <span class="fs-6 fw-bold text-gray-800">Artist Directory</span>
                             <span class="badge badge-light-primary fw-semibold">{{ $details->total() }} artists</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2 text-muted fs-8">
+                        <div class="d-flex align-items-center gap-2 text-muted fs-8" style="cursor: pointer;" onclick="window.location.reload()">
                             <i class="fa-solid fa-arrow-rotate-right"></i> Live data
                         </div>
                     </div>

@@ -17,4 +17,30 @@ return [
     'SITE_ITEM_UPLOAD_PATH' => 'item/',
     'SITE_ICON_UPLOAD_PATH' => 'icon/',
     'CATCH_ERROR_MSG' => "Something went wrong. Please try again later.",
+    'SUPPORT_ARTICLE' => [
+        'Payment & billing' => [
+            'Subscription plan',
+            'How to change payment method details',
+            'How to cancel premium plans',
+            'How to change plan',
+            'How to view purchase history',
+        ],
+        'Manage your account' => [
+            'How to change email id',
+            'How to change password',
+            'How to enable/disable notification',
+            'How to update your profile',
+            'How to enable/disable notification',
+            'How to logout of all devices',
+            'How to delete your account',
+        ],
+        'Security & privacy' => [
+            'Data rights and privacy choices',
+            'Understanding your data',
+            'Safety and privacy center',
+            'Data privacy and cookies',
+            'Terms and privacy',
+            'Security best practices'
+        ]
+    ]
 ];

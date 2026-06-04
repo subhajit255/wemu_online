@@ -3690,3 +3690,164 @@ input:checked + .slider:before { transform: translateX(20px); }
 .bg-secondary { background-color: #cbd5e1 !important; }
 .text-primary { color: #8b5cf6 !important; }
 .text-hover-primary:hover { color: #7c3aed !important; }
+/* Wemu Team Custom Styles */
+.wemu-btn-primary {
+    background-color: #7b61ff !important;
+    color: #fff !important;
+    border: none !important;
+}
+.wemu-btn-primary:hover {
+    background-color: #6a4ef2 !important;
+}
+.wemu-filter-card {
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.02) !important;
+    border: none !important;
+}
+.wemu-search-input {
+    background-color: #f9f9fb !important;
+    border: 1px solid #f1f1f4 !important;
+    border-radius: 8px !important;
+}
+.wemu-select {
+    background-color: #f9f9fb !important;
+    border: 1px solid #f1f1f4 !important;
+    border-radius: 8px !important;
+}
+.wemu-table-card {
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.02) !important;
+    border: none !important;
+}
+.wemu-status-toggle .form-check-input:checked {
+    background-color: #009ef7 !important;
+    border-color: #009ef7 !important;
+}
+.wemu-status-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: #50cd89;
+    text-align: center;
+    margin-top: 4px;
+    display: block;
+}
+.wemu-avatar-wrapper {
+    position: relative;
+}
+.wemu-avatar-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background-color: #50cd89;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+.wemu-role-badge {
+    background-color: #e1e9ff !important;
+    color: #3e63dd !important;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.wemu-table-header-dark {
+    background-color: #0d3831 !important;
+}
+.wemu-table-header-dark th {
+    color: #fff !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    border-bottom: none !important;
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+}
+.wemu-table-row-dashed {
+    border-bottom: 1px dashed #fbd34d !important;
+}
+.wemu-avatar-initials {
+    background-color: #f1f1f4;
+    color: #a1a5b7;
+    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+/* Custom Pagination */
+.custom-pagination-wrapper .pagination {
+    display: flex;
+    gap: 8px;
+    border: none;
+}
+.custom-pagination-wrapper .page-item {
+    margin: 0;
+}
+.custom-pagination-wrapper .page-item .page-link {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px !important;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+.custom-pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    transform: translateY(-2px);
+}
+.custom-pagination-wrapper .page-item .page-link:hover:not(.active) {
+    background-color: #f5f3ff;
+    border-color: #c4b5fd;
+    color: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Premium Card & Element Enhancements */
+.premium-card-hover {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+.premium-card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+    border-color: #e5e7eb;
+}
+
+.premium-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+.premium-image-wrapper img {
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.premium-image-wrapper:hover img {
+    transform: scale(1.08);
+}
+
+.premium-album-card {
+    background: linear-gradient(145deg, #ffffff, #f9fafb);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.premium-badge-date {
+    background: rgba(243, 244, 246, 0.8);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    color: #4b5563;
+}

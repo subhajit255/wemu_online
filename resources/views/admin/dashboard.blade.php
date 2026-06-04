@@ -268,62 +268,38 @@
                             <span class="card-label fw-bold fs-4 text-dark">Pending Artist Approvals</span>
                         </h3>
                         <div class="card-toolbar">
-                            <span class="badge badge-light-warning fw-bold fs-8">3 Pending Request(s)</span>
+                            <span class="badge badge-light-warning fw-bold fs-8">{{ $pendingArtistsCount }} Pending Request(s)</span>
                         </div>
                     </div>
                     <div class="card-body p-6 pt-3">
                         <div class="approval-list-container">
-                            <!-- Travis Scott -->
+                            @forelse($pendingArtists as $artist)
+                            <!-- {{ $artist->name }} -->
                             <div class="approval-item">
                                 <div class="d-flex align-items-center">
-                                    <div class="approval-avatar" style="background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);">
-                                        TS
-                                    </div>
+                                    @if($artist->profile_image)
+                                        <div class="approval-avatar" style="background-image: url('{{ $artist->image_path }}'); background-size: cover; background-position: center;"></div>
+                                    @else
+                                        <div class="approval-avatar" style="background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);">
+                                            {{ strtoupper(substr($artist->name, 0, 2)) }}
+                                        </div>
+                                    @endif
                                     <div class="d-flex flex-column ms-4">
-                                        <a href="#" class="text-gray-800 text-hover-primary fs-6 fw-bold">Travis Scott</a>
-                                        <span class="text-muted fs-8">travis@wemu.com • Hip Hop / Rap</span>
+                                        <a href="{{ route('admin.artist.view', $artist->uuid) }}" class="text-gray-800 text-hover-primary fs-6 fw-bold">{{ $artist->name }}</a>
+                                        <span class="text-muted fs-8">{{ $artist->email }} • {{ $artist->profile?->primaryGenre?->name ?? 'No Genre' }}</span>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-3">
-                                    <span class="text-muted fs-8 d-none d-md-inline me-2">Requested May 19, 2026</span>
-                                    <button class="btn btn-approve">Approve</button>
-                                    <button class="btn btn-reject">Reject</button>
+                                    <span class="text-muted fs-8 d-none d-md-inline me-2">Requested {{ $artist->created_at->format('M d, Y') }}</span>
+                                    <button class="btn btn-approve approve-artist-btn" data-uuid="{{ $artist->uuid }}">Approve</button>
+                                    <button class="btn btn-reject reject-artist-btn" data-uuid="{{ $artist->uuid }}">Reject</button>
                                 </div>
                             </div>
-                            <!-- Dua Lipa -->
-                            <div class="approval-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="approval-avatar" style="background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);">
-                                        DL
-                                    </div>
-                                    <div class="d-flex flex-column ms-4">
-                                        <a href="#" class="text-gray-800 text-hover-primary fs-6 fw-bold">Dua Lipa</a>
-                                        <span class="text-muted fs-8">dua@wemu.com • Dance / Pop</span>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="text-muted fs-8 d-none d-md-inline me-2">Requested May 18, 2026</span>
-                                    <button class="btn btn-approve">Approve</button>
-                                    <button class="btn btn-reject">Reject</button>
-                                </div>
+                            @empty
+                            <div class="text-center py-5">
+                                <span class="text-muted">No pending requests</span>
                             </div>
-                            <!-- Olivia Rodrigo -->
-                            <div class="approval-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="approval-avatar" style="background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);">
-                                        OR
-                                    </div>
-                                    <div class="d-flex flex-column ms-4">
-                                        <a href="#" class="text-gray-800 text-hover-primary fs-6 fw-bold">Olivia Rodrigo</a>
-                                        <span class="text-muted fs-8">olivia@wemu.com • Pop / Rock</span>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="text-muted fs-8 d-none d-md-inline me-2">Requested May 17, 2026</span>
-                                    <button class="btn btn-approve">Approve</button>
-                                    <button class="btn btn-reject">Reject</button>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -590,7 +566,123 @@
     </div>
 </div>
 
+<!-- Reject Artist Modal -->
+<div class="modal fade" id="rejectArtistModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title d-flex align-items-center fs-3 fw-bold text-dark">
+                    <div class="d-flex align-items-center justify-content-center bg-light-danger rounded-circle me-3" style="width: 24px; height: 24px;">
+                        <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: #dc3545;">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </div>
+                    Reject Artist Verification
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <form id="rejectArtistForm">
+                    <input type="hidden" id="rejectArtistUuid" name="uuid">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-gray-800 fs-6">Rejection Reason</label>
+                        <textarea class="form-control form-control-solid bg-light text-gray-600" id="rejectionReason" name="rejection_reason" rows="4" placeholder="Enter clear explanation e.g. Government ID blurry, selfie does not match ID, missing links..." style="border-radius: 8px;" required></textarea>
+                        <div class="form-text text-muted fs-8 mt-2">This comment will be visible to the artist on their registration status dashboard.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-end gap-2">
+                <button type="button" class="btn btn-light fw-bold" style="background-color: #f8f9fa; color: #6c757d;" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger fw-bold d-flex align-items-center gap-2" id="confirmRejectBtn">
+                    <div class="d-flex align-items-center justify-content-center bg-white rounded-circle" style="width: 16px; height: 16px;">
+                        <svg viewBox="0 0 24 24" style="width: 10px; height: 10px; fill: #dc3545;">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </div>
+                    Confirm Rejection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('script')
 <script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        $('.approve-artist-btn').click(function() {
+            let uuid = $(this).data('uuid');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to approve this artist!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('admin/artist/approve') }}/" + uuid,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            if (response.status) {
+                                Swal.fire('Approved!', response.message, 'success').then(() => location.reload());
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // Rejection Modal Logic
+        let rejectModal = new bootstrap.Modal(document.getElementById('rejectArtistModal'));
+        
+        $('.reject-artist-btn').click(function() {
+            let uuid = $(this).data('uuid');
+            $('#rejectArtistUuid').val(uuid);
+            $('#rejectionReason').val('');
+            rejectModal.show();
+        });
+
+        $('#confirmRejectBtn').click(function() {
+            let uuid = $('#rejectArtistUuid').val();
+            let reason = $('#rejectionReason').val().trim();
+            
+            if (!reason) {
+                Swal.fire('Warning', 'Rejection reason is required', 'warning');
+                return;
+            }
+
+            let btn = $(this);
+            btn.prop('disabled', true).text('Rejecting...');
+
+            $.ajax({
+                url: "{{ url('admin/artist/reject') }}/" + uuid,
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    rejection_reason: reason
+                },
+                success: function(response) {
+                    btn.prop('disabled', false).html('<i class="fa fa-times-circle me-1"></i> Confirm Rejection');
+                    if (response.status) {
+                        rejectModal.hide();
+                        Swal.fire('Rejected!', response.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false).html('<i class="fa fa-times-circle me-1"></i> Confirm Rejection');
+                    Swal.fire('Error!', xhr.responseJSON?.message || 'Something went wrong', 'error');
+                }
+            });
+        });
+    });
+</script>
 @endpush
 @endsection

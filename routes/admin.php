@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ArtistController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\ContactController;
@@ -43,8 +45,13 @@ Route::as('admin.')->group(function () {
     });
 
     Route::middleware(['auth'])->group(function () {
-        Route::controller(AdminController::class)->group(function () {
+        Route::controller(DashboardController::class)->group(function () {
             Route::get('dashboard', 'dashboard')->name('dashboard');
+        });
+        Route::controller(AnalyticsController::class)->group(function () {
+            Route::get('analytics', 'index')->name('analytics');
+        });
+        Route::controller(AdminController::class)->group(function () {
             Route::post('profile/update', 'profileUpdate')->name('profile.update');
             Route::post('password/update', 'passwordUpdate')->name('password.update');
             Route::post('notification/read', 'readNotification')->name('read.notification');
@@ -80,6 +87,10 @@ Route::as('admin.')->group(function () {
             Route::get('list', 'index')->name('list')->can('view-cms');
             Route::any('add', 'add')->name('add')->can('add-cms');
             Route::any('edit/{uuid}', 'add')->name('edit')->can('edit-cms');
+        });
+        Route::controller(CmsController::class)->group(function () {
+            Route::match(['get', 'post'], 'help-support', 'helpSupport')->name('help.support');
+            Route::post('help-support/reply', 'replyQuery')->name('help.support.reply');
         });
         Route::controller(CategoryController::class)->as('category.')->prefix('category')->group(function () {
             Route::get('list', 'index')->name('list')->can('view-category');

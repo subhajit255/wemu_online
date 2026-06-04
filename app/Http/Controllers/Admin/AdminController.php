@@ -18,27 +18,6 @@ use App\Http\Controllers\BaseController;
 class AdminController extends BaseController
 {
     use UploadAble;
-    public function dashboard()
-    {
-        $totalUserCount = User::where('user_type', 3)->count();
-        $totalTodaysUserCount = User::where('user_type', 3)->whereDate('created_at', date('Y-m-d'))->count();
-        // $totalItemsCount = Item::count();
-        // $totalTodayItemsCount = Item::whereDate('created_at', date('Y-m-d'))->count();
-        // $totalCategoriesCount = Category::count();
-        // $totalTodayCategoriesCount = Category::whereDate('created_at', date('Y-m-d'))->count();
-        // $totalUserGoalCount = UserGoal::count();
-        // $totalUserGoalTaskCount = UserGoalTask::count();
-        // $totalIncome = Transaction::where('payment_status', 2)->sum('amount');
-        // $totalIncomeThisMonth = Transaction::where('payment_status', 2)
-        //     ->whereBetween('created_at', [
-        //         now()->startOfMonth()->toDateTimeString(),
-        //         now()->endOfMonth()->toDateTimeString()
-        //     ])
-        //     ->sum('amount');
-        // $transactions = Transaction::where('payment_status', 2)->latest()->paginate(10);
-        // return view('admin.dashboard', compact('totalUserCount', 'totalTodaysUserCount', 'totalItemsCount', 'totalTodayItemsCount', 'totalCategoriesCount', 'totalTodayCategoriesCount', 'totalUserGoalCount', 'totalUserGoalTaskCount', 'transactions', 'totalIncome', 'totalIncomeThisMonth'));
-        return view('admin.dashboard', compact('totalUserCount', 'totalTodaysUserCount'));
-    }
 
     public function profileUpdate(Request $request)
     {

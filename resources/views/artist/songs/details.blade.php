@@ -23,6 +23,9 @@ $audioSrc = $hasRealAudio ? $song->audio_file_path : 'https://www.soundhelix.com
             <a href="{{ route('artist.songs.index') }}" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back to Songs
             </a>
+            <a href="{{ route('artist.songs.play', $song->id) }}" class="btn btn-sm btn-info fw-bold" style="margin-right: 5px;">
+                <i class="fa-solid fa-play me-1"></i> Play Screen
+            </a>
             <a href="{{ route('artist.songs.storeOrUpdate', $song->id) }}" class="btn btn-sm btn-dark fw-bold">
                 <i class="fa-solid fa-pen me-1"></i> Edit Song
             </a>

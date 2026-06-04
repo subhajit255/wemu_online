@@ -17,8 +17,8 @@ class ArtistController extends BaseController
 
     public function index(Request $request)
     {
-        // Artists are user_type = 3
-        $query = User::where('user_type', 3)->withCount(['songs', 'albums'])->latest();
+        // Artists are user_type = 3 and main artists have added_by as null
+        $query = User::where('user_type', 3)->whereNull('added_by')->withCount(['songs', 'albums'])->latest();
         
         if (($request->type == 1 || $request->type == 2) && $request->type != null) {
             $query->where('is_active', $request->type == 2 ? 0 : 1);

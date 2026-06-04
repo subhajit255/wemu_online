@@ -15,13 +15,13 @@ use App\Traits\UploadAble;
 class AlbumController extends BaseController
 {
     use UploadAble;
-    
+
     public function index(Request $request)
     {
-        $albums = Album::latest()->paginate(12);
+        $albums = Album::latest()->paginate(8);
         return view('admin.album.index', compact('albums'));
     }
-    
+
     public function StoreOrUpdate(Request $request)
     {
         if ($request->post()) {
@@ -33,7 +33,7 @@ class AlbumController extends BaseController
                 'status' => 'required|in:0,1',
                 'release_date' => 'nullable|date',
             ];
-            
+
             if (!empty($id)) {
                 $rules['file'] = 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10000';
                 $message = "Album Updated Successfully";
@@ -41,7 +41,7 @@ class AlbumController extends BaseController
                 $rules['file'] = 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10000';
                 $message = "Album Created Successfully";
             }
-            
+
             $request->validate($rules);
 
             DB::beginTransaction();
@@ -86,7 +86,7 @@ class AlbumController extends BaseController
         }
         $genres = Genre::where('is_active', 1)->get();
         $artists = User::where('user_type', 3)->latest()->get();
-        
+
         return view('admin.album.form', compact('details', 'genres', 'artists'));
     }
 

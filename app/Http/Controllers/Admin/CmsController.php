@@ -25,24 +25,28 @@ class CmsController extends BaseController
             if (!empty($id)) {
                 $request->validate([
                     'title' => 'required|string',
-                    'description' => 'required|string'
                 ]);
                 $message = "Cms Updated Successfully";
             } else {
                 $request->validate([
                     'title' => 'required|string',
-                    'description' => 'required|string',
-                    // 'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg',
                 ]);
                 $message = "Cms Created Successfully";
             }
 
             DB::beginTransaction();
             try {
+                $descriptionContent = '';
+                if ($request->has('blocks') && is_array($request->blocks)) {
+                    $descriptionContent = json_encode(array_values($request->blocks));
+                } else {
+                    $descriptionContent = $request->description ?? '';
+                }
+
                 $postData = [
                     "title" => $request->title,
                     "alias" => str_replace(' ', '_', strtolower($request->title)),
-                    "description" => $request->description,
+                    "description" => $descriptionContent,
                     "for_home" => $request->for_home ?? 0,
                 ];
                 if (!empty($request->file)) {
@@ -72,5 +76,56 @@ class CmsController extends BaseController
             $details = Cms::find($uuid);
         }
         return view('admin.cms.add', compact('details'));
+    }
+
+    public function helpSupport(Request $request)
+    {
+        $query = \App\Models\UserQuery::with('user')->latest();
+        
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('subject', 'like', '%' . $request->search . '%')
+                  ->orWhere('query', 'like', '%' . $request->search . '%');
+            });
+        }
+        
+        if ($request->filled('type') && $request->type != 'all') {
+            $query->where('subject', 'like', '%' . $request->type . '%');
+        }
+
+        $queries = $query->get();
+        return view('admin.helpsupport.index', compact('queries'));
+    }
+
+    public function replyQuery(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:user_queries,id',
+            'reply' => 'required|string'
+        ]);
+
+        try {
+            $userQuery = \App\Models\UserQuery::with('user')->findOrFail($request->id);
+            $userQuery->update([
+                'reply' => $request->reply,
+                'reply_by' => auth()->id(),
+                'status' => 1 // Replied
+            ]);
+
+            if ($userQuery->user && $userQuery->user->email) {
+                \Illuminate\Support\Facades\Mail::to($userQuery->user->email)
+                    ->send(new \App\Mail\EnquiryReplyMail($userQuery->query, $request->reply));
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Reply sent successfully'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong: ' . $th->getMessage()
+            ], 500);
+        }
     }
 }

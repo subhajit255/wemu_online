@@ -58,7 +58,7 @@ class AuthController extends BaseController
 
             $user = auth()->user();
             if ($user && $user->user_type == 3) {
-                if ($user->completed_steps >= 9) {
+                if ($user->completed_steps >= 9 || $user->added_by) {
                     return redirect()->route('artist.dashboard');
                 }
 
@@ -473,6 +473,10 @@ class AuthController extends BaseController
     {
         $user = auth()->user();
         if ($user && $user->user_type == 3) {
+            if ($user->added_by) {
+                return view('artist.dashboard');
+            }
+
             if ($user->completed_steps < 9) {
                 return redirect()->route('artist.register');
             }

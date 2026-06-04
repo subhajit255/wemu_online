@@ -3,10 +3,29 @@
 namespace App\Http\Controllers\Artist;
 
 use App\Http\Controllers\BaseController;
+use App\Models\Artist;
+use App\Models\StreamLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AnalyticsController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $user = auth()->user();
+            if ($user && $user->added_by) {
+                $perms = $user->permissions ? json_decode($user->permissions, true) : [];
+                if (!is_array($perms)) $perms = [];
+                if (!in_array('analytics', $perms)) {
+                    abort(403, 'Unauthorized access.');
+                }
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         return view('artist.analytics.index');
@@ -18,14 +37,14 @@ class AnalyticsController extends BaseController
             $artistId = auth()->id(); // Assume the logged-in user is the artist
             $filter = $request->query('filter', '1'); // '1' = This Month, '3' = This Year
 
-            $query = \App\Models\StreamLog::where('artist_id', $artistId);
+            $query = StreamLog::where('artist_id', $artistId);
 
             if ($filter == '3') { // This Year
-                $query->whereYear('created_at', \Illuminate\Support\Carbon::now()->year);
-                
+                $query->whereYear('created_at', Carbon::now()->year);
+
                 $logs = $query->select(
-                    \Illuminate\Support\Facades\DB::raw('MONTH(created_at) as period'),
-                    \Illuminate\Support\Facades\DB::raw('COUNT(*) as total_streams')
+                    DB::raw('MONTH(created_at) as period'),
+                    DB::raw('COUNT(*) as total_streams')
                 )->groupBy('period')->orderBy('period')->get();
 
                 // Format data points
@@ -33,20 +52,19 @@ class AnalyticsController extends BaseController
                 $dataPoints = [];
                 $totalCount = 0;
                 foreach ($logs as $log) {
-                    $monthName = \Illuminate\Support\Carbon::createFromFormat('m', $log->period)->format('M');
+                    $monthName = Carbon::createFromFormat('m', $log->period)->format('M');
                     $labels[] = $monthName;
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
                 }
-
             } else {
                 // Default: this month
-                $query->whereMonth('created_at', \Illuminate\Support\Carbon::now()->month)
-                      ->whereYear('created_at', \Illuminate\Support\Carbon::now()->year);
-                
+                $query->whereMonth('created_at', Carbon::now()->month)
+                    ->whereYear('created_at', Carbon::now()->year);
+
                 $logs = $query->select(
-                    \Illuminate\Support\Facades\DB::raw('DATE(created_at) as period'),
-                    \Illuminate\Support\Facades\DB::raw('COUNT(*) as total_streams')
+                    DB::raw('DATE(created_at) as period'),
+                    DB::raw('COUNT(*) as total_streams')
                 )->groupBy('period')->orderBy('period')->get();
 
                 // Format data points
@@ -54,7 +72,7 @@ class AnalyticsController extends BaseController
                 $dataPoints = [];
                 $totalCount = 0;
                 foreach ($logs as $log) {
-                    $dateName = \Illuminate\Support\Carbon::parse($log->period)->format('M j');
+                    $dateName = Carbon::parse($log->period)->format('M j');
                     $labels[] = $dateName;
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
@@ -63,12 +81,12 @@ class AnalyticsController extends BaseController
 
             // Calculate growth percentage
             if ($filter == '3') { // This Year vs Last Year
-                $previousPeriodCount = \App\Models\StreamLog::where('artist_id', $artistId)
-                    ->whereYear('created_at', \Illuminate\Support\Carbon::now()->subYear()->year)
+                $previousPeriodCount = StreamLog::where('artist_id', $artistId)
+                    ->whereYear('created_at', Carbon::now()->subYear()->year)
                     ->count();
             } else { // This Month vs Last Month
-                $previousPeriodCount = \App\Models\StreamLog::where('artist_id', $artistId)
-                    ->whereMonth('created_at', \Illuminate\Support\Carbon::now()->subMonth()->month)
+                $previousPeriodCount = StreamLog::where('artist_id', $artistId)
+                    ->whereMonth('created_at', Carbon::now()->subMonth()->month)
                     ->whereYear('created_at', \Illuminate\Support\Carbon::now()->subMonth()->year)
                     ->count();
             }
@@ -98,7 +116,6 @@ class AnalyticsController extends BaseController
                 'status' => true,
                 'data' => $data
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

@@ -26,12 +26,17 @@
                 <!-- Form Card -->
                 <div class="form-card">
                     <form id="subscriptionForm" action="{{ route('admin.subscription.add') }}" method="POST" class="formSubmit fileUpload" enctype="multipart/form-data">
-                        <input type="hidden" name="id" name="id" value="{{ $details->id ?? null }}">
+                        @csrf
+                        <input type="hidden" name="id" value="{{ $details->id ?? null }}">
                         
                         <div class="row g-5">
                             <div class="col-md-6 modern-form-group">
                                 <label for="name">Plan Name <span class="text-danger">*</span></label>
                                 <input type="text" class="modern-input" placeholder="e.g. Pro Artist Monthly" name="name" id="name" value="{{ $details->name ?? null }}">
+                            </div>
+                            <div class="col-md-6 modern-form-group">
+                                <label for="tagline">Tagline</label>
+                                <input type="text" class="modern-input" placeholder="e.g. Up to 6 Premium accounts" name="tagline" id="tagline" value="{{ $details->tagline ?? null }}">
                             </div>
                             <div class="col-md-3 modern-form-group">
                                 <label for="available_for">Audience <span class="text-danger">*</span></label>
@@ -41,13 +46,18 @@
                                     <option value="2" {{ !empty($details) && $details->available_for == 2 ? 'selected' : null }}>Artist</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 modern-form-group">
+                            <div class="col-md-2 modern-form-group">
                                 <label for="interval">Billing Interval <span class="text-danger">*</span></label>
                                 <select name="interval" id="interval" class="modern-input modern-select">
                                     <option value="">Select Interval</option>
-                                    <option value="1" {{ !empty($details) && $details->interval == 1 ? 'selected' : null }}>Monthly</option>
-                                    <option value="2" {{ !empty($details) && $details->interval == 2 ? 'selected' : null }}>Yearly</option>
+                                    <option value="month" {{ (!empty($details) && $details->interval == 'month') || empty($details) ? 'selected' : null }}>Monthly</option>
+                                    <option value="year" {{ !empty($details) && $details->interval == 'year' ? 'selected' : null }}>Yearly</option>
+                                    <option value="week" {{ !empty($details) && $details->interval == 'week' ? 'selected' : null }}>Weekly</option>
                                 </select>
+                            </div>
+                            <div class="col-md-2 modern-form-group">
+                                <label for="interval_count">Interval Count <span class="text-danger">*</span></label>
+                                <input type="number" class="modern-input" placeholder="e.g. 1" name="interval_count" id="interval_count" value="{{ $details->interval_count ?? 1 }}">
                             </div>
                             
                             <div class="col-md-6 modern-form-group">
@@ -57,7 +67,7 @@
                                     <input type="text" class="modern-input number-only" placeholder="0.00" name="price" id="price" value="{{ $details->price ?? null }}">
                                 </div>
                             </div>
-                            <div class="col-md-6 modern-form-group">
+                            <div class="col-md-3 modern-form-group">
                                 <label for="currency">Currency <span class="text-danger">*</span></label>
                                 <select name="currency" id="currency" class="modern-input modern-select">
                                     <option value="USD" {{ !empty($details) && $details->currency == 'USD' ? 'selected' : null }}>USD ($)</option>
@@ -65,6 +75,25 @@
                                     <option value="GBP" {{ !empty($details) && $details->currency == 'GBP' ? 'selected' : null }}>GBP (£)</option>
                                     <option value="INR" {{ !empty($details) && $details->currency == 'INR' ? 'selected' : null }}>INR (₹)</option>
                                 </select>
+                            </div>
+
+                            <div class="col-md-3 modern-form-group">
+                                <label for="max_users">Max Users <span class="text-danger">*</span></label>
+                                <input type="number" class="modern-input" placeholder="1 for Individual, 2 for Duo" name="max_users" id="max_users" value="{{ $details->max_users ?? 1 }}">
+                            </div>
+                            <div class="col-md-3 modern-form-group">
+                                <label for="trial_days">Trial Days</label>
+                                <input type="number" class="modern-input" placeholder="e.g. 30" name="trial_days" id="trial_days" value="{{ $details->trial_days ?? 0 }}">
+                            </div>
+
+
+                            <div class="col-12 mt-6">
+                                <div class="form-check form-check-custom form-check-solid">
+                                    <input class="form-check-input" type="checkbox" value="1" id="requires_verification" name="requires_verification" {{ !empty($details) && $details->requires_verification ? 'checked' : '' }} />
+                                    <label class="form-check-label fw-semibold text-gray-700" for="requires_verification">
+                                        Requires Student/Third-Party Verification
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="col-12 modern-form-group mt-6">
