@@ -15,7 +15,7 @@ use App\Traits\UploadAble;
 class SongController extends BaseController
 {
     use UploadAble;
-    
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {

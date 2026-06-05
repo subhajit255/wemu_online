@@ -184,7 +184,7 @@
                                     <div id="bgFileName" class="mt-3 fw-bold text-primary p-2 rounded fs-8" style="display: none; background: rgba(99, 102, 241, 0.1);"></div>
                                 </div>
 
-                                <input type="file" class="d-none" name="background" id="background" accept=".mp4,.png,.jpg,.jpeg" onchange="handleDropzoneSelect(this, 'bgDropzone', 'bgFileName', 'fa-solid fa-file-video')" />
+                                <input type="file" class="d-none" name="background" id="background" accept=".mp4,.png,.jpg,.jpeg,.gif" onchange="handleDropzoneSelect(this, 'bgDropzone', 'bgFileName', 'fa-solid fa-file-video')" />
                             </div>
                         </div>
                     </div>
