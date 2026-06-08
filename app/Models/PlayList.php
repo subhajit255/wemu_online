@@ -33,4 +33,8 @@ class PlayList extends Model
     {
         return $this->belongsToMany(Song::class, 'play_list_songs', 'play_list_id', 'song_id')->withTimestamps();
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
