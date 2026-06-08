@@ -319,10 +319,10 @@ class SongController extends BaseController
 
             // Search Artists
             $artists = User::where(function ($q) use ($keywords) {
-                $q->where('name', 'like', "%{$keywords}%")
-                    ->orWhereHas('songs', function ($sq) use ($keywords) {
-                        $sq->where('title', 'like', "%{$keywords}%");
-                    });
+                $q->where('name', 'like', "%{$keywords}%");
+                // ->orWhereHas('songs', function ($sq) use ($keywords) {
+                //     $sq->where('title', 'like', "%{$keywords}%");
+                // });
             })
                 ->whereHas('profile') // Profile usually means artist in this app
                 ->get();
