@@ -773,6 +773,21 @@ body,
     margin-right: 4px;
 }
 
+.trend-down {
+    display: inline-flex;
+    align-items: center;
+    color: #ef4444; /* red color for negative trend */
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.trend-down svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    margin-right: 4px;
+}
+
 .sparkline-svg {
     width: 100%;
     height: 40px;

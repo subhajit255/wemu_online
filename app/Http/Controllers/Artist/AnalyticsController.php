@@ -34,12 +34,16 @@ class AnalyticsController extends BaseController
     public function streamsChart(Request $request)
     {
         try {
-            $artistId = auth()->id(); // Assume the logged-in user is the artist
-            $filter = $request->query('filter', '1'); // '1' = This Month, '3' = This Year
+            $user = auth()->user();
+            $userId = $user ? $user->id : 0;
+            $mainArtistId = $user && $user->added_by ? $user->added_by : $userId;
+            $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
-            $query = StreamLog::where('artist_id', $artistId);
+            $filter = $request->query('filter', '1'); // '1' or 'this_month', '3' or 'this_year', 'last_7_days'
 
-            if ($filter == '3') { // This Year
+            $query = StreamLog::whereIn('artist_id', $teamIds);
+
+            if ($filter === '3' || $filter === 'this_year') { // This Year
                 $query->whereYear('created_at', Carbon::now()->year);
 
                 $logs = $query->select(
@@ -52,13 +56,13 @@ class AnalyticsController extends BaseController
                 $dataPoints = [];
                 $totalCount = 0;
                 foreach ($logs as $log) {
-                    $monthName = Carbon::createFromFormat('m', $log->period)->format('M');
+                    $monthName = Carbon::createFromFormat('m', str_pad($log->period, 2, '0', STR_PAD_LEFT))->format('M');
                     $labels[] = $monthName;
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
                 }
-            } else {
-                // Default: this month
+            } elseif ($filter === '1' || $filter === 'this_month') {
+                // This month
                 $query->whereMonth('created_at', Carbon::now()->month)
                     ->whereYear('created_at', Carbon::now()->year);
 
@@ -77,17 +81,41 @@ class AnalyticsController extends BaseController
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
                 }
+            } else {
+                // last_7_days
+                $query->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
+                
+                $logs = $query->select(
+                    DB::raw('DATE(created_at) as period'),
+                    DB::raw('COUNT(*) as total_streams')
+                )->groupBy('period')->orderBy('period')->get()->pluck('total_streams', 'period');
+
+                $labels = [];
+                $dataPoints = [];
+                $totalCount = 0;
+                for ($i = 6; $i >= 0; $i--) {
+                    $dateStr = Carbon::now()->subDays($i)->format('Y-m-d');
+                    $labels[] = Carbon::now()->subDays($i)->format('M d');
+                    $val = $logs->get($dateStr, 0);
+                    $dataPoints[] = $val;
+                    $totalCount += $val;
+                }
             }
 
             // Calculate growth percentage
-            if ($filter == '3') { // This Year vs Last Year
-                $previousPeriodCount = StreamLog::where('artist_id', $artistId)
+            if ($filter === '3' || $filter === 'this_year') { // This Year vs Last Year
+                $previousPeriodCount = StreamLog::whereIn('artist_id', $teamIds)
                     ->whereYear('created_at', Carbon::now()->subYear()->year)
                     ->count();
-            } else { // This Month vs Last Month
-                $previousPeriodCount = StreamLog::where('artist_id', $artistId)
+            } elseif ($filter === '1' || $filter === 'this_month') { // This Month vs Last Month
+                $previousPeriodCount = StreamLog::whereIn('artist_id', $teamIds)
                     ->whereMonth('created_at', Carbon::now()->subMonth()->month)
                     ->whereYear('created_at', \Illuminate\Support\Carbon::now()->subMonth()->year)
+                    ->count();
+            } else { // Last 7 days vs previous 7 days
+                $previousPeriodCount = StreamLog::whereIn('artist_id', $teamIds)
+                    ->where('created_at', '>=', Carbon::now()->subDays(13)->startOfDay())
+                    ->where('created_at', '<', Carbon::now()->subDays(6)->startOfDay())
                     ->count();
             }
 

@@ -25,9 +25,13 @@ class AudienceController extends BaseController
     }
     public function index(Request $request)
     {
-        $artistId = auth()->user()->id;
+        $user = auth()->user();
+        $userId = $user ? $user->id : 0;
+        $mainArtistId = $user && $user->added_by ? $user->added_by : $userId;
+        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
         $filter = $request->get('filter', 'this_month');
-        $query = AudienceLog::where('artist_id', $artistId);
+        $query = AudienceLog::whereIn('artist_id', $teamIds);
 
         if ($filter === 'this_month') {
             $query->whereMonth('created_at', now()->month)

@@ -13,10 +13,14 @@ class AnalyticsController extends BaseController
     public function artistStreamsChart(Request $request)
     {
         try {
-            $artistId = auth()->id(); // Assume the logged-in user is the artist
-            $filter = $request->query('filter', 'this_month'); // e.g., 'this_month', 'this_year'
+            $user = auth()->user();
+            $userId = $user ? $user->id : 0;
+            $mainArtistId = $user && $user->added_by ? $user->added_by : $userId;
+            $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
-            $query = StreamLog::where('artist_id', $artistId);
+            $filter = $request->query('filter', 'this_month'); // e.g., 'last_7_days', 'this_month', 'this_year'
+
+            $query = StreamLog::whereIn('artist_id', $teamIds);
 
             if ($filter === 'this_year') {
                 $query->whereYear('created_at', Carbon::now()->year);
@@ -31,14 +35,13 @@ class AnalyticsController extends BaseController
                 $dataPoints = [];
                 $totalCount = 0;
                 foreach ($logs as $log) {
-                    $monthName = Carbon::createFromFormat('m', $log->period)->format('M');
+                    $monthName = Carbon::createFromFormat('m', str_pad($log->period, 2, '0', STR_PAD_LEFT))->format('M');
                     $labels[] = $monthName;
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
                 }
 
-            } else {
-                // Default: this_month
+            } elseif ($filter === 'this_month') {
                 $query->whereMonth('created_at', Carbon::now()->month)
                       ->whereYear('created_at', Carbon::now()->year);
                 
@@ -56,6 +59,25 @@ class AnalyticsController extends BaseController
                     $labels[] = $dateName;
                     $dataPoints[] = $log->total_streams;
                     $totalCount += $log->total_streams;
+                }
+            } else {
+                // Default: last 7 days
+                $query->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay());
+                
+                $logs = $query->select(
+                    DB::raw('DATE(created_at) as period'),
+                    DB::raw('COUNT(*) as total_streams')
+                )->groupBy('period')->orderBy('period')->get()->pluck('total_streams', 'period');
+
+                $labels = [];
+                $dataPoints = [];
+                $totalCount = 0;
+                for ($i = 6; $i >= 0; $i--) {
+                    $dateStr = Carbon::now()->subDays($i)->format('Y-m-d');
+                    $labels[] = Carbon::now()->subDays($i)->format('M d');
+                    $val = $logs->get($dateStr, 0);
+                    $dataPoints[] = $val;
+                    $totalCount += $val;
                 }
             }
 

@@ -10,4 +10,9 @@ class StreamLog extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function song()
+    {
+        return $this->belongsTo(Song::class);
+    }
 }

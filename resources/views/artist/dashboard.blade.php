@@ -31,12 +31,16 @@
                             <span class="fs-6 fw-semibold text-muted">Streams</span>
                         </div>
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">2.4M</span>
-                            <span class="trend-up">
-                                <svg viewBox="0 0 24 24">
+                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">{{ $metrics['streams']['total'] }}</span>
+                            <span class="{{ $metrics['streams']['is_positive'] ? 'trend-up' : 'trend-down' }}">
+                                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-right: 4px;">
+                                    @if($metrics['streams']['is_positive'])
                                     <path d="M12 4l-8 8h6v8h4v-8h6z" />
+                                    @else
+                                    <path d="M12 20l-8-8h6v-8h4v8h6z" />
+                                    @endif
                                 </svg>
-                                12.5%
+                                {{ $metrics['streams']['trend'] }}%
                             </span>
                         </div>
                         <div class="sparkline-svg">
@@ -55,12 +59,16 @@
                             <span class="fs-6 fw-semibold text-muted">Listeners</span>
                         </div>
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">840K</span>
-                            <span class="trend-up">
-                                <svg viewBox="0 0 24 24">
+                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">{{ $metrics['listeners']['total'] }}</span>
+                            <span class="{{ $metrics['listeners']['is_positive'] ? 'trend-up' : 'trend-down' }}">
+                                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-right: 4px;">
+                                    @if($metrics['listeners']['is_positive'])
                                     <path d="M12 4l-8 8h6v8h4v-8h6z" />
+                                    @else
+                                    <path d="M12 20l-8-8h6v-8h4v8h6z" />
+                                    @endif
                                 </svg>
-                                8.1%
+                                {{ $metrics['listeners']['trend'] }}%
                             </span>
                         </div>
                         <div class="sparkline-svg">
@@ -79,12 +87,16 @@
                             <span class="fs-6 fw-semibold text-muted">Followers</span>
                         </div>
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">120K</span>
-                            <span class="trend-up">
-                                <svg viewBox="0 0 24 24">
+                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">{{ $metrics['followers']['total'] }}</span>
+                            <span class="{{ $metrics['followers']['is_positive'] ? 'trend-up' : 'trend-down' }}">
+                                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-right: 4px;">
+                                    @if($metrics['followers']['is_positive'])
                                     <path d="M12 4l-8 8h6v8h4v-8h6z" />
+                                    @else
+                                    <path d="M12 20l-8-8h6v-8h4v8h6z" />
+                                    @endif
                                 </svg>
-                                15.3%
+                                {{ $metrics['followers']['trend'] }}%
                             </span>
                         </div>
                         <div class="sparkline-svg">
@@ -95,20 +107,24 @@
                     </div>
                 </div>
             </div>
-            <!-- Total Revenue -->
+            <!-- Countries Reached -->
             <div class="col-md-3">
                 <div class="card clean-metric-card h-100">
                     <div class="card-body p-6">
                         <div class="d-flex justify-content-between align-items-start mb-4">
-                            <span class="fs-6 fw-semibold text-muted">Total Revenue</span>
+                            <span class="fs-6 fw-semibold text-muted">Countries Reached</span>
                         </div>
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">$12.6K</span>
-                            <span class="trend-up">
-                                <svg viewBox="0 0 24 24">
+                            <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">{{ $metrics['countries']['total'] }}</span>
+                            <span class="{{ $metrics['countries']['is_positive'] ? 'trend-up' : 'trend-down' }}">
+                                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; margin-right: 4px;">
+                                    @if($metrics['countries']['is_positive'])
                                     <path d="M12 4l-8 8h6v8h4v-8h6z" />
+                                    @else
+                                    <path d="M12 20l-8-8h6v-8h4v8h6z" />
+                                    @endif
                                 </svg>
-                                10.2%
+                                {{ $metrics['countries']['trend'] }}%
                             </span>
                         </div>
                         <div class="sparkline-svg">
@@ -131,40 +147,16 @@
                             <span class="card-label fw-bold fs-4 text-dark">Stream Overview</span>
                         </h3>
                         <div class="card-toolbar">
-                            <select class="form-select form-select-sm form-select-solid dashboard-select" style="width: 120px;">
-                                <option value="1">This Month</option>
+                            <select id="stream_overview_filter" class="form-select form-select-sm form-select-solid dashboard-select" style="width: 130px;">
+                                <option value="last_7_days">Last 7 Days</option>
+                                <option value="this_month">This Month</option>
+                                <option value="this_year">This Year</option>
                             </select>
                         </div>
                     </div>
                     <div class="card-body p-6">
                         <div class="chart-placeholder position-relative">
-                            <!-- SVG Mock Line Chart -->
-                            <svg viewBox="0 0 800 250" style="width:100%; height:100%;">
-                                <!-- Grid lines -->
-                                <line x1="0" y1="50" x2="800" y2="50" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="100" x2="800" y2="100" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="150" x2="800" y2="150" stroke="#f3f4f6" stroke-width="1" />
-                                <line x1="0" y1="200" x2="800" y2="200" stroke="#f3f4f6" stroke-width="1" />
-
-                                <!-- Line -->
-                                <path d="M 0 150 L 100 120 L 200 160 L 300 80 L 400 130 L 500 170 L 600 100 L 700 140 L 800 40" fill="none" stroke="#4f46e5" stroke-width="3" />
-
-                                <!-- Points -->
-                                <circle cx="100" cy="120" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="200" cy="160" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="300" cy="80" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="400" cy="130" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="500" cy="170" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="600" cy="100" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-                                <circle cx="700" cy="140" r="4" fill="#ffffff" stroke="#4f46e5" stroke-width="2" />
-
-                                <!-- Labels -->
-                                <text x="0" y="240" fill="#9ca3af" font-size="12">Apr 28</text>
-                                <text x="200" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 5</text>
-                                <text x="400" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 12</text>
-                                <text x="600" y="240" fill="#9ca3af" font-size="12" text-anchor="middle">May 19</text>
-                                <text x="800" y="240" fill="#9ca3af" font-size="12" text-anchor="end">May 26</text>
-                            </svg>
+                            <div id="stream_overview_chart" style="width: 100%; height: 250px;"></div>
                         </div>
                     </div>
                 </div>
@@ -182,36 +174,20 @@
                         </div>
                     </div>
                     <div class="card-body p-6 pt-3">
+                        @forelse($topSongs as $index => $log)
+                        @if($log->song)
                         <div class="song-list-item">
-                            <div class="song-list-item-num">1</div>
-                            <div class="song-list-item-img"></div>
-                            <div class="song-list-item-title">Blinding Lights</div>
-                            <div class="song-list-item-plays">1.2M</div>
+                            <div class="song-list-item-num">{{ $index + 1 }}</div>
+                            <div class="song-list-item-img" style="background-image: url('{{ $log->song->cover_image_path }}'); background-size: cover; background-position: center;"></div>
+                            <div class="song-list-item-title">{{ $log->song->title }}</div>
+                            <div class="song-list-item-plays">{{ number_format($log->total_plays) }}</div>
                         </div>
-                        <div class="song-list-item">
-                            <div class="song-list-item-num">2</div>
-                            <div class="song-list-item-img"></div>
-                            <div class="song-list-item-title">Save Your Tears</div>
-                            <div class="song-list-item-plays">980K</div>
+                        @endif
+                        @empty
+                        <div class="text-center text-muted py-5">
+                            No songs played yet.
                         </div>
-                        <div class="song-list-item">
-                            <div class="song-list-item-num">3</div>
-                            <div class="song-list-item-img"></div>
-                            <div class="song-list-item-title">Die For You</div>
-                            <div class="song-list-item-plays">760K</div>
-                        </div>
-                        <div class="song-list-item">
-                            <div class="song-list-item-num">4</div>
-                            <div class="song-list-item-img"></div>
-                            <div class="song-list-item-title">Starboy</div>
-                            <div class="song-list-item-plays">680K</div>
-                        </div>
-                        <div class="song-list-item">
-                            <div class="song-list-item-num">5</div>
-                            <div class="song-list-item-img"></div>
-                            <div class="song-list-item-title">Earned It</div>
-                            <div class="song-list-item-plays">420K</div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -231,20 +207,19 @@
                         </div>
                     </div>
                     <div class="card-body p-6 pt-3">
+                        @forelse($recentReleases as $release)
                         <div class="release-item">
-                            <div class="release-item-img"></div>
+                            <div class="release-item-img" style="background-image: url('{{ $release->image_path }}'); background-size: cover; background-position: center;"></div>
                             <div class="release-item-info">
-                                <h4>After Hours</h4>
-                                <p>Album • Mar 20, 2024</p>
+                                <h4>{{ $release->title }}</h4>
+                                <p>Album • {{ $release->created_at->format('M d, Y') }}</p>
                             </div>
                         </div>
-                        <div class="release-item">
-                            <div class="release-item-img"></div>
-                            <div class="release-item-info">
-                                <h4>Dawn FM</h4>
-                                <p>Album • Jan 7, 2024</p>
-                            </div>
+                        @empty
+                        <div class="text-center text-muted py-5">
+                            No recent releases found.
                         </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -259,38 +234,25 @@
                     </div>
                     <div class="card-body p-6 pt-3 d-flex">
                         <div class="w-50 pe-5">
+                            @forelse($audienceLocations as $location)
+                            @php
+                            $percentage = $totalAudience > 0 ? round(($location->total / $totalAudience) * 100) : 0;
+                            @endphp
                             <div class="audience-row">
-                                <span>United States</span>
-                                <span>35%</span>
+                                <span>{{ $location->country }}</span>
+                                <span>{{ $percentage }}%</span>
                             </div>
-                            <div class="audience-row">
-                                <span>India</span>
-                                <span>16%</span>
+                            @empty
+                            <div class="text-center text-muted py-5">
+                                No audience data available.
                             </div>
-                            <div class="audience-row">
-                                <span>Indonesia</span>
-                                <span>12%</span>
-                            </div>
-                            <div class="audience-row">
-                                <span>Brazil</span>
-                                <span>8%</span>
-                            </div>
-                            <div class="audience-row">
-                                <span>Germany</span>
-                                <span>5%</span>
-                            </div>
-                            <a href="#" class="text-muted fs-7 text-hover-primary mt-4 d-inline-block">View full report</a>
+                            @endforelse
+                            @if(count($audienceLocations) > 0)
+                            <a href="{{ route('artist.analytics.index') }}" class="text-muted fs-7 text-hover-primary mt-4 d-inline-block">View full report</a>
+                            @endif
                         </div>
                         <div class="w-50 d-flex align-items-center justify-content-center">
-                            <!-- Static Map Placeholder SVG -->
-                            <svg viewBox="0 0 400 200" fill="#e5e7eb" width="100%">
-                                <!-- Simplified world map paths -->
-                                <path d="M 50 50 Q 80 40 100 80 Q 70 120 40 90 Z M 200 40 Q 250 20 300 60 Q 320 120 280 140 Q 200 160 180 100 Z M 320 100 Q 360 80 380 140 Q 340 180 300 140 Z" />
-                                <circle cx="80" cy="70" r="5" fill="#4f46e5" />
-                                <circle cx="280" cy="80" r="5" fill="#4f46e5" />
-                                <circle cx="220" cy="110" r="5" fill="#4f46e5" />
-                                <circle cx="340" cy="130" r="5" fill="#4f46e5" />
-                            </svg>
+                            <div id="audience_location_chart" style="width: 100%; min-height: 200px;"></div>
                         </div>
                     </div>
                 </div>
@@ -301,6 +263,148 @@
 </div>
 
 @push('script')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        try {
+            // Stream Overview Chart
+            var streamDates = JSON.parse('{!! addslashes(json_encode(array_values($chartDates ?? []))) !!}');
+            var streamCounts = JSON.parse('{!! addslashes(json_encode(array_values($chartStreams ?? []))) !!}');
+
+            if (streamDates.length > 0 && typeof ApexCharts !== 'undefined') {
+                var streamOptions = {
+                    series: [{
+                        name: 'Streams',
+                        data: streamCounts
+                    }],
+                    chart: {
+                        type: 'area',
+                        height: 250,
+                        toolbar: {
+                            show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        },
+                        background: 'transparent'
+                    },
+                    colors: ['#4f46e5'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.4,
+                            opacityTo: 0.05,
+                            stops: [0, 90, 100]
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 3
+                    },
+                    xaxis: {
+                        categories: streamDates,
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        },
+                        labels: {
+                            style: {
+                                colors: '#9ca3af'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function(val) {
+                                return val ? val.toFixed(0) : 0;
+                            },
+                            style: {
+                                colors: '#9ca3af'
+                            }
+                        }
+                    },
+                    grid: {
+                        borderColor: '#f3f4f6',
+                        strokeDashArray: 4,
+                    },
+                    theme: {
+                        mode: (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'dark' : 'light'
+                    }
+                };
+                var streamChart = new ApexCharts(document.querySelector("#stream_overview_chart"), streamOptions);
+                streamChart.render();
+
+                document.getElementById('stream_overview_filter').addEventListener('change', function(e) {
+                    var filter = e.target.value;
+                    fetch("{{ route('artist.analytics.streams') }}?filter=" + filter)
+                        .then(response => response.json())
+                        .then(res => {
+                            if (res.status && res.data && res.data.chart) {
+                                streamChart.updateSeries([{
+                                    name: 'Streams',
+                                    data: res.data.chart.data
+                                }]);
+                                streamChart.updateOptions({
+                                    xaxis: {
+                                        categories: res.data.chart.labels
+                                    }
+                                });
+                            }
+                        })
+                        .catch(err => console.error("Error fetching stream data:", err));
+                });
+            } else {
+                document.querySelector("#stream_overview_chart").innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100">No stream data available</div>';
+            }
+
+            // Audience Location Chart
+            var audienceLabels = JSON.parse('{!! addslashes(json_encode(isset($audienceLocations) ? $audienceLocations->pluck("country")->values()->toArray() : [])) !!}');
+            var audienceSeries = JSON.parse('{!! addslashes(json_encode(isset($audienceLocations) ? $audienceLocations->pluck("total")->map(fn($val) => (int)$val)->values()->toArray() : [])) !!}');
+
+            if (audienceSeries.length > 0 && typeof ApexCharts !== 'undefined') {
+                var audienceOptions = {
+                    series: audienceSeries,
+                    labels: audienceLabels,
+                    chart: {
+                        type: 'donut',
+                        height: 220,
+                        background: 'transparent'
+                    },
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '65%'
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    legend: {
+                        show: false
+                    },
+                    stroke: {
+                        show: false
+                    },
+                    theme: {
+                        mode: (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'dark' : 'light'
+                    }
+                };
+                var audienceChart = new ApexCharts(document.querySelector("#audience_location_chart"), audienceOptions);
+                audienceChart.render();
+            } else {
+                document.querySelector("#audience_location_chart").innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100" style="min-height: 200px;">No audience data</div>';
+            }
+        } catch (e) {
+            console.error("Error rendering charts:", e);
+        }
+    });
+</script>
 <script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
 @endpush
 @endsection

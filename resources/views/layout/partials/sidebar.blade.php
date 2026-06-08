@@ -31,8 +31,8 @@
 
                 @if(auth()->check() && in_array(auth()->user()->user_type, [1, 2]))
                 <!-- ==========================================
-                         SUPER ADMIN & SUB ADMIN SIDEBAR
-                         ========================================== -->
+                    SUPER ADMIN & SUB ADMIN SIDEBAR
+                    ========================================== -->
 
                 <!-- Dashboard -->
                 <div class="menu-item">

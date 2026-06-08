@@ -474,14 +474,10 @@ class AuthController extends BaseController
         $user = auth()->user();
         if ($user && $user->user_type == 3) {
             if ($user->added_by) {
-                return view('artist.dashboard');
-            }
-
-            if ($user->completed_steps < 9) {
+                // Fall through to show dashboard
+            } elseif ($user->completed_steps < 9) {
                 return redirect()->route('artist.register');
-            }
-
-            if ($user->is_approve == 0) {
+            } elseif ($user->is_verified == 0) {
                 $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
                 if ($verification && $verification->verification_status == 2) {
                     return view('auth.reverify', compact('user', 'verification'));
@@ -489,7 +485,101 @@ class AuthController extends BaseController
                 return view('auth.pending');
             }
         }
-        return view('artist.dashboard');
+
+        $userId = $user ? $user->id : 0;
+        $mainArtistId = $user && $user->added_by ? $user->added_by : $userId;
+        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+        
+        $recentReleases = \App\Models\Album::whereIn('user_id', $teamIds)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+            
+        $audienceLocations = \App\Models\AudienceLog::whereIn('artist_id', $teamIds)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->whereNotNull('country')
+            ->select('country', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->groupBy('country')
+            ->orderBy('total', 'desc')
+            ->take(5)
+            ->get();
+            
+        $totalAudience = \App\Models\AudienceLog::whereIn('artist_id', $teamIds)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->whereNotNull('country')
+            ->count();
+
+        $streamsData = \App\Models\StreamLog::whereIn('artist_id', $teamIds)
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->select(\Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->pluck('count', 'date');
+
+        $chartDates = [];
+        $chartStreams = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $dateStr = now()->subDays($i)->format('Y-m-d');
+            $chartDates[] = now()->subDays($i)->format('M d');
+            $chartStreams[] = $streamsData->get($dateStr, 0);
+        }
+
+        $topSongs = \App\Models\StreamLog::whereIn('artist_id', $teamIds)
+            ->select('song_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_plays'))
+            ->groupBy('song_id')
+            ->orderBy('total_plays', 'desc')
+            ->take(5)
+            ->with('song')
+            ->get();
+
+        // Top Metrics
+        $calcMetric = function ($model, $teamIds, $isDistinctCountry = false) {
+            $query = clone $model;
+            $query = $query->whereIn('artist_id', $teamIds);
+            
+            $currentMonthQuery = (clone $query)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+            $lastMonthQuery = (clone $query)->whereMonth('created_at', now()->subMonth()->month)->whereYear('created_at', now()->subMonth()->year);
+            
+            if ($isDistinctCountry) {
+                $currentMonth = $currentMonthQuery->whereNotNull('country')->distinct('country')->count('country');
+                $lastMonth = $lastMonthQuery->whereNotNull('country')->distinct('country')->count('country');
+            } else {
+                $currentMonth = $currentMonthQuery->count();
+                $lastMonth = $lastMonthQuery->count();
+            }
+
+            if ($lastMonth > 0) {
+                $growth = (($currentMonth - $lastMonth) / $lastMonth) * 100;
+            } elseif ($currentMonth > 0) {
+                $growth = 100;
+            } else {
+                $growth = 0;
+            }
+            
+            $formatNumber = function ($number) {
+                if ($number >= 1000000) return round($number / 1000000, 1) . 'M';
+                if ($number >= 1000) return round($number / 1000, 1) . 'K';
+                return $number;
+            };
+
+            return [
+                'total' => $formatNumber($currentMonth),
+                'trend' => number_format($growth, 1),
+                'is_positive' => $growth >= 0
+            ];
+        };
+
+        $metrics = [
+            'streams' => $calcMetric(new \App\Models\StreamLog, $teamIds),
+            'listeners' => $calcMetric(new \App\Models\AudienceLog, $teamIds),
+            'followers' => $calcMetric(new \App\Models\ArtistFollower, $teamIds),
+            'countries' => $calcMetric(new \App\Models\AudienceLog, $teamIds, true),
+        ];
+
+        return view('artist.dashboard', compact('recentReleases', 'audienceLocations', 'totalAudience', 'chartDates', 'chartStreams', 'topSongs', 'metrics'));
     }
 
     public function reverifySubmit(Request $request)
