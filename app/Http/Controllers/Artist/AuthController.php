@@ -558,6 +558,10 @@ class AuthController extends BaseController
             } else {
                 $growth = 0;
             }
+
+            if ($growth > 100) {
+                $growth = 100;
+            }
             
             $formatNumber = function ($number) {
                 if ($number >= 1000000) return round($number / 1000000, 1) . 'M';
