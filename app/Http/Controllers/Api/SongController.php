@@ -7,6 +7,8 @@ use App\Models\Album;
 use App\Models\Song;
 use App\Models\User;
 use App\Models\SearchHistory;
+use App\Models\ArtistFollower;
+use App\Models\UserPreference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BaseController;
@@ -18,6 +20,7 @@ use App\Http\Resources\Api\SongResource;
 use App\Http\Resources\Api\AlbumResource;
 use App\Http\Resources\Api\ArtistResource;
 use App\Http\Resources\Api\PaginateSongCollection;
+use App\Models\StreamLog;
 
 class SongController extends BaseController
 {
@@ -368,6 +371,116 @@ class SongController extends BaseController
             }
 
             return $this->responseJson(true, 200, 'Trending searches fetched successfully', $trendingKeywords);
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
+    public function biggestHits(Request $request)
+    {
+        try {
+            $query = StreamLog::select('song_id', DB::raw('count(*) as stream_count'))
+                ->groupBy('song_id')
+                ->orderByDesc('stream_count');
+
+            $isEmpty = false;
+
+            if ($request->has('dashboard')) {
+                $biggestHitsSongs = $query->take(3)->get()->pluck('song')->filter();
+                $isEmpty = $biggestHitsSongs->isEmpty();
+            } else {
+                /** @var \Illuminate\Pagination\LengthAwarePaginator $biggestHitsSongs */
+                $biggestHitsSongs = $query->paginate(10);
+                $isEmpty = $biggestHitsSongs->isEmpty();
+                if (!$isEmpty) {
+                    $biggestHitsSongs->through(function ($history) {
+                        return $history->song;
+                    });
+                }
+            }
+
+            if ($isEmpty) {
+                $artistIds = [];
+                if (auth('sanctum')->check() || auth('api')->check() || auth()->check()) {
+                    $userId = auth()->id();
+                    $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                    $chosenArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+                    $artistIds = array_unique(array_merge($followedArtistIds, $chosenArtistIds));
+                }
+
+                $fallbackQuery = Song::where('status', 1);
+                if (!empty($artistIds)) {
+                    $fallbackQuery->whereIn('user_id', $artistIds);
+                }
+
+                $fallbackQuery->inRandomOrder();
+
+                if ($request->has('dashboard')) {
+                    $biggestHitsSongs = $fallbackQuery->take(3)->get();
+                } else {
+                    $biggestHitsSongs = $fallbackQuery->paginate(10);
+                }
+            }
+
+            return $this->responseJson(true, 200, 'Biggest hits fetched successfully', $request->has('dashboard')
+                ? SongResource::collection($biggestHitsSongs)
+                : new PaginateSongCollection($biggestHitsSongs));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
+    public function recomendateSongs(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'playlist_id' => 'nullable|integer|exists:play_lists,id',
+            ]);
+            if ($validator->fails()) {
+                return $this->responseJson(false, 422, $validator->errors()->first(), []);
+            }
+
+            $playlistId = $request->playlist_id;
+            $excludedSongIds = [];
+
+            if ($playlistId) {
+                $playlist = PlayList::find($playlistId);
+                if ($playlist) {
+                    $excludedSongIds = $playlist->songs()->pluck('songs.id')->toArray();
+                }
+            }
+
+            $query = Song::where('status', 1);
+
+            if (auth('api')->check()) {
+                $userId = auth('api')->id();
+                $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                $chosenArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+
+                // Get artists of the songs the user has liked
+                $likedSongIds = DB::table('song_likes')->where('user_id', $userId)->pluck('song_id');
+                $likedSongArtistIds = Song::whereIn('id', $likedSongIds)->pluck('user_id')->toArray();
+
+                $artistIds = array_unique(array_merge($followedArtistIds, $chosenArtistIds, $likedSongArtistIds));
+
+                if (!empty($artistIds)) {
+                    $query->whereIn('user_id', $artistIds);
+                } else {
+                    // Return no results if the user has no preferences or likes
+                    $query->whereRaw('1 = 0');
+                }
+            } else {
+                // Return no results if unauthenticated
+                $query->whereRaw('1 = 0');
+            }
+
+            if (!empty($excludedSongIds)) {
+                $query->whereNotIn('id', $excludedSongIds);
+            }
+
+            $recommendedSongs = $query->inRandomOrder()->paginate($request->per_page ?? 15);
+
+            return $this->responseJson(true, 200, 'Recommended songs fetched successfully', new PaginateSongCollection($recommendedSongs));
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', []);

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Resources\AuthResource;
 use App\Http\Controllers\BaseController;
+use App\Http\Resources\Api\ArtistResource;
 use Illuminate\Support\Facades\Validator;
 
 class ArtistController extends BaseController
@@ -15,8 +16,8 @@ class ArtistController extends BaseController
         try {
             $artists = User::whereHas('roles', function ($q) {
                 $q->where('slug', 'artist');
-            })->get();
-            return $this->responseJson(true, 200, 'Artists fetched successfully', AuthResource::collection($artists));
+            })->whereNull('added_by')->get();
+            return $this->responseJson(true, 200, 'Artists fetched successfully', ArtistResource::collection($artists));
         } catch (\Throwable $th) {
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }

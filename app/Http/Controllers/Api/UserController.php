@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Song;
 use App\Models\Album;
 use App\Models\SongLike;
+use App\Models\UserPreference;
 use App\Models\ArtistFollower;
 use App\Models\PlayHistory;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\SongResource;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Api\MasterResource;
+use App\Http\Resources\Api\ArtistResource;
 use App\Http\Resources\Api\PaginateSongCollection;
 use App\Http\Resources\Api\PaginateMasterCollection;
 
@@ -207,6 +209,52 @@ class UserController extends BaseController
             }
             DB::commit();
             return $this->responseJson(true, 200, $message, []);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
+
+    public function favouriteArtists()
+    {
+        try {
+            $artists = UserPreference::where('user_id', auth()->id())->pluck('artist_id');
+            $favouriteArtists = User::whereIn('id', $artists)->get();
+            return $this->responseJson(true, 200, 'Favourite artists fetched successfully', ArtistResource::collection($favouriteArtists));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
+
+    public function toggleArtistPreference(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'artist_ids' => 'required|array',
+                'artist_ids.*' => 'required|exists:users,id',
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), []);
+        }
+        DB::beginTransaction();
+        try {
+            $userId = auth()->user()->id;
+            foreach ($request->artist_ids as $artistId) {
+                $alreadyPreferred = UserPreference::where(['user_id' => $userId, 'artist_id' => $artistId])->exists();
+                if ($alreadyPreferred) {
+                    // Remove preference
+                    UserPreference::where(['user_id' => $userId, 'artist_id' => $artistId])->delete();
+                } else {
+                    // Add preference
+                    UserPreference::create(['user_id' => $userId, 'artist_id' => $artistId]);
+                }
+            }
+            DB::commit();
+            return $this->responseJson(true, 200, 'Artist preferences updated successfully', []);
         } catch (\Exception $e) {
             DB::rollBack();
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());

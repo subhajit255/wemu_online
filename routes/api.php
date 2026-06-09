@@ -127,6 +127,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/liked-songs', 'likedSong')->name('liked.songs');
         Route::get('/made-for-you', 'madeForYouSongs')->name('made.for.you');
         Route::get('/toggle-artist-follow/{artistId}', 'toggleArtistFollow')->name('toggle.artist.follow');
+        Route::post('/toggle-artist-preference', 'toggleArtistPreference')->name('toggle.artist.preference');
+        Route::get('/favourite-artists', 'favouriteArtists')->name('favourite.artists');
     });
     Route::controller(SongController::class)->group(function () {
         Route::post('/playlist/create-or-update', 'createUpdatePlaylist')->name('playlist.create-or-update');
@@ -135,8 +137,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/playlist/details/{playlistId}', 'playListDetails')->name('playlist.details');
         Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');
         Route::post('/playlist/bulk-add-remove-song', 'bulkSongAddRemovePlayList')->name('playlist.bulk-add-remove-song');
+        Route::get('/recommend-songs', 'recomendateSongs')->name('recommend.songs');
         Route::post('/search', 'searchSongs')->name('search.songs');
         Route::get('/trending-search-items', 'trendingSearches')->name('trending.search.items');
+        Route::get('/biggest-hits', 'biggestHits')->name('biggest.hits');
     });
     Route::controller(SubscriptionController::class)->group(function () {
         Route::get('/my-current-subscription', 'myCurrentSubscription')->name('my-current-subscription');
