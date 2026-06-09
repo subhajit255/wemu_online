@@ -439,7 +439,6 @@ class SongController extends BaseController
             if ($validator->fails()) {
                 return $this->responseJson(false, 422, $validator->errors()->first(), []);
             }
-
             $playlistId = $request->playlist_id;
             $excludedSongIds = [];
 
