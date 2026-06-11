@@ -19,6 +19,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('expense-remainder:cron')->daily();
         $schedule->command('goal-remainder:cron')->daily();
         $schedule->command('task-remainder:cron')->daily();
+        $schedule->command('songs:publish-scheduled')->everyMinute();
+        $schedule->command('albums:publish-scheduled')->daily();
     }
 
     /**

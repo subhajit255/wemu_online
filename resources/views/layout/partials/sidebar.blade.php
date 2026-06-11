@@ -73,11 +73,11 @@
 
                 <!-- Subscription -->
                 <div class="menu-item">
-                    <!-- <a href="{{ route('admin.subscription.list') }}"> -->
-                    <span class="menu-link {{ request()->routeIs('admin.subscription.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
-                        <span class="menu-title">Subscription</span>
-                    </span>
+                    <a href="{{ route('admin.subscription.list') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.subscription.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
+                            <span class="menu-title">Subscription</span>
+                        </span>
                     </a>
                 </div>
 
@@ -122,19 +122,19 @@
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <!-- <a class="menu-link {{ request()->routeIs('admin.help.support') ? 'active' : '' }}" href="{{ route('admin.help.support') }}"> -->
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">User Queries</span>
+                            <a class="menu-link {{ request()->routeIs('admin.help.support') ? 'active' : '' }}" href="{{ route('admin.help.support') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">User Queries</span>
                             </a>
                         </div>
                         <div class="menu-item">
-                            <!-- <a class="menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="{{ route('admin.cms.list') }}"> -->
-                            <span class="menu-bullet">
-                                <span class="bullet bullet-dot"></span>
-                            </span>
-                            <span class="menu-title">CMS Pages</span>
+                            <a class="menu-link {{ request()->routeIs('admin.cms.*') ? 'active' : '' }}" href="{{ route('admin.cms.list') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">CMS Pages</span>
                             </a>
                         </div>
                     </div>
@@ -142,8 +142,8 @@
 
                 <!-- Reports -->
                 <div class="menu-item">
-                    <a href="#">
-                        <span class="menu-link">
+                    <a href="{{ route('admin.report.index') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.report.*') ? 'active' : '' }}">
                             <span class="menu-icon"><i class="fa-solid fa-chart-pie fs-5"></i></span>
                             <span class="menu-title">Reports</span>
                         </span>
@@ -152,11 +152,21 @@
 
                 <!-- Analytics -->
                 <div class="menu-item">
-                    <!-- <a href="{{ route('admin.analytics') }}"> -->
-                    <span class="menu-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
-                        <span class="menu-title">Analytics</span>
-                    </span>
+                    <a href="{{ route('admin.analytics') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
+                            <span class="menu-title">Analytics</span>
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Settings -->
+                <div class="menu-item">
+                    <a href="{{ route('admin.setting.update') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.setting.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
+                            <span class="menu-title">Settings</span>
+                        </span>
                     </a>
                 </div>
 

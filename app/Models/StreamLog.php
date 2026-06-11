@@ -15,4 +15,8 @@ class StreamLog extends Model
     {
         return $this->belongsTo(Song::class);
     }
+    public function artist()
+    {
+        return $this->belongsTo(User::class, "artist_id");
+    }
 }

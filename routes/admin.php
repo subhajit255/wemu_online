@@ -165,5 +165,9 @@ Route::as('admin.')->group(function () {
             Route::match(['get', 'post'], 'add-or-update/{id?}', 'storeOrUpdate')->name('storeOrUpdate');
             Route::get('{id}', 'show')->name('show');
         });
+        
+        Route::controller(\App\Http\Controllers\Admin\ReportController::class)->as('report.')->prefix('report')->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
     });
 });

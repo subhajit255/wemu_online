@@ -22,12 +22,12 @@
                     </ul>
                 </div>
                 @can('add-user')
-                <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <!-- <div class="d-flex align-items-center gap-2 gap-lg-3">
                     <button type="button" class="btn wemu-btn-add-user goTo d-flex align-items-center gap-2"
                         data-action="{{ route('admin.user.add') }}">
                         <i class="fa-solid fa-user-plus fs-6"></i> Add User
                     </button>
-                </div>
+                </div> -->
                 @endcan
             </div>
         </div>
