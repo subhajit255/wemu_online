@@ -689,7 +689,6 @@ class AuthController extends BaseController
 
         return view('artist.dashboard', compact('recentReleases', 'audienceLocations', 'totalAudience', 'chartDates', 'chartStreams', 'topSongs', 'metrics'));
     }
-
     public function reverifySubmit(Request $request)
     {
         $user = auth()->user();
