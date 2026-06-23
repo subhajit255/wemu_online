@@ -35,12 +35,19 @@
                         $stepLabels = [1=>'Signup',2=>'Verify',3=>'Info',4=>'Profile',5=>'Socials',6=>'ID Verif',7=>'Prefs',8=>'Plan',9=>'Terms',10=>'Done'];
                     @endphp
                     @for ($i = 1; $i <= 10; $i++)
+                        @if ($i == 8 && !($artistSubscriptionEnabled ?? 0))
+                            @continue
+                        @endif
                         <div class="step-node" id="node-{{ $i }}" data-s="{{ $i }}">
                             <div class="step-circle">{{ $i }}</div>
                             <div class="step-lbl">{{ $stepLabels[$i] }}</div>
                         </div>
                         @if ($i < 10)
-                            <div class="step-line" id="line-{{ $i }}"></div>
+                            @if ($i == 7 && !($artistSubscriptionEnabled ?? 0))
+                                <div class="step-line" id="line-{{ $i }}"></div>
+                            @elseif ($i != 8 || ($artistSubscriptionEnabled ?? 0))
+                                <div class="step-line" id="line-{{ $i }}"></div>
+                            @endif
                         @endif
                     @endfor
                 </div>
@@ -508,72 +515,36 @@
                     {{-- ==============================
                          STEP 8: CHOOSE YOUR PLAN
                          ============================== --}}
+                    @if ($artistSubscriptionEnabled ?? 0)
                     <div class="step-section" id="sec-8" data-step="8">
                         <h2 class="step-heading">Choose Your Plan</h2>
                         <p class="step-sub">Select the plan that fits your publishing needs — you can upgrade anytime</p>
 
                         @php
-                            $curPlan = isset($user) && !empty($user->subscription_type) ? $user->subscription_type : 'free';
+                            $curPlan = isset($user) && !empty($user->subscription_type) ? $user->subscription_type : '';
                         @endphp
 
                         <div class="plan-list">
-                            <!-- Free -->
-                            <div class="plan-item {{ $curPlan == 'free' ? 'chosen' : '' }}" id="pi-free" onclick="pickPlan('free')">
+                            @foreach ($subscriptions ?? [] as $plan)
+                            <div class="plan-item {{ $curPlan == $plan->id ? 'chosen' : '' }}" id="pi-{{ $plan->id }}" onclick="pickPlan('{{ $plan->id }}')">
                                 <div class="plan-radio-dot"></div>
                                 <div class="plan-info">
-                                    <div class="plan-title">Free</div>
-                                    <div class="plan-desc">Perfect for getting started on WEMU</div>
+                                    <div class="plan-title">{{ $plan->name }} @if($plan->is_default) <span class="plan-badge">Recommended</span> @endif</div>
+                                    <div class="plan-desc">{{ $plan->tagline ?? strip_tags($plan->description) }}</div>
                                     <div class="plan-feats">
-                                        <span><i class="fas fa-check"></i> Up to 5 tracks</span>
-                                        <span><i class="fas fa-check"></i> Basic analytics</span>
-                                        <span><i class="fas fa-check"></i> Community access</span>
+                                        {!! str_replace(['<ul>', '</ul>', '<li>', '</li>'], ['', '', '<span><i class="fas fa-check"></i> ', '</span>'], $plan->features) !!}
                                     </div>
                                 </div>
                                 <div class="plan-price-col">
-                                    <span class="plan-price">$0</span>
-                                    <span class="plan-period">/ month</span>
+                                    <span class="plan-price">${{ number_format($plan->price, 0) }}</span>
+                                    <span class="plan-period">/ {{ $plan->interval == 'month' ? 'month' : ($plan->interval == 'year' ? 'year' : 'week') }}</span>
                                 </div>
                             </div>
-
-                            <!-- Pro (highlighted) -->
-                            <div class="plan-item plan-item-pro {{ $curPlan == 'pro' ? 'chosen' : '' }}" id="pi-pro" onclick="pickPlan('pro')">
-                                <div class="plan-radio-dot"></div>
-                                <div class="plan-info">
-                                    <div class="plan-title">Pro <span class="plan-badge">Recommended</span></div>
-                                    <div class="plan-desc">For serious independent artists and producers</div>
-                                    <div class="plan-feats">
-                                        <span><i class="fas fa-check"></i> Unlimited tracks</span>
-                                        <span><i class="fas fa-check"></i> Advanced analytics</span>
-                                        <span><i class="fas fa-check"></i> Promotion tools</span>
-                                        <span><i class="fas fa-check"></i> Priority support</span>
-                                    </div>
-                                </div>
-                                <div class="plan-price-col">
-                                    <span class="plan-price">$99</span>
-                                    <span class="plan-period">/ month</span>
-                                </div>
-                            </div>
-
-                            <!-- Label -->
-                            <div class="plan-item {{ $curPlan == 'label' ? 'chosen' : '' }}" id="pi-label" onclick="pickPlan('label')">
-                                <div class="plan-radio-dot"></div>
-                                <div class="plan-info">
-                                    <div class="plan-title">Label</div>
-                                    <div class="plan-desc">For labels and multi-artist organizations</div>
-                                    <div class="plan-feats">
-                                        <span><i class="fas fa-check"></i> Manage multiple artists</span>
-                                        <span><i class="fas fa-check"></i> Team access &amp; roles</span>
-                                        <span><i class="fas fa-check"></i> Dedicated account manager</span>
-                                    </div>
-                                </div>
-                                <div class="plan-price-col">
-                                    <span class="plan-price">$499</span>
-                                    <span class="plan-period">/ month</span>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                         <input type="hidden" name="plan" id="planInput" value="{{ $curPlan }}">
                     </div>
+                    @endif
 
                     {{-- ==============================
                          STEP 9: TERMS & AGREEMENT
@@ -721,7 +692,11 @@
     }
 
     function prevStep() {
-        if (currentStep > 1) goStep(currentStep - 1);
+        if (currentStep > 1) {
+            var prev = currentStep - 1;
+            if (prev === 8 && {{ ($artistSubscriptionEnabled ?? 0) ? 'false' : 'true' }}) prev = 7;
+            goStep(prev);
+        }
     }
 
     /* ---- Password toggle ---- */
@@ -914,6 +889,10 @@
 
                 if (resp.status) {
                     toastr.success(resp.message || 'Saved!');
+                    if (resp.url) {
+                        window.location.href = resp.url;
+                        return;
+                    }
                     if (resp.user_id) $('#userIdInput').val(resp.user_id);
                     if (resp.next_step) goStep(resp.next_step);
                     if (resp.otp) {
@@ -937,6 +916,19 @@
             }
         });
     });
-    </script>
+</script>
+
+@if(session('success'))
+<script>
+    toastr.success("{{ session('success') }}");
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    toastr.error("{{ session('error') }}");
+</script>
+@endif
+
 </body>
 </html>

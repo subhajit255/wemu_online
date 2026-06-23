@@ -33,3 +33,5 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/privacy-policy', 'privacyPolicy')->name('privacy.policy');
     Route::post('/notify-me', 'notifyMe')->name('notify.me');
 });
+
+Route::post('stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');

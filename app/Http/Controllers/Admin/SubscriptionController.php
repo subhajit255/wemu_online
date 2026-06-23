@@ -82,14 +82,10 @@ class SubscriptionController extends BaseController
                         $stripePriceId = $existingSubscription->stripe_price_id;
                         $stripeProductId = $existingSubscription->stripe_product_id;
 
-                        // Check if the actual pricing components changed
-                        if (
-                            $existingSubscription->price == $request->price &&
-                            $existingSubscription->currency == $request->currency &&
-                            $existingSubscription->interval == $request->interval &&
-                            $existingSubscription->interval_count == ($request->interval_count ?? 1)
-                        ) {
-                            $pricingChanged = false; // No need to create a new Stripe Price
+                        if (!empty($stripePriceId) && !empty($stripeProductId)) {
+                            $pricingChanged = false;
+                        } else {
+                            $pricingChanged = true;
                         }
                     }
                 }
@@ -115,6 +111,12 @@ class SubscriptionController extends BaseController
                     $stripeProductId = $stripePrice->product;
                 }
 
+                $is_default = $request->has('is_default') ? 1 : 0;
+                
+                if ($is_default == 1) {
+                    Subscription::query()->update(['is_default' => 0]);
+                }
+
                 $postData = [
                     "name" => $request->name,
                     "slug" => Str::slug($request->name),
@@ -131,6 +133,7 @@ class SubscriptionController extends BaseController
                     "max_users" => $request->max_users,
                     "trial_days" => $request->trial_days ?? 0,
                     "requires_verification" => $request->has('requires_verification') ? 1 : 0,
+                    "is_default" => $is_default,
                 ];
                 $details = Subscription::updateOrCreate(['id' => $id], $postData);
                 DB::Commit();

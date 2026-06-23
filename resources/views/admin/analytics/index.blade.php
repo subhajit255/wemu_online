@@ -137,118 +137,119 @@
 </div>
 
 @push('script')
-<!-- Include ApexCharts via CDN just in case it's not bundled in the theme -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // --- Current Month Revenue Chart (Area Chart) ---
-        var monthData = @json(array_values($dailyRevenueData));
-        var monthLabels = @json($monthLabels);
+        var monthData = @json(array_values($dailyRevenueData ?? []));
+        var monthLabels = @json($monthLabels ?? []);
 
-        var monthOptions = {
-            series: [{
-                name: 'Revenue',
-                data: monthData
-            }],
-            chart: {
-                type: 'area',
-                height: 300,
-                toolbar: { show: false },
-                zoom: { enabled: false },
-                fontFamily: 'inherit'
-            },
-            colors: ['#4f46e5'],
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.4,
-                    opacityTo: 0.05,
-                    stops: [0, 90, 100]
+        if (document.querySelector("#current_month_chart") && monthData.length > 0) {
+            var monthOptions = {
+                series: [{
+                    name: 'Revenue',
+                    data: monthData
+                }],
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    fontFamily: 'inherit'
+                },
+                colors: ['#4f46e5'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                dataLabels: { enabled: false },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                xaxis: {
+                    categories: monthLabels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' },
+                        formatter: function (val) { return "$" + val }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f1f4',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                tooltip: {
+                    y: { formatter: function (val) { return "$" + val } }
                 }
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            xaxis: {
-                categories: monthLabels,
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-                labels: {
-                    style: { colors: '#a1a5b7', fontSize: '12px' }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: '#a1a5b7', fontSize: '12px' },
-                    formatter: function (val) { return "$" + val }
-                }
-            },
-            grid: {
-                borderColor: '#f1f1f4',
-                strokeDashArray: 4,
-                yaxis: { lines: { show: true } }
-            },
-            tooltip: {
-                y: { formatter: function (val) { return "$" + val } }
-            }
-        };
+            };
 
-        var monthChart = new ApexCharts(document.querySelector("#current_month_chart"), monthOptions);
-        monthChart.render();
+            var monthChart = new ApexCharts(document.querySelector("#current_month_chart"), monthOptions);
+            monthChart.render();
+        }
 
         // --- Current Year Revenue Chart (Bar Chart) ---
-        var yearData = @json(array_values($monthlyRevenueData));
-        var yearLabels = @json($yearLabels);
+        var yearData = @json(array_values($monthlyRevenueData ?? []));
+        var yearLabels = @json($yearLabels ?? []);
 
-        var yearOptions = {
-            series: [{
-                name: 'Revenue',
-                data: yearData
-            }],
-            chart: {
-                type: 'bar',
-                height: 300,
-                toolbar: { show: false },
-                fontFamily: 'inherit'
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 6,
-                    columnWidth: '45%',
+        if (document.querySelector("#current_year_chart") && yearData.length > 0) {
+            var yearOptions = {
+                series: [{
+                    name: 'Revenue',
+                    data: yearData
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false },
+                    fontFamily: 'inherit'
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 6,
+                        columnWidth: '45%',
+                    }
+                },
+                colors: ['#06b6d4'],
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: yearLabels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' },
+                        formatter: function (val) { return "$" + val }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f1f4',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                tooltip: {
+                    y: { formatter: function (val) { return "$" + val } }
                 }
-            },
-            colors: ['#06b6d4'],
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: yearLabels,
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-                labels: {
-                    style: { colors: '#a1a5b7', fontSize: '12px' }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: '#a1a5b7', fontSize: '12px' },
-                    formatter: function (val) { return "$" + val }
-                }
-            },
-            grid: {
-                borderColor: '#f1f1f4',
-                strokeDashArray: 4,
-                yaxis: { lines: { show: true } }
-            },
-            tooltip: {
-                y: { formatter: function (val) { return "$" + val } }
-            }
-        };
+            };
 
-        var yearChart = new ApexCharts(document.querySelector("#current_year_chart"), yearOptions);
-        yearChart.render();
+            var yearChart = new ApexCharts(document.querySelector("#current_year_chart"), yearOptions);
+            yearChart.render();
+        }
     });
 </script>
 @endpush

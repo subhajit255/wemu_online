@@ -3656,11 +3656,13 @@ body,
 [data-bs-theme="dark"] .status-dot { border-color: #1e1e2d; }
 [data-bs-theme="dark"] .name-text { color: #ffffff; }
 
-/* Light Blue/Purple Pills */
+/* Light Blue/Purple/Green Pills */
 .pill-blue { background: #e0f2fe; color: #0284c7; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 .pill-purple { background: #f3e8ff; color: #7e22ce; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.pill-green { background: #d1fae5; color: #059669; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 [data-bs-theme="dark"] .pill-blue { background: rgba(2, 132, 199, 0.2); color: #38bdf8; }
 [data-bs-theme="dark"] .pill-purple { background: rgba(126, 34, 206, 0.2); color: #c084fc; }
+[data-bs-theme="dark"] .pill-green { background: rgba(5, 150, 105, 0.2); color: #34d399; }
 
 /* Custom Toggle Switch */
 .custom-switch { position: relative; display: inline-block; width: 44px; height: 24px; }

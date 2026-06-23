@@ -105,4 +105,37 @@ trait StripeTrait
         
         return $paymentMethod;
     }
+
+    /**
+     * Create a Stripe Checkout Session for subscription
+     *
+     * @param string $customerId The Stripe Customer ID
+     * @param string $priceId The Stripe Price ID
+     * @param string $successUrl URL to redirect upon success
+     * @param string $cancelUrl URL to redirect upon cancellation
+     * @param array $metadata Additional metadata
+     * @return \Stripe\Checkout\Session
+     */
+    public function createCheckoutSession(string $customerId, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [])
+    {
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+
+        $session = $stripe->checkout->sessions->create([
+            'customer' => $customerId,
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price' => $priceId,
+                'quantity' => 1,
+            ]],
+            'mode' => 'subscription',
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'metadata' => $metadata,
+            'subscription_data' => [
+                'metadata' => $metadata,
+            ],
+        ]);
+
+        return $session;
+    }
 }

@@ -17,10 +17,24 @@ class SongController extends BaseController
 {
     use UploadAble;
     
-    public function index()
+    public function index(Request $request)
     {
         $currentDateTime = date('Y-m-d H:i:s');
-        $songs = Song::latest()->paginate(10);
+        $query = Song::query();
+
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->title . '%');
+        }
+
+        if ($request->filled('artist')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('artist', function ($q2) use ($request) {
+                    $q2->where('name', 'like', '%' . $request->artist . '%');
+                })->orWhere('artist_name', 'like', '%' . $request->artist . '%');
+            });
+        }
+
+        $songs = $query->latest()->paginate(10);
         $upcomingReleases = Song::where('published_at', '>', $currentDateTime)->get();
         return view('admin.songs.index', compact('songs', 'upcomingReleases'));
     }

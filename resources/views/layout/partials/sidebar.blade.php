@@ -105,11 +105,11 @@
 
                 <!-- FAQs -->
                 <div class="menu-item">
-                    <!-- <a href="{{ route('admin.faq.list') }}"> -->
-                    <span class="menu-link {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-circle-question fs-5"></i></span>
-                        <span class="menu-title">FAQs</span>
-                    </span>
+                    <a href="{{ route('admin.faq.list') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-circle-question fs-5"></i></span>
+                            <span class="menu-title">FAQs</span>
+                        </span>
                     </a>
                 </div>
 
@@ -219,11 +219,11 @@
                 @if($isMainOrAdmin || in_array('analytics', $perms))
                 <!-- Analytics -->
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.analytics.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.analytics.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
-                        <span class="menu-title">Analytics</span>
-                    </span>
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.analytics.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.analytics.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-chart-line fs-5"></i></span>
+                            <span class="menu-title">Analytics</span>
+                        </span>
                     </a>
                 </div>
                 @endif
@@ -231,11 +231,11 @@
                 @if($isMainOrAdmin || in_array('audience', $perms))
                 <!-- Audience -->
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.audience.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.audience.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
-                        <span class="menu-title">Audience</span>
-                    </span>
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.audience.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.audience.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
+                            <span class="menu-title">Audience</span>
+                        </span>
                     </a>
                 </div>
                 @endif
@@ -263,11 +263,11 @@
                 @if($isMainOrAdmin || in_array('releases', $perms))
                 <!-- Releases -->
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.releases.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.releases.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
-                        <span class="menu-title">Releases</span>
-                    </span>
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.releases.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.releases.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-calendar-check fs-5"></i></span>
+                            <span class="menu-title">Releases</span>
+                        </span>
                     </a>
                 </div>
                 @endif
@@ -285,11 +285,11 @@
                 <!-- Team -->
                 @if(!auth()->user()->added_by)
                 <div class="menu-item">
-                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.team.index') : '#' }}"> -->
-                    <span class="menu-link {{ request()->routeIs('artist.team.*') ? 'active' : '' }}">
-                        <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
-                        <span class="menu-title">Team</span>
-                    </span>
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.team.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.team.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-user-group fs-5"></i></span>
+                            <span class="menu-title">Team</span>
+                        </span>
                     </a>
                 </div>
                 @endif
@@ -302,11 +302,11 @@
 
                 <!-- Settings -->
                 <div class="menu-item">
-                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.settings.index') : '#' }}">
-                        <span class="menu-link {{ request()->routeIs('artist.settings.*') ? 'active' : '' }}">
-                            <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
-                            <span class="menu-title">Settings</span>
-                        </span>
+                    <!-- <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.settings.index') : '#' }}"> -->
+                    <span class="menu-link {{ request()->routeIs('artist.settings.*') ? 'active' : '' }}">
+                        <span class="menu-icon"><i class="fa-solid fa-gear fs-5"></i></span>
+                        <span class="menu-title">Settings</span>
+                    </span>
                     </a>
                 </div>
 

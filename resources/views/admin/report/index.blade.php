@@ -17,6 +17,17 @@
                 <li class="breadcrumb-item text-muted">Reports</li>
             </ul>
         </div>
+        <div class="d-flex align-items-center gap-2 gap-lg-3">
+            <form method="GET" action="{{ route('admin.report.index') }}" class="d-flex align-items-center" id="filter-form">
+                <select name="period" class="form-select form-select-sm form-select-solid w-150px" onchange="document.getElementById('filter-form').submit()">
+                    <option value="all" {{ request('period') == 'all' ? 'selected' : '' }}>All Time</option>
+                    <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>Today</option>
+                    <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>This Week</option>
+                    <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>This Month</option>
+                    <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>This Year</option>
+                </select>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -62,6 +73,39 @@
                         <div class="d-flex flex-column">
                             <span class="fs-1 fw-bold text-dark lh-1 ls-n2 mb-2">{{ number_format($totalListeners) }}</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
+            <!-- Current Month Revenue Chart -->
+            <div class="col-lg-6">
+                <div class="card card-flush h-lg-100">
+                    <div class="card-header pt-5 border-0">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold fs-3 text-dark">Current Month Revenue</span>
+                            <span class="text-muted mt-1 fw-semibold fs-7">Daily breakdown for {{ now()->format('F Y') }}</span>
+                        </h3>
+                    </div>
+                    <div class="card-body d-flex align-items-end p-0">
+                        <div id="current_month_chart" class="w-100 min-h-300px"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Year Revenue Chart -->
+            <div class="col-lg-6">
+                <div class="card card-flush h-lg-100">
+                    <div class="card-header pt-5 border-0">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bold fs-3 text-dark">Current Year Revenue</span>
+                            <span class="text-muted mt-1 fw-semibold fs-7">Monthly breakdown for {{ now()->format('Y') }}</span>
+                        </h3>
+                    </div>
+                    <div class="card-body d-flex align-items-end p-0">
+                        <div id="current_year_chart" class="w-100 min-h-300px"></div>
                     </div>
                 </div>
             </div>
@@ -161,4 +205,122 @@
 
     </div>
 </div>
+
+@push('script')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- Current Month Revenue Chart (Area Chart) ---
+        var monthData = @json(array_values($dailyRevenueData ?? []));
+        var monthLabels = @json($monthLabels ?? []);
+
+        if (document.querySelector("#current_month_chart") && monthData.length > 0) {
+            var monthOptions = {
+                series: [{
+                    name: 'Revenue',
+                    data: monthData
+                }],
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    fontFamily: 'inherit'
+                },
+                colors: ['#4f46e5'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                dataLabels: { enabled: false },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                xaxis: {
+                    categories: monthLabels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' },
+                        formatter: function (val) { return "$" + val }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f1f4',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                tooltip: {
+                    y: { formatter: function (val) { return "$" + val } }
+                }
+            };
+
+            var monthChart = new ApexCharts(document.querySelector("#current_month_chart"), monthOptions);
+            monthChart.render();
+        }
+
+        // --- Current Year Revenue Chart (Bar Chart) ---
+        var yearData = @json(array_values($monthlyRevenueData ?? []));
+        var yearLabels = @json($yearLabels ?? []);
+
+        if (document.querySelector("#current_year_chart") && yearData.length > 0) {
+            var yearOptions = {
+                series: [{
+                    name: 'Revenue',
+                    data: yearData
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false },
+                    fontFamily: 'inherit'
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 6,
+                        columnWidth: '45%',
+                    }
+                },
+                colors: ['#06b6d4'],
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: yearLabels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: '#a1a5b7', fontSize: '12px' },
+                        formatter: function (val) { return "$" + val }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f1f4',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                tooltip: {
+                    y: { formatter: function (val) { return "$" + val } }
+                }
+            };
+
+            var yearChart = new ApexCharts(document.querySelector("#current_year_chart"), yearOptions);
+            yearChart.render();
+        }
+    });
+</script>
+@endpush
 @endsection

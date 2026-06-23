@@ -82,6 +82,9 @@
                                         <div class="name-block">
                                             <div>
                                                 <span class="name-text">{{ $detail->name ?? 'N/A' }}</span>
+                                                @if($detail->is_default == 1)
+                                                <span class="badge bg-success ms-1" style="font-size: 0.7rem; padding: 0.35em 0.5em;">Default</span>
+                                                @endif
                                                 <span class="sub-text">Added {{ $detail->created_at->format('M Y') }}</span>
                                             </div>
                                         </div>
@@ -91,7 +94,9 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2 align-items-center">
-                                            @if($detail->available_for == 1)
+                                            @if($detail->is_default == 1)
+                                            <span class="pill-green"><i class="fa-solid fa-users"></i> All</span>
+                                            @elseif($detail->available_for == 1)
                                             <span class="pill-blue"><i class="fa-solid fa-user"></i> User</span>
                                             @else
                                             <span class="pill-purple"><i class="fa-solid fa-music"></i> Artist</span>

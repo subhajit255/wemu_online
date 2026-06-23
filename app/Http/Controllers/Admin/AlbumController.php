@@ -18,7 +18,19 @@ class AlbumController extends BaseController
 
     public function index(Request $request)
     {
-        $albums = Album::latest()->paginate(8);
+        $query = Album::query();
+
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->title . '%');
+        }
+
+        if ($request->filled('artist')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->artist . '%');
+            });
+        }
+
+        $albums = $query->latest()->paginate(8);
         return view('admin.album.index', compact('albums'));
     }
 

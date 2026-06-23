@@ -12,9 +12,11 @@ use App\Models\ArtistPreference;
 use App\Http\Controllers\BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\StripeTrait;
 
 class AuthController extends BaseController
 {
+    use StripeTrait;
     public function login(Request $request)
     {
         if ($request->post()) {
@@ -47,6 +49,17 @@ class AuthController extends BaseController
     public function register(Request $request)
     {
         $genres = Genre::where('is_active', 1)->get();
+        $settings = \App\Models\Setting::find(1);
+        $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
+        $subscriptions = [];
+        if ($artistSubscriptionEnabled) {
+            $subscriptions = \App\Models\Subscription::where('status', 1)
+                ->where(function($q) {
+                    $q->where('available_for', 2)->orWhere('is_default', 1);
+                })
+                ->orderBy('sort_order', 'asc')
+                ->get();
+        }
 
         if ($request->isMethod('get')) {
             if ($request->has('reset') || $request->query('reset') == 1) {
@@ -68,16 +81,19 @@ class AuthController extends BaseController
                 $preferences = ArtistPreference::firstOrCreate(['user_id' => $user->id]);
 
                 $activeStep = $user->completed_steps ? ($user->completed_steps + 1) : 3;
+                if ($activeStep == 8 && !$artistSubscriptionEnabled) {
+                    $activeStep = 9;
+                }
                 if ($activeStep > 10) $activeStep = 10;
 
-                return view('auth.register', compact('genres', 'user', 'profile', 'socials', 'verification', 'preferences', 'activeStep'));
+                return view('auth.register', compact('genres', 'user', 'profile', 'socials', 'verification', 'preferences', 'activeStep', 'artistSubscriptionEnabled', 'subscriptions'));
             }
 
             $verifyUserId = session('verify_user_id');
             $verifyUser = $verifyUserId ? User::find($verifyUserId) : null;
             $activeStep = ($verifyUser && !$verifyUser->email_verified) ? 2 : 1;
 
-            return view('auth.register', compact('genres', 'activeStep', 'verifyUser'));
+            return view('auth.register', compact('genres', 'activeStep', 'verifyUser', 'artistSubscriptionEnabled', 'subscriptions'));
         }
 
         if ($request->isMethod('post')) {
@@ -367,12 +383,16 @@ class AuthController extends BaseController
                         'release_frequency' => $request->release_frequency,
                     ]);
 
-                    $user->update(['completed_steps' => 7]);
+                    $settings = \App\Models\Setting::find(1);
+                    $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
+                    $nextStep = $artistSubscriptionEnabled ? 8 : 9;
+
+                    $user->update(['completed_steps' => ($nextStep == 9 ? 8 : 7)]);
 
                     return response([
                         'status' => true,
                         'message' => 'Preferences saved successfully!',
-                        'next_step' => 8
+                        'next_step' => $nextStep
                     ]);
 
                 case 8:
@@ -382,9 +402,50 @@ class AuthController extends BaseController
                     }
 
                     $request->validate([
-                        'plan' => 'required|in:free,pro,label',
+                        'plan' => 'required|exists:subscriptions,id',
                     ]);
 
+                    $settings = \App\Models\Setting::find(1);
+                    $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
+                    
+                    if ($artistSubscriptionEnabled) {
+                        $subscription = \App\Models\Subscription::find($request->plan);
+                        
+                        if ($subscription && $subscription->price > 0 && $subscription->stripe_price_id) {
+                            // Do NOT update completed_steps to 8 yet to ensure they pay!
+                            $user->update([
+                                'subscription_type' => $request->plan,
+                            ]);
+
+                            $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
+                                ->where('user_id', $user->id)
+                                ->where('subscription_id', $subscription->id)
+                                ->where('status', 1)
+                                ->first();
+
+                            if (!$existingSub) {
+                                if (!$user->stripe_id) {
+                                    $customer = $this->createCustomer($user->email, $user->name);
+                                    $user->update(['stripe_id' => $customer->id]);
+                                }
+
+                                $sessionUrl = $this->createCheckoutSession(
+                                    $user->stripe_id,
+                                    $subscription->stripe_price_id,
+                                    route('artist.register.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                                    route('artist.register') . '?reset=0'
+                                );
+
+                                return response([
+                                    'status' => true,
+                                    'message' => 'Redirecting to payment gateway...',
+                                    'url' => $sessionUrl->url
+                                ]);
+                            }
+                        }
+                    }
+
+                    // Free plan or already paid or disabled
                     $user->update([
                         'subscription_type' => $request->plan,
                         'completed_steps' => 8
@@ -408,6 +469,45 @@ class AuthController extends BaseController
                         'agree_copyright' => 'required|accepted',
                         'agree_revenue' => 'required|accepted',
                     ]);
+
+                    $settings = \App\Models\Setting::find(1);
+                    $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
+                    
+                    if ($artistSubscriptionEnabled && $user->subscription_type) {
+                        $subscription = \App\Models\Subscription::find($user->subscription_type);
+                        
+                        if ($subscription) {
+                            if ($subscription->price > 0 && $subscription->stripe_price_id) {
+                                // Ensure they actually paid
+                                $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
+                                    ->where('user_id', $user->id)
+                                    ->where('status', 1)
+                                    ->first();
+                                
+                                if (!$existingSub) {
+                                    return response(['status' => false, 'message' => 'Please complete your subscription payment first.', 'next_step' => 8]);
+                                }
+                            } else {
+                                // Free subscription
+                                $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
+                                    ->where('user_id', $user->id)
+                                    ->where('subscription_id', $subscription->id)
+                                    ->first();
+
+                                if (!$existingSub) {
+                                    \Illuminate\Support\Facades\DB::table('user_subscriptions')->insert([
+                                        'uuid' => \Webpatser\Uuid\Uuid::generate(4)->string,
+                                        'user_id' => $user->id,
+                                        'subscription_id' => $subscription->id,
+                                        'status' => 1,
+                                        'started_on' => now(),
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ]);
+                                }
+                            }
+                        }
+                    }
 
                     $user->update(['completed_steps' => 9]);
 
@@ -477,7 +577,7 @@ class AuthController extends BaseController
                 // Fall through to show dashboard
             } elseif ($user->completed_steps < 9) {
                 return redirect()->route('artist.register');
-            } elseif ($user->is_verified == 0) {
+            } elseif ($user->is_approve == 0) {
                 $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
                 if ($verification && $verification->verification_status == 2) {
                     return view('auth.reverify', compact('user', 'verification'));
@@ -638,6 +738,88 @@ class AuthController extends BaseController
             'message' => 'Documents uploaded successfully! Awaiting admin approval.',
             'url' => route('artist.dashboard')
         ]);
+    }
+
+    public function checkoutSuccess(Request $request)
+    {
+        $sessionId = $request->get('session_id');
+        if (!$sessionId) {
+            return redirect()->route('artist.register');
+        }
+
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+        try {
+            $session = $stripe->checkout->sessions->retrieve($sessionId);
+            
+            $user = auth()->user();
+            if (!$user) {
+                // Recover user if session cookie was lost during redirect
+                $user = \App\Models\User::where('stripe_id', $session->customer)->first();
+                if ($user) {
+                    auth()->login($user);
+                } else {
+                    return redirect()->route('artist.login')->with('error', 'Session expired. Please log in again.');
+                }
+            }
+
+            if ($session->payment_status === 'paid' || $session->status === 'complete') {
+                $subscriptionId = $session->subscription; // This is the Stripe subscription ID (sub_xxx)
+                
+                // Fetch the actual subscription from Stripe to get period dates
+                $stripeSubscription = $stripe->subscriptions->retrieve($subscriptionId);
+
+                // Get the local subscription record
+                $localSubscription = \App\Models\Subscription::find($user->subscription_type);
+                
+                if ($localSubscription) {
+                    $existing = \Illuminate\Support\Facades\DB::table('user_subscriptions')
+                        ->where('stripe_id', $subscriptionId)
+                        ->first();
+
+                    if (!$existing) {
+                        \Illuminate\Support\Facades\DB::table('user_subscriptions')->insert([
+                            'uuid' => \Webpatser\Uuid\Uuid::generate(4)->string,
+                            'user_id' => $user->id,
+                            'subscription_id' => $localSubscription->id,
+                            'stripe_id' => $subscriptionId,
+                            'stripe_status' => $stripeSubscription->status,
+                            'trial_ends_at' => $stripeSubscription->trial_end ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->trial_end) : null,
+                            'current_period_start' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start),
+                            'current_period_end' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end),
+                            'ends_at' => $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
+                            'status' => in_array($stripeSubscription->status, ['active', 'trialing']) ? 1 : 0,
+                            'transaction_id' => $session->payment_intent ?? $session->invoice ?? $sessionId,
+                            'started_on' => now(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Try to get payment intent or invoice
+                        $transactionId = $session->payment_intent ?? $session->invoice ?? $sessionId;
+
+                        \Illuminate\Support\Facades\DB::table('transactions')->insert([
+                            'user_id' => $user->id,
+                            'transaction_id' => $transactionId,
+                            'payment_type' => 'stripe',
+                            'amount' => $session->amount_total / 100,
+                            'currency' => strtoupper($session->currency),
+                            'payment_status' => 'completed',
+                            'payment_details' => json_encode($session->toArray()),
+                            'description' => 'Subscription payment for ' . $localSubscription->name,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+
+                $user->update(['completed_steps' => 8]);
+                return redirect()->route('artist.register')->with('success', 'Payment successful! Please accept the terms to complete registration.');
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Stripe Checkout verification failed: ' . $e->getMessage());
+        }
+
+        return redirect()->route('artist.register')->with('error', 'Payment verification failed. Please try again.');
     }
 
     public function logout()

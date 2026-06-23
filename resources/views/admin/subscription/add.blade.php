@@ -88,11 +88,23 @@
 
 
                             <div class="col-12 mt-6">
-                                <div class="form-check form-check-custom form-check-solid">
-                                    <input class="form-check-input" type="checkbox" value="1" id="requires_verification" name="requires_verification" {{ !empty($details) && $details->requires_verification ? 'checked' : '' }} />
-                                    <label class="form-check-label fw-semibold text-gray-700" for="requires_verification">
-                                        Requires Student/Third-Party Verification
-                                    </label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-custom form-check-solid">
+                                            <input class="form-check-input" type="checkbox" value="1" id="requires_verification" name="requires_verification" {{ !empty($details) && $details->requires_verification ? 'checked' : '' }} />
+                                            <label class="form-check-label fw-semibold text-gray-700" for="requires_verification">
+                                                Requires Student/Third-Party Verification
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-custom form-check-solid">
+                                            <input class="form-check-input" type="checkbox" value="1" id="is_default" name="is_default" {{ !empty($details) && $details->is_default == 1 ? 'checked' : '' }} />
+                                            <label class="form-check-label fw-semibold text-gray-700" for="is_default">
+                                                Set as Default Plan (For both Artist and User)
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

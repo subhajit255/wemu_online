@@ -40,7 +40,7 @@ class TeamController extends Controller
             $query->where('is_active', $request->status);
         }
 
-        $users = $query->latest()->paginate(1);
+        $users = $query->latest()->paginate(10);
         return view('artist.team.index', compact('users'));
     }
 

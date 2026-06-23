@@ -21,12 +21,13 @@ Route::as('artist.')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::match(['get', 'post'], 'login', 'login')->name('login');
         Route::match(['get', 'post'], 'register', 'register')->name('register');
+        Route::get('register/checkout-success', 'checkoutSuccess')->name('register.checkout.success');
         Route::match(['get', 'post'], 'otp-verify', 'otpVerify')->name('otp.verify');
         Route::match(['get', 'post'], 'logout', 'logout')->name('logout');
         Route::get('dashboard', 'dashboard')->name('dashboard');
         Route::post('reverify', 'reverifySubmit')->name('reverify.submit');
     });
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', \App\Http\Middleware\CheckArtistApproval::class])->group(function () {
         Route::controller(SongController::class)->group(function () {
             Route::get('songs', 'index')->name('songs.index');
             Route::match(['get', 'post'], 'songs/add-or-update/{id?}', 'storeOrUpdate')->name('songs.storeOrUpdate');
