@@ -23,9 +23,9 @@ $audioSrc = $hasRealAudio ? $song->audio_file_path : 'https://www.soundhelix.com
             <a href="{{ route('artist.songs.index') }}" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back to Songs
             </a>
-            <a href="{{ route('artist.songs.play', $song->id) }}" class="btn btn-sm btn-info fw-bold" style="margin-right: 5px;">
+            <!-- <a href="{{ route('artist.songs.play', $song->id) }}" class="btn btn-sm btn-info fw-bold" style="margin-right: 5px;">
                 <i class="fa-solid fa-play me-1"></i> Play Screen
-            </a>
+            </a> -->
             <a href="{{ route('artist.songs.storeOrUpdate', $song->id) }}" class="btn btn-sm btn-dark fw-bold">
                 <i class="fa-solid fa-pen me-1"></i> Edit Song
             </a>
@@ -54,7 +54,7 @@ $audioSrc = $hasRealAudio ? $song->audio_file_path : 'https://www.soundhelix.com
         <div class="card glass-card mb-8 overflow-hidden position-relative">
             <!-- Ambient blurred cover art backdrop -->
             <div class="player-hero-backdrop" style="background-image: url('{{ $song->cover_image_path }}');"></div>
-            
+
             <div class="card-body p-8 p-lg-12 position-relative" style="z-index: 1;">
                 <div class="row align-items-center g-8">
 
