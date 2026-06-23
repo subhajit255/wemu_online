@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Artist;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Genre;
+use App\Models\Album;
 use App\Models\ArtistProfile;
+use App\Models\ArtistFollower;
+use App\Models\AudienceLog;
+use App\Models\StreamLog;
 use App\Models\SocialLink;
 use App\Models\ArtistVerification;
 use App\Models\ArtistPreference;
@@ -54,7 +58,7 @@ class AuthController extends BaseController
         $subscriptions = [];
         if ($artistSubscriptionEnabled) {
             $subscriptions = \App\Models\Subscription::where('status', 1)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('available_for', 2)->orWhere('is_default', 1);
                 })
                 ->orderBy('sort_order', 'asc')
@@ -407,10 +411,10 @@ class AuthController extends BaseController
 
                     $settings = \App\Models\Setting::find(1);
                     $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
-                    
+
                     if ($artistSubscriptionEnabled) {
                         $subscription = \App\Models\Subscription::find($request->plan);
-                        
+
                         if ($subscription && $subscription->price > 0 && $subscription->stripe_price_id) {
                             // Do NOT update completed_steps to 8 yet to ensure they pay!
                             $user->update([
@@ -472,10 +476,10 @@ class AuthController extends BaseController
 
                     $settings = \App\Models\Setting::find(1);
                     $artistSubscriptionEnabled = $settings ? $settings->artist_subscription : 0;
-                    
+
                     if ($artistSubscriptionEnabled && $user->subscription_type) {
                         $subscription = \App\Models\Subscription::find($user->subscription_type);
-                        
+
                         if ($subscription) {
                             if ($subscription->price > 0 && $subscription->stripe_price_id) {
                                 // Ensure they actually paid
@@ -483,7 +487,7 @@ class AuthController extends BaseController
                                     ->where('user_id', $user->id)
                                     ->where('status', 1)
                                     ->first();
-                                
+
                                 if (!$existingSub) {
                                     return response(['status' => false, 'message' => 'Please complete your subscription payment first.', 'next_step' => 8]);
                                 }
@@ -578,7 +582,7 @@ class AuthController extends BaseController
             } elseif ($user->completed_steps < 9) {
                 return redirect()->route('artist.register');
             } elseif ($user->is_approve == 0) {
-                $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
+                $verification = ArtistVerification::where('user_id', $user->id)->first();
                 if ($verification && $verification->verification_status == 2) {
                     return view('auth.reverify', compact('user', 'verification'));
                 }
@@ -588,14 +592,14 @@ class AuthController extends BaseController
 
         $userId = $user ? $user->id : 0;
         $mainArtistId = $user && $user->added_by ? $user->added_by : $userId;
-        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
-        
-        $recentReleases = \App\Models\Album::whereIn('user_id', $teamIds)
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
+        $recentReleases = Album::whereIn('user_id', $teamIds)
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
-            
-        $audienceLocations = \App\Models\AudienceLog::whereIn('artist_id', $teamIds)
+
+        $audienceLocations = AudienceLog::whereIn('artist_id', $teamIds)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->whereNotNull('country')
@@ -604,14 +608,14 @@ class AuthController extends BaseController
             ->orderBy('total', 'desc')
             ->take(5)
             ->get();
-            
-        $totalAudience = \App\Models\AudienceLog::whereIn('artist_id', $teamIds)
+
+        $totalAudience = AudienceLog::whereIn('artist_id', $teamIds)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->whereNotNull('country')
             ->count();
 
-        $streamsData = \App\Models\StreamLog::whereIn('artist_id', $teamIds)
+        $streamsData = StreamLog::whereIn('artist_id', $teamIds)
             ->where('created_at', '>=', now()->subDays(6)->startOfDay())
             ->select(\Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
             ->groupBy('date')
@@ -627,7 +631,7 @@ class AuthController extends BaseController
             $chartStreams[] = $streamsData->get($dateStr, 0);
         }
 
-        $topSongs = \App\Models\StreamLog::whereIn('artist_id', $teamIds)
+        $topSongs = StreamLog::whereIn('artist_id', $teamIds)
             ->select('song_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_plays'))
             ->groupBy('song_id')
             ->orderBy('total_plays', 'desc')
@@ -639,10 +643,10 @@ class AuthController extends BaseController
         $calcMetric = function ($model, $teamIds, $isDistinctCountry = false) {
             $query = clone $model;
             $query = $query->whereIn('artist_id', $teamIds);
-            
+
             $currentMonthQuery = (clone $query)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
             $lastMonthQuery = (clone $query)->whereMonth('created_at', now()->subMonth()->month)->whereYear('created_at', now()->subMonth()->year);
-            
+
             if ($isDistinctCountry) {
                 $currentMonth = $currentMonthQuery->whereNotNull('country')->distinct('country')->count('country');
                 $lastMonth = $lastMonthQuery->whereNotNull('country')->distinct('country')->count('country');
@@ -662,7 +666,7 @@ class AuthController extends BaseController
             if ($growth > 100) {
                 $growth = 100;
             }
-            
+
             $formatNumber = function ($number) {
                 if ($number >= 1000000) return round($number / 1000000, 1) . 'M';
                 if ($number >= 1000) return round($number / 1000, 1) . 'K';
@@ -677,10 +681,10 @@ class AuthController extends BaseController
         };
 
         $metrics = [
-            'streams' => $calcMetric(new \App\Models\StreamLog, $teamIds),
-            'listeners' => $calcMetric(new \App\Models\AudienceLog, $teamIds),
-            'followers' => $calcMetric(new \App\Models\ArtistFollower, $teamIds),
-            'countries' => $calcMetric(new \App\Models\AudienceLog, $teamIds, true),
+            'streams' => $calcMetric(new StreamLog, $teamIds),
+            'listeners' => $calcMetric(new AudienceLog, $teamIds),
+            'followers' => $calcMetric(new ArtistFollower, $teamIds),
+            'countries' => $calcMetric(new AudienceLog, $teamIds, true),
         ];
 
         return view('artist.dashboard', compact('recentReleases', 'audienceLocations', 'totalAudience', 'chartDates', 'chartStreams', 'topSongs', 'metrics'));
@@ -693,7 +697,7 @@ class AuthController extends BaseController
             return response(['status' => false, 'message' => 'Session expired. Please log in.', 'url' => route('artist.login')]);
         }
 
-        $verification = \App\Models\ArtistVerification::where('user_id', $user->id)->first();
+        $verification = ArtistVerification::where('user_id', $user->id)->first();
         if (!$verification) {
             return response(['status' => false, 'message' => 'Verification record not found.']);
         }
@@ -750,7 +754,7 @@ class AuthController extends BaseController
         $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
         try {
             $session = $stripe->checkout->sessions->retrieve($sessionId);
-            
+
             $user = auth()->user();
             if (!$user) {
                 // Recover user if session cookie was lost during redirect
@@ -764,13 +768,13 @@ class AuthController extends BaseController
 
             if ($session->payment_status === 'paid' || $session->status === 'complete') {
                 $subscriptionId = $session->subscription; // This is the Stripe subscription ID (sub_xxx)
-                
+
                 // Fetch the actual subscription from Stripe to get period dates
                 $stripeSubscription = $stripe->subscriptions->retrieve($subscriptionId);
 
                 // Get the local subscription record
                 $localSubscription = \App\Models\Subscription::find($user->subscription_type);
-                
+
                 if ($localSubscription) {
                     $existing = \Illuminate\Support\Facades\DB::table('user_subscriptions')
                         ->where('stripe_id', $subscriptionId)
