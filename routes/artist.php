@@ -4,6 +4,7 @@ use App\Http\Controllers\Artist\AlbumController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Artist\AuthController;
 use App\Http\Controllers\Artist\SongController;
+use App\Http\Controllers\Artist\SubscriptionController;
 use App\Http\Controllers\Artist\AnalyticsController;
 use App\Http\Controllers\Artist\AudienceController;
 /*
@@ -61,6 +62,9 @@ Route::as('artist.')->group(function () {
         });
         Route::controller(\App\Http\Controllers\Artist\ReleaseController::class)->group(function () {
             Route::get('releases', 'index')->name('releases.index');
+        });
+        Route::controller(SubscriptionController::class)->group(function () {
+            Route::get('subscription', 'index')->name('subscription.index');
         });
         Route::controller(\App\Http\Controllers\Artist\FaqController::class)->group(function () {
             Route::get('faq', 'index')->name('faq.index');

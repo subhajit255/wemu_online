@@ -240,6 +240,18 @@
                 </div>
                 @endif
 
+                @if($isMainOrAdmin || in_array('subscription', $perms))
+                <!-- Subscription -->
+                <div class="menu-item">
+                    <a href="{{ auth()->user() && auth()->user()->user_type == 3 ? route('artist.subscription.index') : '#' }}">
+                        <span class="menu-link {{ request()->routeIs('artist.subscription.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-credit-card fs-5"></i></span>
+                            <span class="menu-title">Subscription</span>
+                        </span>
+                    </a>
+                </div>
+                @endif
+
                 <!-- Royalties -->
                 <!-- <div class="menu-item">
                     <a href="#">
