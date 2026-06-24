@@ -29,12 +29,18 @@ class AlbumController extends BaseController
             return $next($request);
         });
     }
-    public function index()
+    public function index(Request $request)
     {
         $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
         $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
-        $albums = Album::whereIn('user_id', $teamIds)->latest()->paginate(8);
+        $query = Album::whereIn('user_id', $teamIds);
+
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->title . '%');
+        }
+
+        $albums = $query->latest()->paginate(8);
         return view('artist.album.index', compact('albums'));
     }
     public function StoreOrUpdate(Request $request)

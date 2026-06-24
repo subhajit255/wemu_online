@@ -10,7 +10,29 @@
         </div>
         <div class="d-flex align-items-center gap-2 gap-lg-3">
             <a href="{{ route('artist.songs.storeOrUpdate') }}" class="btn btn-sm btn-dark fw-bold">Upload Song</a>
-            <a href="#" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;">Filters</a>
+            <a href="#" class="btn btn-sm btn-light fw-bold" style="border: 1px solid #e5e7eb;" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                <i class="fa-solid fa-filter fs-7 me-1"></i>Filters
+            </a>
+            <!--begin::Menu 1-->
+            <div class="menu menu-sub menu-sub-dropdown w-250px w-md-300px" data-kt-menu="true" id="kt_menu_artist_song_filter">
+                <div class="px-7 py-5">
+                    <div class="fs-5 text-dark fw-bold">Filter Options</div>
+                </div>
+                <div class="separator border-gray-200"></div>
+                <form action="{{ route('artist.songs.index') }}" method="GET" class="px-7 py-5">
+                    <div class="mb-10">
+                        <label class="form-label fw-semibold">Song Title:</label>
+                        <div>
+                            <input class="form-control form-control-solid" type="text" name="title" value="{{ request('title') }}" placeholder="Search by title..." />
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ route('artist.songs.index') }}" class="btn btn-sm btn-light btn-active-light-primary me-2">Reset</a>
+                        <button type="submit" class="btn btn-sm btn-primary">Apply</button>
+                    </div>
+                </form>
+            </div>
+            <!--end::Menu 1-->
         </div>
     </div>
 </div>

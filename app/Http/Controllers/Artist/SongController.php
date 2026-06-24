@@ -30,13 +30,19 @@ class SongController extends BaseController
             return $next($request);
         });
     }
-    public function index()
+    public function index(Request $request)
     {
         $currentDateTime = date('Y-m-d H:i:s');
         $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
         $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
-        $songs = Song::whereIn('user_id', $teamIds)->latest()->paginate(10);
+        $query = Song::whereIn('user_id', $teamIds);
+
+        if ($request->filled('title')) {
+            $query->where('title', 'like', '%' . $request->title . '%');
+        }
+
+        $songs = $query->latest()->paginate(10);
         $postReleases = Song::whereIn('user_id', $teamIds)
             ->where('status', 0)
             ->where('published_at', '>', $currentDateTime)
