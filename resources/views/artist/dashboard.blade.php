@@ -170,7 +170,7 @@
                             <span class="card-label fw-bold fs-4 text-dark">Top Songs</span>
                         </h3>
                         <div class="card-toolbar">
-                            <a href="#" class="text-muted fs-7 text-hover-primary">See all</a>
+                            <a href="{{ route('artist.song.index') }}" class="text-muted fs-7 text-hover-primary">See all</a>
                         </div>
                     </div>
                     <div class="card-body p-6 pt-3">
@@ -203,7 +203,7 @@
                             <span class="card-label fw-bold fs-4 text-dark">Recent Releases</span>
                         </h3>
                         <div class="card-toolbar">
-                            <a href="#" class="text-muted fs-7 text-hover-primary">See all</a>
+                            <a href="{{ route('artist.album.index') }}" class="text-muted fs-7 text-hover-primary">See all</a>
                         </div>
                     </div>
                     <div class="card-body p-6 pt-3">
