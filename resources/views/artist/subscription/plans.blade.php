@@ -24,13 +24,54 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
+        <style>
+            .plan-card {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border-top: 5px solid transparent;
+            }
+            .plan-card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+            }
+            .plan-card.plan-0 { border-top-color: #50cd89; }
+            .plan-card.plan-1 { border-top-color: #009ef7; }
+            .plan-card.plan-2 { border-top-color: #7239ea; }
+            .plan-card.plan-3 { border-top-color: #f1416c; }
+            .plan-card.plan-4 { border-top-color: #ffc700; }
+
+            .description-content p {
+                margin-bottom: 0;
+            }
+            
+            .features-content ul {
+                list-style: none;
+                padding-left: 0;
+            }
+            .features-content ul li {
+                position: relative;
+                padding-left: 28px;
+                margin-bottom: 12px;
+                color: #5e6278;
+            }
+            .features-content ul li::before {
+                content: '\f00c';
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+                position: absolute;
+                left: 0;
+                top: 2px;
+                color: #50cd89;
+                font-size: 14px;
+            }
+        </style>
+
         <div class="row g-10">
-            @forelse($subscriptions as $plan)
+            @forelse($subscriptions as $index => $plan)
                 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
-                    <div class="card h-100 shadow-sm border-0" style="border-radius: 15px;">
-                        <div class="card-body p-8">
+                    <div class="card h-100 shadow-sm border-0 plan-card plan-{{ $index % 5 }}" style="border-radius: 15px;">
+                        <div class="card-body p-8 d-flex flex-column">
                             <div class="mb-5 text-center">
-                                <h2 class="fw-bold text-dark mb-2">{{ $plan->name }}</h2>
+                                <h2 class="fw-bold text-dark mb-2 text-capitalize">{{ $plan->name }}</h2>
                                 @if($plan->price > 0)
                                     <div class="fs-1 fw-bold text-primary mb-2">${{ number_format($plan->price, 2) }}</div>
                                     <span class="text-muted fs-5 fw-semibold">/ {{ $plan->interval }}</span>
@@ -40,25 +81,13 @@
                                 @endif
                             </div>
                             
-                            <div class="fs-6 text-muted mb-8 text-center">
-                                {{ $plan->description ?? 'Get access to premium features and analytics to grow your audience.' }}
+                            <div class="fs-6 text-muted mb-8 text-center description-content">
+                                {!! $plan->description ?? 'Get access to premium features and analytics to grow your audience.' !!}
                             </div>
 
                             @if($plan->features)
-                            <div class="mb-8">
-                                <ul class="list-unstyled">
-                                    @php
-                                        $features = explode("\n", $plan->features);
-                                    @endphp
-                                    @foreach($features as $feature)
-                                        @if(trim($feature) !== '')
-                                        <li class="d-flex align-items-center mb-3">
-                                            <i class="fa-solid fa-check text-success me-3"></i>
-                                            <span class="text-gray-800">{{ trim($feature) }}</span>
-                                        </li>
-                                        @endif
-                                    @endforeach
-                                </ul>
+                            <div class="mb-8 features-content flex-grow-1">
+                                {!! $plan->features !!}
                             </div>
                             @endif
 
