@@ -67,12 +67,22 @@ class SubscriptionController extends Controller
             return redirect()->route('artist.subscription.index')->with('error', 'Artist subscriptions are currently disabled.');
         }
 
-        $subscriptions = Subscription::where('status', 1)
+        $hasActiveSubscription = UserSubscription::where('user_id', auth()->id())
+            ->where('status', 1)
+            ->exists();
+
+        $query = Subscription::where('status', 1)
             ->where(function ($q) {
                 $q->where('available_for', 2)->orWhere('is_default', 1);
-            })
-            ->orderBy('sort_order', 'asc')
-            ->get();
+            });
+
+        if ($hasActiveSubscription) {
+            $query->where(function($q) {
+                $q->whereNotNull('price')->where('price', '>', 0);
+            });
+        }
+
+        $subscriptions = $query->orderBy('sort_order', 'asc')->get();
 
         return view('artist.subscription.plans', compact('subscriptions'));
     }
@@ -92,6 +102,22 @@ class SubscriptionController extends Controller
                 $user->update(['stripe_id' => $customer->id]);
             }
 
+            // Check if user has an active subscription that ends in the future
+            $activeSubscription = UserSubscription::where('user_id', $user->id)
+                ->where('status', 1)
+                ->where('ends_at', '>', now())
+                ->latest()
+                ->first();
+
+            $subscriptionData = [];
+            if ($activeSubscription && $activeSubscription->ends_at) {
+                $trialEnd = \Carbon\Carbon::parse($activeSubscription->ends_at)->timestamp;
+                // Stripe requires trial_end to be at least 48 hours in the future
+                if ($trialEnd > now()->addHours(48)->timestamp) {
+                    $subscriptionData['trial_end'] = $trialEnd;
+                }
+            }
+
             // Save the intention to switch plan
             session(['pending_subscription_plan_id' => $subscription->id]);
 
@@ -99,7 +125,9 @@ class SubscriptionController extends Controller
                 $user->stripe_id,
                 $subscription->stripe_price_id,
                 route('artist.subscription.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                route('artist.subscription.plans')
+                route('artist.subscription.plans'),
+                [],
+                $subscriptionData
             );
 
             return redirect($sessionUrl->url);
@@ -133,7 +161,7 @@ class SubscriptionController extends Controller
                     $existing = UserSubscription::where('stripe_id', $subscriptionId)->first();
                     
                     if (!$existing) {
-                        // Cancel old active subscriptions
+                        // Cancel old active subscriptions at their period end
                         $activeSubs = UserSubscription::where('user_id', $user->id)
                             ->where('status', 1)
                             ->get();
@@ -141,12 +169,15 @@ class SubscriptionController extends Controller
                         foreach($activeSubs as $sub) {
                             if ($sub->stripe_id) {
                                 try {
-                                    $stripe->subscriptions->cancel($sub->stripe_id);
+                                    $stripe->subscriptions->update($sub->stripe_id, [
+                                        'cancel_at_period_end' => true,
+                                    ]);
                                 } catch (\Exception $e) {
                                     // ignore
                                 }
                             }
-                            $sub->update(['status' => 0, 'ended_at' => now()]);
+                            // Only update stripe_status to pending_cancel so user keeps access until ends_at
+                            $sub->update(['stripe_status' => 'pending_cancel']);
                         }
 
                         $endDate = null;

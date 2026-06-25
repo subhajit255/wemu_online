@@ -114,13 +114,14 @@ trait StripeTrait
      * @param string $successUrl URL to redirect upon success
      * @param string $cancelUrl URL to redirect upon cancellation
      * @param array $metadata Additional metadata
+     * @param array $subscriptionData Additional subscription data (like trial_end)
      * @return \Stripe\Checkout\Session
      */
-    public function createCheckoutSession(string $customerId, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [])
+    public function createCheckoutSession(string $customerId, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], array $subscriptionData = [])
     {
         $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
 
-        $session = $stripe->checkout->sessions->create([
+        $sessionPayload = [
             'customer' => $customerId,
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -131,10 +132,12 @@ trait StripeTrait
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'metadata' => $metadata,
-            'subscription_data' => [
+            'subscription_data' => array_merge([
                 'metadata' => $metadata,
-            ],
-        ]);
+            ], $subscriptionData),
+        ];
+
+        $session = $stripe->checkout->sessions->create($sessionPayload);
 
         return $session;
     }
