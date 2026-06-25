@@ -64,7 +64,7 @@
             {{-- Table header bar --}}
             <div class="d-flex align-items-center justify-content-between px-7 py-5" style="border-bottom: 1px solid rgba(0,0,0,0.04);">
                 <div class="d-flex align-items-center gap-3">
-                    <span class="fs-6 fw-bold text-gray-800">User Directory</span>
+                    <span class="fs-6 fw-bold text-dark">User Directory</span>
                     <span class="badge badge-light-primary fw-semibold">{{ $users->total() }} users</span>
                 </div>
                 <div class="d-flex align-items-center gap-2 text-muted fs-8" style="cursor: pointer;" onclick="window.location.reload()">
@@ -100,19 +100,19 @@
                                     </div>
                                     <div class="d-flex flex-column">
                                         <a href="#"
-                                            class="text-gray-900 text-hover-primary fw-bold fs-6 mb-1">{{ $user->name }}</a>
+                                            class="text-dark text-hover-primary fw-bold fs-6 mb-1">{{ $user->name }}</a>
                                         <span class="text-muted fw-semibold fs-7">Joined {{ $user->created_at->format('M Y') }}</span>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="text-gray-600 fs-7 mb-1"><i
-                                            class="fa-solid fa-envelope text-gray-400 me-2"></i>
+                                    <span class="text-muted fs-7 mb-1"><i
+                                            class="fa-solid fa-envelope text-muted me-2"></i>
                                         {{ $user->email }}</span>
                                     @if($user->mobile_number)
-                                    <span class="text-gray-600 fs-7"><i
-                                            class="fa-solid fa-phone text-gray-400 me-2"></i> {{ $user->mobile_number }}</span>
+                                    <span class="text-muted fs-7"><i
+                                            class="fa-solid fa-phone text-muted me-2"></i> {{ $user->mobile_number }}</span>
                                     @endif
                                 </div>
                             </td>
@@ -128,7 +128,7 @@
                                         <input class="form-check-input h-20px w-35px" type="checkbox"
                                             value="" id="status_{{ $user->id }}" {{ $user->is_active ? 'checked="checked"' : '' }} />
                                     </div>
-                                    <span class="wemu-status-text ms-1">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
+                                    <span class="wemu-status-text ms-1 text-dark">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                                 </div>
                             </td>
                             <td class="text-end pe-7">

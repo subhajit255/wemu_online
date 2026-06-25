@@ -21,8 +21,9 @@ class HomeController extends BaseController
     public function termAndConditions()
     {
         $settings = Setting::first();
-        $data = $settings->term_and_condition;
-        return view('frontend.pages.page', compact('data', 'settings'));
+        $cms = \App\Models\Cms::where('alias', 'wemu_terms_of_use')->first();
+        $sections = $cms ? json_decode($cms->description, true) : [];
+        return view('frontend.pages.terms', compact('sections', 'settings', 'cms'));
     }
     public function privacyPolicy()
     {

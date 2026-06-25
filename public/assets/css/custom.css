@@ -636,6 +636,11 @@ body,
     color: #4b5563;
     font-size: 0.85rem;
 }
+[data-bs-theme="dark"] .dashboard-select {
+    background-color: #1e1e2d !important;
+    border-color: #2b2b40 !important;
+    color: #ffffff !important;
+}
 
 /* Sidebar Light Styling */
 .app-sidebar {
@@ -3726,10 +3731,20 @@ input:checked + .slider:before { transform: translateX(20px); }
     border: 1px solid #f1f1f4 !important;
     border-radius: 8px !important;
 }
+[data-bs-theme="dark"] .wemu-search-input {
+    background-color: #1e1e2d !important;
+    border-color: #2b2b40 !important;
+    color: #ffffff !important;
+}
 .wemu-select {
     background-color: #f9f9fb !important;
     border: 1px solid #f1f1f4 !important;
     border-radius: 8px !important;
+}
+[data-bs-theme="dark"] .wemu-select {
+    background-color: #1e1e2d !important;
+    border-color: #2b2b40 !important;
+    color: #ffffff !important;
 }
 .wemu-table-card {
     border-radius: 12px;

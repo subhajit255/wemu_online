@@ -25,7 +25,7 @@
         type="text/css" />
     <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/custom.css') }}?v={{ time() }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/cdn/jquery.dataTables.min.css') }}" />

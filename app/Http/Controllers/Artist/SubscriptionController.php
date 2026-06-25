@@ -180,17 +180,19 @@ class SubscriptionController extends Controller
                             $sub->update(['stripe_status' => 'pending_cancel']);
                         }
 
+                        $baseDate = $stripeSubscription->trial_end ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->trial_end) : now();
+
                         $endDate = null;
                         if ($localSubscription->interval) {
                             $intervalCount = $localSubscription->interval_count > 0 ? $localSubscription->interval_count : 1;
                             if ($localSubscription->interval === 'month') {
-                                $endDate = now()->addMonths($intervalCount);
+                                $endDate = (clone $baseDate)->addMonths($intervalCount);
                             } elseif ($localSubscription->interval === 'year') {
-                                $endDate = now()->addYears($intervalCount);
+                                $endDate = (clone $baseDate)->addYears($intervalCount);
                             } elseif ($localSubscription->interval === 'week') {
-                                $endDate = now()->addWeeks($intervalCount);
+                                $endDate = (clone $baseDate)->addWeeks($intervalCount);
                             } elseif ($localSubscription->interval === 'day') {
-                                $endDate = now()->addDays($intervalCount);
+                                $endDate = (clone $baseDate)->addDays($intervalCount);
                             }
                         } else {
                             $endDate = $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null;
@@ -208,7 +210,7 @@ class SubscriptionController extends Controller
                             'ends_at' => $endDate,
                             'status' => in_array($stripeSubscription->status, ['active', 'trialing']) ? 1 : 0,
                             'transaction_id' => $session->payment_intent ?? $session->invoice ?? $sessionId,
-                            'started_on' => now(),
+                            'started_on' => $baseDate,
                         ]);
 
                         $transactionId = $session->payment_intent ?? $session->invoice ?? $sessionId;

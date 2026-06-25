@@ -4,28 +4,13 @@
 <header class="header">
     <div class="container-fluid">
         <div class="header-wrap">
-            <div class="logo">
-                <a href="{{ route('landing.page') }}">
-                    <img src="{{ asset('assets/frontend') }}/images/logo.png" alt="">
-                </a>
-            </div>
-            <div class="rt-side">
-                <div class="navigation">
-                    <div class="stellarnav">
-                        <ul>
-                            <li><a href="{{ route('landing.page') }}">Home</a></li>
-                            <li><a href="#feature-sec">Features</a></li>
-                            <li><a href="#howItWork-sec">How it works</a></li>
-                            <li><a href="#goals-sec">Achieve Goal</a></li>
-                            <li><a href="#faq-sec">FAQ</a></li>
-                            <li><a target="_blank" href="{{ route('coming.soon') }}">Download App</a></li>
-                        </ul>
+            <div class="logo" style="margin-bottom: 8px;">
+                <a href="{{ route('landing.page') }}" class="d-flex align-items-center" style="text-decoration: none;">
+                    <div class="rounded d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px; background-color: #6366f1;">
+                        <span class="text-white fw-bold fs-4" style="line-height: 1;">W</span>
                     </div>
-                </div>
-                <div class="hd-right-side">
-                    <a href="javascript:void(0);" class="book-btn" data-bs-toggle="modal"
-                        data-bs-target="#exampleModal">Contact</a>
-                </div>
+                    <h3 class="m-0 ms-3 fw-bolder d-flex align-items-center" style="font-size: 24px; color: #6366f1; letter-spacing: -0.5px; line-height: 1;">Wemu</h3>
+                </a>
             </div>
         </div>
     </div>

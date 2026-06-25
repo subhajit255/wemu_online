@@ -148,7 +148,7 @@
                             <label class="chk-wrap">
                                 <input type="checkbox" name="agree_terms" value="1">
                                 <span class="chk-box"></span>
-                                <span class="chk-text">I agree to the <a href="#" style="color:#a5b4fc;">Terms &amp; Conditions</a> of WEMU</span>
+                                <span class="chk-text">I agree to the <a href="{{ route('term.and.conditions') }}" target="_blank" style="color:#a5b4fc;">Terms &amp; Conditions</a> of WEMU</span>
                             </label>
                             <label class="chk-wrap">
                                 <input type="checkbox" name="own_rights" value="1">
@@ -562,7 +562,7 @@
                             <label class="chk-wrap">
                                 <input type="checkbox" name="agree_wemu_terms" value="1">
                                 <span class="chk-box"></span>
-                                <span class="chk-text">I have read and agree to the <a href="#" style="color:#a5b4fc;">WEMU Terms &amp; Conditions</a> and <a href="#" style="color:#a5b4fc;">Privacy Policy</a>.</span>
+                                <span class="chk-text">I have read and agree to the <a href="{{ route('term.and.conditions') }}" target="_blank" style="color:#a5b4fc;">WEMU Terms &amp; Conditions</a> and <a href="{{ route('privacy.policy') }}" target="_blank" style="color:#a5b4fc;">Privacy Policy</a>.</span>
                             </label>
                             <label class="chk-wrap">
                                 <input type="checkbox" name="agree_copyright" value="1">
