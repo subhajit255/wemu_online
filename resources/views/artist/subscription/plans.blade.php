@@ -17,13 +17,6 @@
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-fluid">
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
         <style>
             .plan-card {
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -117,4 +110,16 @@
         </div>
     </div>
 </div>
+@push('script')
+<script>
+    $(document).ready(function() {
+        @if(session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
+        @if(session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
+    });
+</script>
+@endpush
 @endsection

@@ -17,13 +17,6 @@
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-fluid">
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
-
         <div class="card clean-metric-card mb-5 mb-xl-10">
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -88,7 +81,7 @@
                                 </td>
                                 <td class="text-end pe-6">
                                     @if($sub->status == 1 && $sub->stripe_status !== 'pending_cancel')
-                                        <form action="{{ route('artist.subscription.cancel', $sub->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this subscription? Your access will continue until the end of your billing period.');">
+                                        <form action="{{ route('artist.subscription.cancel', $sub->id) }}" method="POST" class="cancel-subscription-form">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-light-danger fw-bold">Cancel</button>
                                         </form>
@@ -97,7 +90,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-10">
+                                <td colspan="7" class="text-center py-10">
                                     <div class="d-flex flex-column align-items-center justify-content-center py-5">
                                         <i class="fa-solid fa-credit-card text-muted mb-4" style="font-size: 3rem; opacity: 0.2;"></i>
                                         <h4 class="fw-bold text-dark mb-1">No Subscriptions Found</h4>
@@ -177,5 +170,38 @@
             outline: 0;
         }
     </style>
+    @endpush
+    @push('script')
+    <script>
+        $(document).ready(function() {
+            @if(session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+            @if(session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
+
+            $(document).on('submit', '.cancel-subscription-form', function(e) {
+                e.preventDefault();
+                var form = this;
+                Swal.fire({
+                    text: "Are you sure you want to cancel this subscription? Your access will continue until the end of your billing period.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    buttonsStyling: false,
+                    confirmButtonText: "Yes, cancel it!",
+                    cancelButtonText: "No, keep it",
+                    customClass: {
+                        confirmButton: "btn fw-bold btn-danger",
+                        cancelButton: "btn fw-bold btn-active-light-primary"
+                    }
+                }).then(function(result) {
+                    if (result.value) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
     @endpush
 @endsection
