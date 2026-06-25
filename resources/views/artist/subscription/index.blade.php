@@ -8,11 +8,21 @@
             </h1>
             <span class="text-muted fs-7 my-1 pt-1">View your subscription history and details</span>
         </div>
+        <div class="d-flex align-items-center gap-2 gap-lg-3">
+            <a href="{{ route('artist.subscription.plans') }}" class="btn btn-sm fw-bold btn-primary">Take New Subscription</a>
+        </div>
     </div>
 </div>
 
 <div id="kt_app_content" class="app-content flex-column-fluid">
     <div id="kt_app_content_container" class="app-container container-fluid">
+
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         <div class="card clean-metric-card mb-5 mb-xl-10">
             <div class="card-body p-0">
@@ -25,7 +35,8 @@
                                 <th class="min-w-100px">Started On</th>
                                 <th class="min-w-100px">Ends At</th>
                                 <th class="min-w-100px">Transaction ID</th>
-                                <th class="min-w-100px text-end pe-6 rounded-end">Status</th>
+                                <th class="min-w-100px">Status</th>
+                                <th class="min-w-100px text-end pe-6 rounded-end">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,8 +71,10 @@
                                 <td>
                                     <span class="text-dark fw-semibold d-block fs-7">{{ $sub->transaction_id ?? 'N/A' }}</span>
                                 </td>
-                                <td class="text-end pe-6">
-                                    @if($sub->status == 1)
+                                <td>
+                                    @if($sub->stripe_status === 'pending_cancel')
+                                        <span class="badge badge-light-warning fw-bold px-4 py-2">Cancels at period end</span>
+                                    @elseif($sub->status == 1)
                                         <span class="badge badge-light-success fw-bold px-4 py-2">Active</span>
                                     @elseif($sub->status == 0)
                                         <span class="badge badge-light-warning fw-bold px-4 py-2">In-active</span>
@@ -71,6 +84,14 @@
                                         <span class="badge badge-light-danger fw-bold px-4 py-2">Cancelled</span>
                                     @else
                                         <span class="badge badge-light-secondary fw-bold px-4 py-2">Unknown</span>
+                                    @endif
+                                </td>
+                                <td class="text-end pe-6">
+                                    @if($sub->status == 1 && $sub->stripe_status !== 'pending_cancel')
+                                        <form action="{{ route('artist.subscription.cancel', $sub->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this subscription? Your access will continue until the end of your billing period.');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-light-danger fw-bold">Cancel</button>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>

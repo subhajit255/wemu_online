@@ -13,10 +13,13 @@ use App\Models\StreamLog;
 use App\Models\SocialLink;
 use App\Models\ArtistVerification;
 use App\Models\ArtistPreference;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BaseController;
+use App\Models\UserSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\StripeTrait;
+use Illuminate\Support\Facades\Route;
 
 class AuthController extends BaseController
 {
@@ -421,7 +424,7 @@ class AuthController extends BaseController
                                 'subscription_type' => $request->plan,
                             ]);
 
-                            $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
+                            $existingSub = DB::table('user_subscriptions')
                                 ->where('user_id', $user->id)
                                 ->where('subscription_id', $subscription->id)
                                 ->where('status', 1)
@@ -483,8 +486,7 @@ class AuthController extends BaseController
                         if ($subscription) {
                             if ($subscription->price > 0 && $subscription->stripe_price_id) {
                                 // Ensure they actually paid
-                                $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
-                                    ->where('user_id', $user->id)
+                                $existingSub = UserSubscription::where('user_id', $user->id)
                                     ->where('status', 1)
                                     ->first();
 
@@ -493,20 +495,31 @@ class AuthController extends BaseController
                                 }
                             } else {
                                 // Free subscription
-                                $existingSub = \Illuminate\Support\Facades\DB::table('user_subscriptions')
-                                    ->where('user_id', $user->id)
+                                $existingSub = UserSubscription::where('user_id', $user->id)
                                     ->where('subscription_id', $subscription->id)
                                     ->first();
 
                                 if (!$existingSub) {
-                                    \Illuminate\Support\Facades\DB::table('user_subscriptions')->insert([
-                                        'uuid' => \Webpatser\Uuid\Uuid::generate(4)->string,
+                                    $endDate = null;
+                                    if ($subscription->interval) {
+                                        $intervalCount = $subscription->interval_count > 0 ? $subscription->interval_count : 1;
+                                        if ($subscription->interval === 'month') {
+                                            $endDate = now()->addMonths($intervalCount);
+                                        } elseif ($subscription->interval === 'year') {
+                                            $endDate = now()->addYears($intervalCount);
+                                        } elseif ($subscription->interval === 'week') {
+                                            $endDate = now()->addWeeks($intervalCount);
+                                        } elseif ($subscription->interval === 'day') {
+                                            $endDate = now()->addDays($intervalCount);
+                                        }
+                                    }
+
+                                    UserSubscription::create([
                                         'user_id' => $user->id,
                                         'subscription_id' => $subscription->id,
                                         'status' => 1,
                                         'started_on' => now(),
-                                        'created_at' => now(),
-                                        'updated_at' => now(),
+                                        'ends_at' => $endDate,
                                     ]);
                                 }
                             }
@@ -555,7 +568,7 @@ class AuthController extends BaseController
                 $user->update(['verification_code' => null]);
                 auth()->login($user);
                 session()->forget('verify_user_id');
-                $url = \Illuminate\Support\Facades\Route::has('artist.dashboard') ? route('artist.dashboard') : url('/');
+                $url = Route::has('artist.dashboard') ? route('artist.dashboard') : url('/');
                 return response(['status' => true, 'message' => 'Verification successful', 'data' => null, 'url' => $url]);
             }
 
@@ -603,7 +616,7 @@ class AuthController extends BaseController
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->whereNotNull('country')
-            ->select('country', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+            ->select('country', DB::raw('count(*) as total'))
             ->groupBy('country')
             ->orderBy('total', 'desc')
             ->take(5)
@@ -617,7 +630,7 @@ class AuthController extends BaseController
 
         $streamsData = StreamLog::whereIn('artist_id', $teamIds)
             ->where('created_at', '>=', now()->subDays(6)->startOfDay())
-            ->select(\Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get()
@@ -632,7 +645,7 @@ class AuthController extends BaseController
         }
 
         $topSongs = StreamLog::whereIn('artist_id', $teamIds)
-            ->select('song_id', \Illuminate\Support\Facades\DB::raw('count(*) as total_plays'))
+            ->select('song_id', DB::raw('count(*) as total_plays'))
             ->groupBy('song_id')
             ->orderBy('total_plays', 'desc')
             ->take(5)

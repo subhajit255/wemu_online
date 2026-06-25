@@ -65,6 +65,10 @@ Route::as('artist.')->group(function () {
         });
         Route::controller(SubscriptionController::class)->group(function () {
             Route::get('subscription', 'index')->name('subscription.index');
+            Route::post('subscription/{id}/cancel', 'cancel')->name('subscription.cancel');
+            Route::get('subscription/plans', 'plans')->name('subscription.plans');
+            Route::post('subscription/checkout', 'checkout')->name('subscription.checkout');
+            Route::get('subscription/checkout/success', 'checkoutSuccess')->name('subscription.checkout.success');
         });
         Route::controller(\App\Http\Controllers\Artist\FaqController::class)->group(function () {
             Route::get('faq', 'index')->name('faq.index');
