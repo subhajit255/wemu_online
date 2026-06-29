@@ -135,8 +135,10 @@
                             <span class="card-label fw-bold fs-4 text-dark">Platform Revenue Overview</span>
                         </h3>
                         <div class="card-toolbar">
-                            <select class="form-select form-select-sm form-select-solid dashboard-select" style="width: 150px;">
-                                <option value="1">Last 6 Months</option>
+                            <select class="form-select form-select-sm form-select-solid dashboard-select" style="width: 150px;" onchange="window.location.href = '?revenue_filter=' + this.value;">
+                                <option value="6_months" {{ $revenueFilter == '6_months' ? 'selected' : '' }}>Last 6 Months</option>
+                                <option value="current_month" {{ $revenueFilter == 'current_month' ? 'selected' : '' }}>Current Month</option>
+                                <option value="current_year" {{ $revenueFilter == 'current_year' ? 'selected' : '' }}>Current Year</option>
                             </select>
                         </div>
                     </div>
@@ -146,26 +148,45 @@
                             <svg viewBox="0 0 800 250" style="width:100%; height:100%;">
                                 <defs>
                                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.25" />
-                                        <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.0" />
+                                        <stop offset="0%" stop-color="var(--bs-primary, #4f46e5)" stop-opacity="0.25" />
+                                        <stop offset="100%" stop-color="var(--bs-primary, #4f46e5)" stop-opacity="0.0" />
                                     </linearGradient>
                                 </defs>
-                                <!-- Grid lines -->
-                                <line x1="0" y1="50" x2="800" y2="50" stroke="#f3f4f6" stroke-width="1" class="chart-grid-line" />
-                                <line x1="0" y1="100" x2="800" y2="100" stroke="#f3f4f6" stroke-width="1" class="chart-grid-line" />
-                                <line x1="0" y1="150" x2="800" y2="150" stroke="#f3f4f6" stroke-width="1" class="chart-grid-line" />
-                                <line x1="0" y1="200" x2="800" y2="200" stroke="#f3f4f6" stroke-width="1" class="chart-grid-line" />
+                                
+                                <!-- Y-Axis Grid Lines & Labels -->
+                                @php
+                                    $ySteps = [
+                                        ['y' => 200, 'val' => 0],
+                                        ['y' => 155, 'val' => $chartMaxRevenue * 0.25],
+                                        ['y' => 110, 'val' => $chartMaxRevenue * 0.5],
+                                        ['y' => 65,  'val' => $chartMaxRevenue * 0.75],
+                                        ['y' => 20,  'val' => $chartMaxRevenue]
+                                    ];
+                                @endphp
+                                @foreach($ySteps as $step)
+                                    <text x="0" y="{{ $step['y'] + 4 }}" fill="var(--bs-gray-500, #9ca3af)" font-size="11">{{ $step['val'] < 1000 ? round($step['val']) : round($step['val']/1000, 1) . 'k' }}</text>
+                                    <line x1="30" y1="{{ $step['y'] }}" x2="800" y2="{{ $step['y'] }}" stroke="var(--bs-border-color, #f3f4f6)" stroke-width="1" stroke-dasharray="4 4" />
+                                @endforeach
 
                                 <!-- Filled Area under curve -->
                                 <path d="{{ $svgFillPath }}" fill="url(#chartGradient)" />
 
-                                <!-- Dynamic Line -->
-                                <path d="{{ $svgPath }}" fill="none" stroke="#4f46e5" stroke-width="3" />
+                                <!-- Dynamic Smooth Line -->
+                                <path d="{{ $svgPath }}" fill="none" stroke="var(--bs-primary, #4f46e5)" stroke-width="3" />
 
-                                <!-- Points and Labels -->
+                                <!-- Data Badges and X-Axis Labels -->
                                 @foreach($chartPoints as $index => $point)
-                                    <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="4.5" fill="#ffffff" stroke="#4f46e5" stroke-width="2.5" />
-                                    <text x="{{ $point['x'] }}" y="235" fill="#9ca3af" font-size="11" font-weight="500" text-anchor="{{ $index == 0 ? 'start' : ($index == count($chartPoints) - 1 ? 'end' : 'middle') }}">
+                                    <!-- Marker Badge -->
+                                    <g class="chart-point" data-bs-toggle="tooltip" data-bs-placement="top" title="Exact Revenue: ${{ number_format($point['revenue'], 2) }}" style="cursor: pointer;">
+                                        <rect x="{{ $point['x'] - 14 }}" y="{{ $point['y'] - 9 }}" width="28" height="18" rx="4" fill="var(--bs-primary, #4f46e5)" />
+                                        <text x="{{ $point['x'] }}" y="{{ $point['y'] + 4 }}" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">
+                                            {{ $point['revenue'] < 1000 ? round($point['revenue']) : round($point['revenue']/1000, 1) . 'k' }}
+                                        </text>
+                                        <title>Exact Revenue: ${{ number_format($point['revenue'], 2) }}</title>
+                                    </g>
+                                    
+                                    <!-- X-Axis Label -->
+                                    <text x="{{ $point['x'] }}" y="235" fill="var(--bs-gray-500, #9ca3af)" font-size="11" font-weight="500" text-anchor="{{ $index == 0 ? 'start' : ($index == count($chartPoints) - 1 ? 'end' : 'middle') }}">
                                         {{ $point['label'] }}
                                     </text>
                                 @endforeach

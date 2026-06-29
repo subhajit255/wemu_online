@@ -70,20 +70,57 @@ class DashboardController extends BaseController
             ];
         }
 
-        // Platform Revenue Overview (Last 6 Months)
+        $revenueFilter = request()->query('revenue_filter', '6_months');
         $revenueOverview = collect();
-        for ($i = 5; $i >= 0; $i--) {
-            $monthStart = now()->subMonths($i)->startOfMonth();
-            $monthEnd = now()->subMonths($i)->endOfMonth();
-            
-            $monthRevenue = Transaction::where('payment_status', 2)
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
-                ->sum('amount');
-                
+
+        if ($revenueFilter === 'current_month') {
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
             $revenueOverview->push([
-                'month' => $monthStart->format('M'),
-                'revenue' => $monthRevenue ?: 0
+                'label' => 'W1',
+                'revenue' => Transaction::where('payment_status', 2)->whereBetween('created_at', [$start->copy(), $start->copy()->addDays(6)])->sum('amount')
             ]);
+            $revenueOverview->push([
+                'label' => 'W2',
+                'revenue' => Transaction::where('payment_status', 2)->whereBetween('created_at', [$start->copy()->addDays(7), $start->copy()->addDays(13)])->sum('amount')
+            ]);
+            $revenueOverview->push([
+                'label' => 'W3',
+                'revenue' => Transaction::where('payment_status', 2)->whereBetween('created_at', [$start->copy()->addDays(14), $start->copy()->addDays(20)])->sum('amount')
+            ]);
+            $revenueOverview->push([
+                'label' => 'W4',
+                'revenue' => Transaction::where('payment_status', 2)->whereBetween('created_at', [$start->copy()->addDays(21), $end])->sum('amount')
+            ]);
+        } elseif ($revenueFilter === 'current_year') {
+            for ($i = 1; $i <= 12; $i++) {
+                $monthStart = now()->month($i)->startOfMonth();
+                $monthEnd = now()->month($i)->endOfMonth();
+                
+                $monthRevenue = Transaction::where('payment_status', 2)
+                    ->whereBetween('created_at', [$monthStart, $monthEnd])
+                    ->sum('amount');
+                    
+                $revenueOverview->push([
+                    'label' => $monthStart->format('M'),
+                    'revenue' => $monthRevenue ?: 0
+                ]);
+            }
+        } else {
+            // Default: Last 6 Months
+            for ($i = 5; $i >= 0; $i--) {
+                $monthStart = now()->subMonths($i)->startOfMonth();
+                $monthEnd = now()->subMonths($i)->endOfMonth();
+                
+                $monthRevenue = Transaction::where('payment_status', 2)
+                    ->whereBetween('created_at', [$monthStart, $monthEnd])
+                    ->sum('amount');
+                    
+                $revenueOverview->push([
+                    'label' => $monthStart->format('M'),
+                    'revenue' => $monthRevenue ?: 0
+                ]);
+            }
         }
         
         $chartMaxRevenue = $revenueOverview->max('revenue');
@@ -93,15 +130,18 @@ class DashboardController extends BaseController
             $chartMaxRevenue = $chartMaxRevenue * 1.2; // 20% padding at top
         }
         
+        $pointCount = count($revenueOverview);
+        $segmentWidth = $pointCount > 1 ? (740 / ($pointCount - 1)) : 740;
+        
         $chartPoints = [];
         foreach ($revenueOverview as $index => $data) {
-            $x = $index * 160; // 800 width / 5 segments = 160
+            $x = 40 + ($index * $segmentWidth);
             // Available height for chart is 180 (from Y=20 to Y=200)
             $y = 200 - (($data['revenue'] / $chartMaxRevenue) * 180);
             $chartPoints[] = [
                 'x' => $x,
                 'y' => $y,
-                'label' => $data['month'],
+                'label' => $data['label'],
                 'revenue' => $data['revenue']
             ];
         }
@@ -109,13 +149,16 @@ class DashboardController extends BaseController
         $svgPath = "M " . $chartPoints[0]['x'] . " " . $chartPoints[0]['y'];
         foreach ($chartPoints as $index => $point) {
             if ($index > 0) {
-                // To make a curve, we can use a basic Cubic Bezier approximation if we want,
-                // but standard line (L) is safest for arbitrary dynamic data without crossing paths.
-                // We will use straight lines for accurate data points representation.
-                $svgPath .= " L " . $point['x'] . " " . $point['y'];
+                $prev = $chartPoints[$index - 1];
+                $dx = $point['x'] - $prev['x'];
+                $cp1x = $prev['x'] + $dx * 0.5;
+                $cp1y = $prev['y'];
+                $cp2x = $point['x'] - $dx * 0.5;
+                $cp2y = $point['y'];
+                $svgPath .= " C " . $cp1x . " " . $cp1y . ", " . $cp2x . " " . $cp2y . ", " . $point['x'] . " " . $point['y'];
             }
         }
-        $svgFillPath = $svgPath . " L 800 200 L 0 200 Z";
+        $svgFillPath = $svgPath . " L 800 200 L 40 200 Z";
 
 
         // Global User Distribution (from AudienceLogs)
@@ -203,8 +246,10 @@ class DashboardController extends BaseController
             'chartPoints',
             'svgPath',
             'svgFillPath',
+            'chartMaxRevenue',
             'globalDistribution',
-            'activeHubs'
+            'activeHubs',
+            'revenueFilter'
         ));
     }
 }
