@@ -325,7 +325,7 @@
     function updateClock() {
         var now = new Date();
         var options = {
-            timeZone: 'Australia/Sydney',
+            timeZone: '{{ config('app.timezone') }}',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
@@ -335,7 +335,7 @@
         if (timeElem) timeElem.innerText = timeString;
 
         var dateOptions = {
-            timeZone: 'Australia/Sydney',
+            timeZone: '{{ config('app.timezone') }}',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
