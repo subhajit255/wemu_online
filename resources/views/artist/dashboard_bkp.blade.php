@@ -137,73 +137,43 @@
             </div>
         </div>
 
-        <!-- Row 2: Custom Layout as requested -->
+        <!-- Row 2: Stream Overview & Top Songs -->
         <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
-            <div class="col-md-4">
-                <div class="card clean-metric-card mb-5">
-                    <div class="card-body p-6">
-                        <span class="fs-6 fw-bold text-muted text-uppercase">monthly listeners {{ now()->format('F Y') }}</span>
-                        <div class="mt-4 mb-2">
-                            <span class="fs-1 fw-bold text-dark" style="font-size: 2.5rem !important;">{{ $metrics['listeners']['total'] }}</span>
-                        </div>
-                        <span class="{{ $metrics['listeners']['is_positive'] ? 'text-success' : 'text-danger' }} fw-bold">
-                            @if($metrics['listeners']['is_positive']) &#x2197; @else &#x2198; @endif
-                            {{ $metrics['listeners']['trend'] }}%
-                        </span>
-                    </div>
-                </div>
-                <div class="card clean-metric-card">
-                    <div class="card-body p-6">
-                        <span class="fs-6 fw-bold text-muted text-uppercase">listening percentage</span>
-                        <div class="d-flex justify-content-between align-items-end mt-4">
-                            <div class="text-success fw-bold">&#x2197; +17% <br><span class="text-muted fs-8 fw-bold text-uppercase">THIS WEEK</span></div>
-                            <div class="text-end">
-                                <span class="fs-1 fw-bold text-dark">{{ $listeningPercentage }}%</span> 
-                                <span class="text-muted fs-6">100%</span>
-                            </div>
-                        </div>
-                        <div class="progress mt-4" style="height: 12px; border-radius: 6px;">
-                            <div class="progress-bar" role="progressbar" style="width: {{ $listeningPercentage }}%; background-color: #4a90e2; border-radius: 6px;" aria-valuenow="{{ $listeningPercentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-8">
+            <!-- Stream Overview -->
+            <div class="col-lg-8">
                 <div class="card clean-metric-card h-100">
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-5 text-dark">weekly artist follows</span>
+                            <span class="card-label fw-bold fs-4 text-dark">Stream Overview</span>
                         </h3>
+                        <div class="card-toolbar">
+                            <select id="stream_overview_filter" class="form-select form-select-sm form-select-solid dashboard-select" style="width: 130px;">
+                                <option value="last_7_days">Last 7 Days</option>
+                                <option value="this_month">This Month</option>
+                                <option value="this_year">This Year</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="card-body p-6 pt-0">
-                        <div id="artist_follows_chart" style="width: 100%; height: 300px;"></div>
+                    <div class="card-body p-6">
+                        <div class="chart-placeholder position-relative">
+                            <div id="stream_overview_chart" style="width: 100%; height: 250px;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
-            <div class="col-md-8">
+            <!-- Top Songs -->
+            <div class="col-lg-4">
                 <div class="card clean-metric-card h-100">
                     <div class="card-header border-0 pt-5">
                         <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-5 text-dark">weekly profile visitors</span>
+                            <span class="card-label fw-bold fs-4 text-dark">Top Songs</span>
                         </h3>
+                        <div class="card-toolbar">
+                            <a href="{{ route('artist.songs.index') }}" class="text-muted fs-7 text-hover-primary">See all</a>
+                        </div>
                     </div>
-                    <div class="card-body p-6 pt-0">
-                        <div id="weekly_profile_visitors_chart" style="width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card clean-metric-card h-100">
-                    <div class="card-header border-0 pt-5">
-                        <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold fs-5 text-dark">most popular {{ now()->format('F Y') }}</span>
-                        </h3>
-                    </div>
-                    <div class="card-body p-6 pt-4">
+                    <div class="card-body p-6 pt-3">
                         @forelse($topSongs as $index => $log)
                         @if($log->song)
                         <div class="song-list-item">
@@ -214,7 +184,9 @@
                         </div>
                         @endif
                         @empty
-                        <div class="text-center text-muted py-5">No songs played yet.</div>
+                        <div class="text-center text-muted py-5">
+                            No songs played yet.
+                        </div>
                         @endforelse
                     </div>
                 </div>
@@ -294,108 +266,66 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         try {
-            // Artist Follows Chart (Line Chart with two lines for This Year / Last Year comparison)
-            var followDates = JSON.parse('{!! addslashes(json_encode(array_values($followDates ?? []))) !!}');
-            var followsThisYear = JSON.parse('{!! addslashes(json_encode(array_values($followsThisYear ?? []))) !!}');
-            var followsLastYear = JSON.parse('{!! addslashes(json_encode(array_values($followsLastYear ?? []))) !!}');
-            
-            if (followDates.length > 0 && typeof ApexCharts !== 'undefined') {
-                var followsOptions = {
-                    series: [{
-                        name: 'This Year',
-                        data: followsThisYear
-                    }, {
-                        name: 'Last Year',
-                        data: followsLastYear
-                    }],
-                    chart: {
-                        type: 'line',
-                        height: 300,
-                        toolbar: { show: false },
-                        zoom: { enabled: false }
-                    },
-                    colors: ['#4a90e2', '#e56a54'],
-                    stroke: {
-                        curve: 'straight',
-                        width: 2
-                    },
-                    markers: {
-                        size: 4
-                    },
-                    xaxis: {
-                        categories: followDates,
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
-                        labels: {
-                            style: { colors: '#9ca3af' }
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            formatter: function(val) {
-                                if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-                                if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-                                return val;
-                            },
-                            style: { colors: '#9ca3af' }
-                        }
-                    },
-                    grid: {
-                        borderColor: '#f3f4f6',
-                        strokeDashArray: 4,
-                    },
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    theme: {
-                        mode: (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'dark' : 'light'
-                    }
-                };
-                var followsChart = new ApexCharts(document.querySelector("#artist_follows_chart"), followsOptions);
-                followsChart.render();
-            }
+            // Stream Overview Chart
+            var streamDates = JSON.parse('{!! addslashes(json_encode(array_values($chartDates ?? []))) !!}');
+            var streamCounts = JSON.parse('{!! addslashes(json_encode(array_values($chartStreams ?? []))) !!}');
 
-            // Weekly Profile Visitors Chart (Bar Chart)
-            var visitorCounts = JSON.parse('{!! addslashes(json_encode(array_values($visitorCounts ?? []))) !!}');
-            
-            if (visitorCounts.length > 0 && typeof ApexCharts !== 'undefined') {
-                var visitorsOptions = {
+            if (streamDates.length > 0 && typeof ApexCharts !== 'undefined') {
+                var streamOptions = {
                     series: [{
-                        name: 'Visitors',
-                        data: visitorCounts
+                        name: 'Streams',
+                        data: streamCounts
                     }],
                     chart: {
-                        type: 'bar',
-                        height: 300,
-                        toolbar: { show: false }
+                        type: 'area',
+                        height: 250,
+                        toolbar: {
+                            show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        },
+                        background: 'transparent'
                     },
-                    colors: ['#4a90e2'],
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 2,
-                            columnWidth: '40%',
+                    colors: ['#4f46e5'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.4,
+                            opacityTo: 0.05,
+                            stops: [0, 90, 100]
                         }
                     },
                     dataLabels: {
                         enabled: false
                     },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 3
+                    },
                     xaxis: {
-                        categories: followDates, // re-using followDates since it's the same time frame
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
+                        categories: streamDates,
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        },
                         labels: {
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     yaxis: {
                         labels: {
                             formatter: function(val) {
-                                if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
-                                if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
-                                return val;
+                                return val ? val.toFixed(0) : 0;
                             },
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     grid: {
@@ -406,8 +336,30 @@
                         mode: (document.documentElement.getAttribute('data-bs-theme') === 'dark') ? 'dark' : 'light'
                     }
                 };
-                var visitorsChart = new ApexCharts(document.querySelector("#weekly_profile_visitors_chart"), visitorsOptions);
-                visitorsChart.render();
+                var streamChart = new ApexCharts(document.querySelector("#stream_overview_chart"), streamOptions);
+                streamChart.render();
+
+                document.getElementById('stream_overview_filter').addEventListener('change', function(e) {
+                    var filter = e.target.value;
+                    fetch("{{ route('artist.analytics.streams') }}?filter=" + filter)
+                        .then(response => response.json())
+                        .then(res => {
+                            if (res.status && res.data && res.data.chart) {
+                                streamChart.updateSeries([{
+                                    name: 'Streams',
+                                    data: res.data.chart.data
+                                }]);
+                                streamChart.updateOptions({
+                                    xaxis: {
+                                        categories: res.data.chart.labels
+                                    }
+                                });
+                            }
+                        })
+                        .catch(err => console.error("Error fetching stream data:", err));
+                });
+            } else {
+                document.querySelector("#stream_overview_chart").innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100">No stream data available</div>';
             }
 
             // Audience Location Chart

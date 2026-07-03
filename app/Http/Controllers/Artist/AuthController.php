@@ -700,7 +700,42 @@ class AuthController extends BaseController
             'countries' => $calcMetric(new AudienceLog, $teamIds, true),
         ];
 
-        return view('artist.dashboard', compact('recentReleases', 'audienceLocations', 'totalAudience', 'chartDates', 'chartStreams', 'topSongs', 'metrics'));
+        // New Metrics
+        $followsQuery = ArtistFollower::whereIn('artist_id', $teamIds)
+            ->where('created_at', '>=', now()->subWeeks(12)->subYear()->startOfWeek())
+            ->get();
+            
+        $followsThisYear = [];
+        $followsLastYear = [];
+        $followDates = [];
+        $visitorCounts = [];
+
+        $visitorQuery = StreamLog::whereIn('artist_id', $teamIds)
+            ->where('created_at', '>=', now()->subWeeks(12)->startOfWeek())
+            ->get();
+
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subWeeks($i);
+            $followDates[] = $date->format('M d');
+            
+            $startOfWeek = $date->copy()->startOfWeek();
+            $endOfWeek = $date->copy()->endOfWeek();
+            
+            $followsThisYear[] = $followsQuery->whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
+            
+            $startOfWeekLY = $startOfWeek->copy()->subYear();
+            $endOfWeekLY = $endOfWeek->copy()->subYear();
+            
+            $followsLastYear[] = $followsQuery->whereBetween('created_at', [$startOfWeekLY, $endOfWeekLY])->count();
+            $visitorCounts[] = $visitorQuery->whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
+        }
+
+        $totalStreamsAllTime = StreamLog::whereIn('artist_id', $teamIds)->count();
+        $thisWeekStreamsCount = StreamLog::whereIn('artist_id', $teamIds)->where('created_at', '>=', now()->startOfWeek())->count();
+        $listeningPercentage = $totalStreamsAllTime > 0 ? round(($thisWeekStreamsCount / $totalStreamsAllTime) * 100) : 0;
+
+
+        return view('artist.dashboard', compact('recentReleases', 'audienceLocations', 'totalAudience', 'chartDates', 'chartStreams', 'topSongs', 'metrics', 'followDates', 'followsThisYear', 'followsLastYear', 'visitorCounts', 'listeningPercentage'));
     }
     public function reverifySubmit(Request $request)
     {
