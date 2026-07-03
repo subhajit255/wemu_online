@@ -9,7 +9,48 @@
             id="kt_app_header_menu" data-kt-menu="true">
             <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start"
                 class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
-                <a href="{{ route('admin.dashboard') }}">
+                
+                @if(auth()->check() && auth()->user()->user_type == 3)
+                <style>
+                    /* Custom Artist Top Navbar Styling */
+                    #kt_app_header {
+                        background-color: #1E293B !important; /* Lighter Slate for contrast against the dark sidebar */
+                        border-bottom: 1px solid #334155 !important;
+                    }
+                    /* Navbar text and icons */
+                    #kt_app_header .fw-bold, #kt_app_header .menu-title {
+                        color: #F8FAFC !important;
+                    }
+                    #kt_app_header .text-muted, #kt_app_header i {
+                        color: #CBD5E1 !important;
+                    }
+                    #kt_app_header .btn-icon i {
+                        color: #CBD5E1 !important;
+                    }
+                    #kt_app_header .btn-icon:hover i {
+                        color: #FFFFFF !important;
+                    }
+                    
+                    /* Active Menu Button in Navbar */
+                    #kt_app_header_menu .menu-item.here .menu-link.active,
+                    #kt_app_header_menu .menu-item .menu-link.active,
+                    .menu-here-bg.here .menu-link.active {
+                        background-color: #6366f1 !important; /* Solid Indigo so it pops on dark background */
+                        color: #FFFFFF !important;
+                        border-radius: 6px;
+                    }
+                    #kt_app_header_menu .menu-item.here .menu-link.active .menu-title,
+                    #kt_app_header_menu .menu-item .menu-link.active .menu-title {
+                        color: #FFFFFF !important;
+                    }
+                    #kt_app_header_menu .menu-item:hover .menu-link {
+                        background-color: rgba(99, 102, 241, 0.2) !important;
+                        color: #FFFFFF !important;
+                    }
+                </style>
+                @endif
+
+                <a href="{{ auth()->check() && auth()->user()->user_type == 3 ? route('artist.dashboard') : route('admin.dashboard') }}">
                     <span class="menu-link active">
                         <span class="menu-title">Dashboard</span>
                         <span class="menu-arrow d-lg-none"></span>

@@ -188,7 +188,9 @@ class SongController extends BaseController
         }
         $genres    = Genre::where('is_active', 1)->get();
         $languages = Language::get();
-        $albums    = Album::where('user_id', auth()->id())->latest()->get();
+        $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
+        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+        $albums    = Album::whereIn('user_id', $teamIds)->latest()->get();
 
         return view('artist.songs.form', compact('details', 'genres', 'languages', 'albums'));
     }
