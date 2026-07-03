@@ -163,30 +163,50 @@ class DashboardController extends BaseController
 
         // Global User Distribution (from AudienceLogs)
         $continentMapping = [
-            'United States' => 'North America',
-            'Canada' => 'North America',
-            'United Kingdom' => 'Europe',
-            'Germany' => 'Europe',
-            'Serbia' => 'Europe',
-            'Indonesia' => 'Asia Pacific',
-            'Australia' => 'Asia Pacific',
-            'India' => 'Asia Pacific',
-            'Brazil' => 'Latin America',
+            'United States' => 'North America', 'US' => 'North America',
+            'Canada' => 'North America', 'CA' => 'North America',
+            'United Kingdom' => 'Europe', 'UK' => 'Europe', 'GB' => 'Europe',
+            'Germany' => 'Europe', 'DE' => 'Europe',
+            'France' => 'Europe', 'FR' => 'Europe',
+            'Serbia' => 'Europe', 'RS' => 'Europe',
+            'Indonesia' => 'Asia Pacific', 'ID' => 'Asia Pacific',
+            'Australia' => 'Asia Pacific', 'AU' => 'Asia Pacific',
+            'India' => 'Asia Pacific', 'IN' => 'Asia Pacific',
+            'Brazil' => 'Latin America', 'BR' => 'Latin America',
+        ];
+
+        $countryNameMap = [
+            'US' => 'United States', 'UK' => 'United Kingdom', 'GB' => 'United Kingdom',
+            'CA' => 'Canada', 'AU' => 'Australia', 'IN' => 'India',
+            'FR' => 'France', 'DE' => 'Germany', 'BR' => 'Brazil',
+            'ID' => 'Indonesia', 'RS' => 'Serbia'
         ];
 
         $globalDistribution = [
-            'North America' => ['name' => 'North America', 'count' => 0, 'percentage' => 0, 'growth' => '+6.2%', 'color' => 'primary'],
-            'Europe' => ['name' => 'Europe', 'count' => 0, 'percentage' => 0, 'growth' => '+4.8%', 'color' => 'info'],
-            'Asia Pacific' => ['name' => 'Asia Pacific', 'count' => 0, 'percentage' => 0, 'growth' => '+8.5%', 'color' => 'warning'],
-            'Latin America' => ['name' => 'Latin America', 'count' => 0, 'percentage' => 0, 'growth' => '+5.1%', 'color' => 'success'],
-            'Middle East & Africa' => ['name' => 'Middle East & Africa', 'count' => 0, 'percentage' => 0, 'growth' => '+3.2%', 'color' => 'danger'],
+            'North America' => ['name' => 'North America', 'count' => 0, 'prev_count' => 0, 'percentage' => 0, 'growth' => '+0.0%', 'color' => 'primary'],
+            'Europe' => ['name' => 'Europe', 'count' => 0, 'prev_count' => 0, 'percentage' => 0, 'growth' => '+0.0%', 'color' => 'info'],
+            'Asia Pacific' => ['name' => 'Asia Pacific', 'count' => 0, 'prev_count' => 0, 'percentage' => 0, 'growth' => '+0.0%', 'color' => 'warning'],
+            'Latin America' => ['name' => 'Latin America', 'count' => 0, 'prev_count' => 0, 'percentage' => 0, 'growth' => '+0.0%', 'color' => 'success'],
+            'Middle East & Africa' => ['name' => 'Middle East & Africa', 'count' => 0, 'prev_count' => 0, 'percentage' => 0, 'growth' => '+0.0%', 'color' => 'danger'],
         ];
 
+        $currentMonthStart = now()->startOfMonth();
+        $prevMonthStart = now()->subMonth()->startOfMonth();
+        $prevMonthEnd = now()->subMonth()->endOfMonth();
+
+        // Current overall counts
         $audienceLogs = \App\Models\AudienceLog::select('country', DB::raw('count(*) as user_count'))
             ->whereNotNull('country')
             ->groupBy('country')
             ->get();
             
+        // Previous month counts for growth calculation
+        $prevAudienceLogs = \App\Models\AudienceLog::select('country', DB::raw('count(*) as user_count'))
+            ->whereNotNull('country')
+            ->whereBetween('created_at', [$prevMonthStart, $prevMonthEnd])
+            ->groupBy('country')
+            ->get();
+
         $totalAudience = 0;
         foreach ($audienceLogs as $log) {
             $continent = $continentMapping[$log->country] ?? 'Middle East & Africa';
@@ -195,10 +215,28 @@ class DashboardController extends BaseController
                 $totalAudience += $log->user_count;
             }
         }
+
+        foreach ($prevAudienceLogs as $log) {
+            $continent = $continentMapping[$log->country] ?? 'Middle East & Africa';
+            if (isset($globalDistribution[$continent])) {
+                $globalDistribution[$continent]['prev_count'] += $log->user_count;
+            }
+        }
         
         if ($totalAudience > 0) {
             foreach ($globalDistribution as &$data) {
                 $data['percentage'] = round(($data['count'] / $totalAudience) * 100);
+                
+                // Calculate growth
+                if ($data['prev_count'] > 0) {
+                    $growthVal = (($data['count'] - $data['prev_count']) / $data['prev_count']) * 100;
+                    $sign = $growthVal >= 0 ? '+' : '';
+                    $data['growth'] = $sign . number_format($growthVal, 1) . '%';
+                } else if ($data['count'] > 0) {
+                    $data['growth'] = '+100.0%';
+                } else {
+                    $data['growth'] = '0.0%';
+                }
             }
         } else {
             // Visual fallback when empty
@@ -214,13 +252,26 @@ class DashboardController extends BaseController
             ->whereNotNull('country')
             ->groupBy('country')
             ->orderByDesc('count')
-            ->take(3)
             ->get();
             
-        $activeHubs = [];
+        // Normalize country names and merge duplicates
+        $normalizedHubs = [];
         foreach ($hubs as $hub) {
+            $normalizedName = $countryNameMap[$hub->country] ?? $hub->country;
+            if (!isset($normalizedHubs[$normalizedName])) {
+                $normalizedHubs[$normalizedName] = 0;
+            }
+            $normalizedHubs[$normalizedName] += $hub->count;
+        }
+        
+        // Sort and take top 3
+        arsort($normalizedHubs);
+        $topHubs = array_slice($normalizedHubs, 0, 3, true);
+
+        $activeHubs = [];
+        foreach ($topHubs as $name => $count) {
             $activeHubs[] = [
-                'name' => $hub->country . ' Regional Node',
+                'name' => $name . ' Regional Node',
                 'status' => 'Active'
             ];
         }
