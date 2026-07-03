@@ -158,7 +158,7 @@
                         <div class="d-flex justify-content-between align-items-end mt-4">
                             <div class="text-success fw-bold">&#x2197; +17% <br><span class="text-muted fs-8 fw-bold text-uppercase">THIS WEEK</span></div>
                             <div class="text-end">
-                                <span class="fs-1 fw-bold text-dark">{{ $listeningPercentage }}%</span> 
+                                <span class="fs-1 fw-bold text-dark">{{ $listeningPercentage }}%</span>
                                 <span class="text-muted fs-6">100%</span>
                             </div>
                         </div>
@@ -168,7 +168,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-8">
                 <div class="card clean-metric-card h-100">
                     <div class="card-header border-0 pt-5">
@@ -220,7 +220,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Row 3: Recent Releases & Audience -->
         <div class="row g-5 g-xl-10">
             <!-- Recent Releases -->
@@ -298,7 +297,7 @@
             var followDates = JSON.parse('{!! addslashes(json_encode(array_values($followDates ?? []))) !!}');
             var followsThisYear = JSON.parse('{!! addslashes(json_encode(array_values($followsThisYear ?? []))) !!}');
             var followsLastYear = JSON.parse('{!! addslashes(json_encode(array_values($followsLastYear ?? []))) !!}');
-            
+
             if (followDates.length > 0 && typeof ApexCharts !== 'undefined') {
                 var followsOptions = {
                     series: [{
@@ -311,8 +310,12 @@
                     chart: {
                         type: 'line',
                         height: 300,
-                        toolbar: { show: false },
-                        zoom: { enabled: false }
+                        toolbar: {
+                            show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        }
                     },
                     colors: ['#4a90e2', '#e56a54'],
                     stroke: {
@@ -324,10 +327,16 @@
                     },
                     xaxis: {
                         categories: followDates,
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        },
                         labels: {
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     yaxis: {
@@ -337,7 +346,9 @@
                                 if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
                                 return val;
                             },
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     grid: {
@@ -358,7 +369,7 @@
 
             // Weekly Profile Visitors Chart (Bar Chart)
             var visitorCounts = JSON.parse('{!! addslashes(json_encode(array_values($visitorCounts ?? []))) !!}');
-            
+
             if (visitorCounts.length > 0 && typeof ApexCharts !== 'undefined') {
                 var visitorsOptions = {
                     series: [{
@@ -368,7 +379,9 @@
                     chart: {
                         type: 'bar',
                         height: 300,
-                        toolbar: { show: false }
+                        toolbar: {
+                            show: false
+                        }
                     },
                     colors: ['#4a90e2'],
                     plotOptions: {
@@ -382,10 +395,16 @@
                     },
                     xaxis: {
                         categories: followDates, // re-using followDates since it's the same time frame
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        },
                         labels: {
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     yaxis: {
@@ -395,7 +414,9 @@
                                 if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
                                 return val;
                             },
-                            style: { colors: '#9ca3af' }
+                            style: {
+                                colors: '#9ca3af'
+                            }
                         }
                     },
                     grid: {
