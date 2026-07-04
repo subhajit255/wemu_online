@@ -10,9 +10,8 @@
             <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start"
                 class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
                 
-                @if(auth()->check() && auth()->user()->user_type == 3)
                 <style>
-                    /* Custom Artist Top Navbar Styling */
+                    /* Custom Top Navbar Styling */
                     #kt_app_header {
                         background-color: #1E293B !important; /* Lighter Slate for contrast against the dark sidebar */
                         border-bottom: 1px solid #334155 !important;
@@ -29,6 +28,16 @@
                     }
                     #kt_app_header .btn-icon:hover i {
                         color: #FFFFFF !important;
+                    }
+                    
+                    /* Reset colors inside dropdowns */
+                    #kt_app_header .menu-sub .fw-bold, 
+                    #kt_app_header .menu-sub .menu-title {
+                        color: #181C32 !important;
+                    }
+                    #kt_app_header .menu-sub .text-muted, 
+                    #kt_app_header .menu-sub i {
+                        color: #A1A5B7 !important;
                     }
                     
                     /* Active Menu Button in Navbar */
@@ -48,7 +57,6 @@
                         color: #FFFFFF !important;
                     }
                 </style>
-                @endif
 
                 <a href="{{ auth()->check() && auth()->user()->user_type == 3 ? route('artist.dashboard') : route('admin.dashboard') }}">
                     <span class="menu-link active">

@@ -2,42 +2,41 @@
     $isArtistSidebar = auth()->check() && auth()->user()->user_type == 3;
 @endphp
 
-@if($isArtistSidebar)
 <style>
-    /* Premium Dark Navy Artist Sidebar Styling */
-    .artist-custom-sidebar {
+    /* Premium Dark Navy Sidebar Styling */
+    .custom-dark-sidebar {
         background-color: #0F172A !important; /* Deep Slate / Navy */
         border-right: 1px solid #1E293B !important;
     }
     
-    .artist-custom-sidebar .menu-item .menu-link {
+    .custom-dark-sidebar .menu-item .menu-link {
         color: #94A3B8;
         padding-left: 20px;
         transition: all 0.3s ease;
     }
-    .artist-custom-sidebar .menu-item .menu-link:hover {
+    .custom-dark-sidebar .menu-item .menu-link:hover {
         color: #E2E8F0;
         background-color: rgba(99, 102, 241, 0.05);
     }
-    .artist-custom-sidebar .menu-item .menu-link .menu-icon i {
+    .custom-dark-sidebar .menu-item .menu-link .menu-icon i {
         color: #64748B;
         transition: all 0.3s ease;
     }
-    .artist-custom-sidebar .menu-item .menu-link.active {
+    .custom-dark-sidebar .menu-item .menu-link.active {
         background-color: rgba(99, 102, 241, 0.1) !important; /* Soft Indigo bg */
         border-left: 4px solid #6366f1; /* Wemu Indigo */
     }
-    .artist-custom-sidebar .menu-item .menu-link.active .menu-title,
-    .artist-custom-sidebar .menu-item .menu-link.active .menu-icon i {
+    .custom-dark-sidebar .menu-item .menu-link.active .menu-title,
+    .custom-dark-sidebar .menu-item .menu-link.active .menu-icon i {
         color: #6366f1 !important; /* Wemu Indigo */
         font-weight: 600;
     }
     
     /* Modify default logo text/border for this dark sidebar */
-    .artist-custom-sidebar .app-sidebar-logo {
+    .custom-dark-sidebar .app-sidebar-logo {
         border-bottom: 1px solid #1E293B !important;
     }
-    .artist-custom-sidebar .app-sidebar-logo-default {
+    .custom-dark-sidebar .app-sidebar-logo-default {
         color: #F8FAFC !important; /* White text for logo */
     }
     
@@ -64,9 +63,8 @@
         letter-spacing: -0.3px;
     }
 </style>
-@endif
 
-<div id="kt_app_sidebar" class="app-sidebar flex-column {{ $isArtistSidebar ? 'artist-custom-sidebar' : '' }}" data-kt-drawer="true" data-kt-drawer-name="app-sidebar"
+<div id="kt_app_sidebar" class="app-sidebar flex-column custom-dark-sidebar" data-kt-drawer="true" data-kt-drawer-name="app-sidebar"
     data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px"
     data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
 
@@ -415,7 +413,7 @@
 
     @if(!$isArtistSidebar)
     <!-- Footer Profile -->
-    <div class="app-sidebar-footer d-flex flex-column flex-center w-100" id="kt_app_sidebar_footer" style="padding: 15px; border-top: 1px solid #f3f4f6; background: #ffffff;">
+    <div class="app-sidebar-footer d-flex flex-column flex-center w-100" id="kt_app_sidebar_footer" style="padding: 15px; border-top: 1px solid #1E293B; background: transparent;">
         <div class="d-flex align-items-center w-100" style="padding: 10px; border-radius: 8px;">
             <div class="avatar avatar-md avatar-circle me-3">
                 <img style="border-radius: 50%; width: 45px; height: 45px; object-fit: cover;" class="onerror-image"
@@ -423,7 +421,7 @@
                     src="{{ auth()->user()->image_path }}" alt="Avatar">
             </div>
             <div class="d-flex flex-column flex-grow-1">
-                <span class="fw-bold text-dark fs-6">
+                <span class="fw-bold text-white fs-6">
                     @if (auth()->user()->name)
                     {{ auth()->user()->name }}
                     @else
