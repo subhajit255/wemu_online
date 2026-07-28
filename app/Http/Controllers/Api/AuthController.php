@@ -382,6 +382,49 @@ class AuthController extends BaseController
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+        if ($validator->fails()) {
+            $status = false;
+            $code = 422;
+            $response = [];
+            $message = $validator->errors()->first();
+
+            return $this->responseJson($status, $code, $message, $response);
+        } else {
+            DB::beginTransaction();
+            try {
+                $userDetails = User::where('email', $request->email)->first();
+                if (! $userDetails || empty($userDetails->email)) {
+                    $status = false;
+                    $code = 422;
+                    $response = [];
+                    $message = 'Invalid Email Id !!';
+                } else {
+                    $otp = generateOTP(4);
+                    User::where('id', $userDetails->id)->update([
+                        'verification_code' => $otp,
+                    ]);
+                    DB::commit();
+                    $status = true;
+                    $code = 200;
+                    $response = ['otp' => $otp];
+                    $message = 'OTP Sent Successfully !!';
+                }
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                $status = false;
+                $code = 500;
+                $response = [];
+                $message = config('constants.CATCH_ERROR_MSG');
+            }
+
+            return $this->responseJson($status, $code, $message, $response);
+        }
+    }
+    public function forgotPasswordByPhone(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'mobile_number' => 'required|numeric|digits_between:8,13',
         ]);
         if ($validator->fails()) {
@@ -426,6 +469,58 @@ class AuthController extends BaseController
             }
             return $this->responseJson($status, $code, $message, $response);
         }
+    }
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'new_password' => 'required|min:6|string',
+            'confirm_password' => 'required|same:new_password',
+            'email' => 'required|email',
+        ]);
+        if ($validator->fails()) {
+            $status = false;
+            $code = 422;
+            $response = [];
+            $message = $validator->errors()->first();
+
+            return $this->responseJson($status, $code, $message, $response);
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($request->email) {
+                $condition = ['email' => $request->email];
+                $userFound = User::where($condition)->first();
+            }
+            if ($userFound) {
+                $otpUpdate = User::find($userFound->id)->update(['password' => Hash::make($request->new_password), 'verification_code' => null, 'original_password' => $request->new_password]);
+                if ($otpUpdate) {
+                    DB::Commit();
+                    $status = true;
+                    $code = 200;
+                    $response = [];
+                    $message = 'Password Reset Successfully, Now you can login';
+                } else {
+                    $status = false;
+                    $code = 422;
+                    $response = [];
+                    $message = 'Something went wrong';
+                }
+            } else {
+                $status = false;
+                $code = 500;
+                $response = [];
+                $message = 'User not found';
+            }
+        } catch (\Throwable $th) {
+            DB::rollback();
+            $status = false;
+            $code = 500;
+            $response = [];
+            $message = config('constants.CATCH_ERROR_MSG');
+        }
+
+        return $this->responseJson($status, $code, $message, $response);
     }
     public function changePassword(Request $request)
     {

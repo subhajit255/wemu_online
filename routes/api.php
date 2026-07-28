@@ -30,6 +30,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', 'logout')->name('logout');
     Route::post('/forgot/password', 'forgotPassword')->name('forgot.password');
     Route::post('/change/password', 'changePassword')->name('change.password');
+    Route::post('/reset/password', 'resetPassword')->name('reset.password');
 
     Route::post('/forgot/pin', 'forgotPin')->name('forgot.pin');
     Route::post('/verify/pin', 'verifyPin')->name('verify.pin');
