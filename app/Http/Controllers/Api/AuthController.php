@@ -493,7 +493,7 @@ class AuthController extends BaseController
                 $userFound = User::where($condition)->first();
             }
             if ($userFound) {
-                $otpUpdate = User::find($userFound->id)->update(['password' => Hash::make($request->new_password), 'verification_code' => null, 'original_password' => $request->new_password]);
+                $otpUpdate = User::find($userFound->id)->update(['password' => Hash::make($request->new_password), 'verification_code' => null]);
                 if ($otpUpdate) {
                     DB::Commit();
                     $status = true;
