@@ -485,4 +485,50 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+
+    public function artistRadio($artistId, Request $request)
+    {
+        $validator = Validator::make(
+            ['artist_id' => $artistId],
+            ['artist_id' => 'required|exists:users,id']
+        );
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+        }
+
+        try {
+            // Find the artist's most common genre from their songs
+            $genreId = Song::where('user_id', $artistId)
+                ->where('status', 1)
+                ->select('genre_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+                ->groupBy('genre_id')
+                ->orderByDesc('total')
+                ->first()?->genre_id;
+
+            $perPage = $request->per_page ?? 15;
+            
+            // Build the query: mix of songs from this artist, and songs from the same genre
+            $query = Song::where('status', 1)
+                ->where(function ($q) use ($artistId, $genreId) {
+                    $q->where('user_id', $artistId);
+                    if ($genreId) {
+                        $q->orWhere('genre_id', $genreId);
+                    }
+                })
+                ->inRandomOrder();
+
+            $radioSongs = $query->paginate($perPage);
+
+            return $this->responseJson(
+                true,
+                200,
+                'Artist radio fetched successfully',
+                new PaginateSongCollection($radioSongs)
+            );
+
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
 }

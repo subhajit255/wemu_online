@@ -69,61 +69,6 @@ class User extends Authenticatable
         return $this->hasMany(Album::class);
     }
 
-    public function userIncome(): HasMany
-    {
-        return $this->hasMany(UserIncome::class);
-    }
-    public function userIncomeCurrentMonth(): HasMany
-    {
-        return $this->hasMany(UserIncome::class)->whereMonth('date', now()->month)->whereYear('date', now()->year);
-    }
-    public function userIncomePreviousMonth(): HasMany
-    {
-        return $this->hasMany(UserIncome::class)->whereMonth('date', now()->subMonth()->month)->whereYear('date', now()->subMonth()->year);
-    }
-
-    public function userExpense(): HasMany
-    {
-        return $this->hasMany(UserExpense::class);
-    }
-    public function userExpenseCurrentMonth(): HasMany
-    {
-        return $this->hasMany(UserExpense::class)->whereMonth('date', now()->month)->whereYear('date', now()->year);
-    }
-    public function userExpensePreviousMonth(): HasMany
-    {
-        return $this->hasMany(UserExpense::class)->whereMonth('date', now()->subMonth()->month)->whereYear('date', now()->subMonth()->year);
-    }
-
-    public function userItem(): HasMany
-    {
-        return $this->hasMany(Item::class);
-    }
-    public function userItemCurrentMonth(): HasMany
-    {
-        return $this->hasMany(Item::class)->whereMonth('date', now()->month)->whereYear('date', now()->year);
-    }
-    public function userItemPreviousMonth(): HasMany
-    {
-        return $this->hasMany(Item::class)->whereMonth('date', now()->subMonth()->month)->whereYear('date', now()->subMonth()->year);
-    }
-    public function userItemExpense(): HasMany
-    {
-        return $this->hasMany(Item::class)->where('is_expense', 1);
-    }
-    public function userItemCurrentMonthExpense(): HasMany
-    {
-        return $this->hasMany(Item::class)->whereMonth('date', now()->month)->whereYear('date', now()->year)->where('is_expense', 1);
-    }
-    public function userItemPreviousMonthExpense(): HasMany
-    {
-        return $this->hasMany(Item::class)->whereMonth('date', now()->subMonth()->month)->whereYear('date', now()->subMonth()->year)->where('is_expense', 1);
-    }
-    public function userGoals(): HasMany
-    {
-        return $this->hasMany(UserGoal::class);
-    }
-
     public function profile()
     {
         return $this->hasOne(ArtistProfile::class);
@@ -142,6 +87,11 @@ class User extends Authenticatable
     public function socialLink()
     {
         return $this->hasOne(SocialLink::class);
+    }
+
+    public function followers()
+    {
+        return $this->hasMany(ArtistFollower::class, 'artist_id');
     }
 
     // public function hasActiveSubscription(): bool

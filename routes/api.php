@@ -1,15 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\MasterController;
+use \App\Http\Controllers\Api\AnalyticsController;
+use \App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\HelpAndSupportController;
-use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\SongController;
-use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Route;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +73,8 @@ Route::controller(ArtistController::class)->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/artist/analytics/streams', [\App\Http\Controllers\Api\AnalyticsController::class, 'artistStreamsChart'])->name('artist.analytics.streams');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/artist/analytics/streams', [AnalyticsController::class, 'artistStreamsChart'])->name('artist.analytics.streams');
 
     // Route::controller(UserController::class)->group(function () {
     //     Route::post('/user/list', 'userList')->name('user.list');
@@ -139,6 +144,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');
         Route::post('/playlist/bulk-add-remove-song', 'bulkSongAddRemovePlayList')->name('playlist.bulk-add-remove-song');
         Route::get('/recommend-songs', 'recomendateSongs')->name('recommend.songs');
+        Route::get('/radio/artist/{artistId}', 'artistRadio')->name('radio.artist');
         Route::post('/search', 'searchSongs')->name('search.songs');
         Route::get('/trending-search-items', 'trendingSearches')->name('trending.search.items');
         Route::get('/biggest-hits', 'biggestHits')->name('biggest.hits');
