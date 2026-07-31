@@ -506,7 +506,7 @@ class SongController extends BaseController
                 ->first()?->genre_id;
 
             $perPage = $request->per_page ?? 15;
-            
+
             // Build the query: mix of songs from this artist, and songs from the same genre
             $query = Song::where('status', 1)
                 ->where(function ($q) use ($artistId, $genreId) {
@@ -525,7 +525,6 @@ class SongController extends BaseController
                 'Artist radio fetched successfully',
                 new PaginateSongCollection($radioSongs)
             );
-
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
