@@ -42,7 +42,7 @@ class SubscriptionController extends BaseController
                     'name' => [
                         'required',
                         'string',
-                        Rule::unique('subscriptions', 'name')->ignore($id)->whereNull('deleted_at')
+                        Rule::unique('subscriptions', 'name')->ignore($id)->where('available_for', $request->available_for)->whereNull('deleted_at')
                     ],
                     'available_for' => 'required|numeric|in:1,2',
                     'interval' => 'required|string|in:month,year,week',
@@ -58,7 +58,7 @@ class SubscriptionController extends BaseController
                     'name' => [
                         'required',
                         'string',
-                        Rule::unique('subscriptions', 'name')->whereNull('deleted_at')
+                        Rule::unique('subscriptions', 'name')->where('available_for', $request->available_for)->whereNull('deleted_at')
                     ],
                     'available_for' => 'required|numeric|in:1,2',
                     'interval' => 'required|string|in:month,year,week',
@@ -112,7 +112,7 @@ class SubscriptionController extends BaseController
                 }
 
                 $is_default = $request->has('is_default') ? 1 : 0;
-                
+
                 if ($is_default == 1) {
                     Subscription::query()->update(['is_default' => 0]);
                 }
