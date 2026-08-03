@@ -34,7 +34,7 @@ class SongResource extends JsonResource
             'background_file_path' => $this->background_file_path ?? null,
             'status' => $this->status ?? 0,
             'published_at' => $this->published_at ?? null,
-            'artist' => new ArtistResource($this->whenLoaded('artist')),
+            'artist' => new ArtistResource($this->artist),
             'album' => new AlbumResource($this->whenLoaded('album')),
             'genre' => $this->whenLoaded('genre'),
         ];

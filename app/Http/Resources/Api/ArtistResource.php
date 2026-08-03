@@ -19,7 +19,9 @@ class ArtistResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             'username' => $this->username,
-            'image_path' => $this->image_path, // Uses getImagePathAttribute() from User model
+            'image_path' => $this->profile->image_path,
+            'cover_image_path' => $this->profile->cover_image_path,
+            'bio' => $this->profile->bio ?? null
         ];
     }
 }
