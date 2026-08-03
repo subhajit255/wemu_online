@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\ArtistFollower;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,7 +22,13 @@ class ArtistResource extends JsonResource
             'username' => $this->username,
             'image_path' => $this->profile->image_path,
             'cover_image_path' => $this->profile->cover_image_path,
-            'bio' => $this->profile->bio ?? null
+            'bio' => $this->profile->bio ?? null,
+            'total_followers' => self::totalFollowers($this->id) ?? 0
         ];
+    }
+
+    public static function totalFollowers($artistId): int
+    {
+        return ArtistFollower::where('artist_id', $artistId)->count();
     }
 }
