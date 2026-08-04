@@ -23,12 +23,17 @@ class ArtistResource extends JsonResource
             'image_path' => $this->profile->image_path,
             'cover_image_path' => $this->profile->cover_image_path,
             'bio' => $this->profile->bio ?? null,
-            'total_followers' => self::totalFollowers($this->id) ?? 0
+            'total_followers' => self::totalFollowers($this->id) ?? 0,
+            'is_followed' => self::isFollowedArtist($this->id) ?? false
         ];
     }
 
     public static function totalFollowers($artistId): int
     {
         return ArtistFollower::where('artist_id', $artistId)->count();
+    }
+    public static function isFollowedArtist($artistId): bool
+    {
+        return ArtistFollower::where(['user_id' => auth()->user()->id(), 'artist_id' => $artistId])->exists();
     }
 }
