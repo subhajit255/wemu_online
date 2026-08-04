@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\PlayHistory;
-use App\Models\User;
-use App\Models\Song;
-use App\Models\PlayList;
-use App\Models\ArtistFollower;
-use App\Models\UserPreference;
-use App\Models\StreamLog;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use \Illuminate\Support\Facades\Cache;
+use \Illuminate\Support\Facades\Http;
 use App\Http\Controllers\BaseController;
-use App\Http\Resources\Api\SongResource;
 use App\Http\Resources\Api\ArtistResource;
 use App\Http\Resources\Api\PlayListResource;
+use App\Http\Resources\Api\SongResource;
+use App\Models\ArtistFollower;
+use App\Models\PlayHistory;
+use App\Models\PlayList;
+use App\Models\Song;
+use App\Models\StreamLog;
+use App\Models\User;
+use App\Models\UserPreference;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends BaseController
 {
@@ -137,13 +139,20 @@ class DashboardController extends BaseController
 
             if ($ip && filter_var($ip, FILTER_VALIDATE_IP) && !in_array($ip, ['127.0.0.1', '::1'])) {
                 try {
-                    $response = \Illuminate\Support\Facades\Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
-                    if ($response->successful()) {
-                        $data = $response->json();
-                        if (isset($data['status']) && $data['status'] === 'success' && !empty($data['country'])) {
-                            $country = $data['country'];
+                    $country = Cache::remember("user_country_{$ip}", 86400, function () use ($ip) {
+                        try {
+                            $response = Http::timeout(2)->get("http://ip-api.com/json/{$ip}");
+                            if ($response->successful()) {
+                                $data = $response->json();
+                                if (isset($data['status']) && $data['status'] === 'success' && !empty($data['country'])) {
+                                    return $data['country'];
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            // Proceed to default
                         }
-                    }
+                        return 'California';
+                    });
                 } catch (\Exception $e) {
                     // Default to California
                 }
