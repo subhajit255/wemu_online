@@ -415,7 +415,8 @@ class SongController extends BaseController
 
                 $seed = $request->seed;
                 if ($seed) {
-                    $fallbackQuery->inRandomOrder($seed);
+                    $seedInt = is_numeric($seed) ? (int)$seed : crc32($seed);
+                    $fallbackQuery->inRandomOrder($seedInt);
                 } else {
                     $fallbackQuery->inRandomOrder();
                 }
@@ -478,7 +479,8 @@ class SongController extends BaseController
 
             $seed = $request->seed;
             if ($seed) {
-                $query->inRandomOrder($seed);
+                $seedInt = is_numeric($seed) ? (int)$seed : crc32($seed);
+                $query->inRandomOrder($seedInt);
             } else {
                 $query->inRandomOrder();
             }
@@ -523,7 +525,8 @@ class SongController extends BaseController
 
             $seed = $request->seed;
             if ($seed) {
-                $query->inRandomOrder($seed);
+                $seedInt = is_numeric($seed) ? (int)$seed : crc32($seed);
+                $query->inRandomOrder($seedInt);
             } else {
                 $query->inRandomOrder();
             }
