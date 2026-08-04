@@ -110,7 +110,7 @@ class SubscriptionController extends BaseController
                 'payment_method_id' => $request->payment_method_id,
                 'amount' => $subscription->price, // Storing amount from local subscription plan
                 'currency' => config('services.stripe.currency', 'usd'),
-                'payment_status' => $isActive ? 'success' : 'pending',
+                'payment_status' => $isActive ? 'completed' : 'pending',
                 'description' => 'Subscription purchase: ' . $subscription->title,
             ]);
 

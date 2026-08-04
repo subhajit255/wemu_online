@@ -158,4 +158,4 @@ Route::middleware('auth:api')->group(function () {
     });
 });
 
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('api.stripe.webhook');
