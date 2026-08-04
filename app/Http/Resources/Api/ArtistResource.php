@@ -34,6 +34,6 @@ class ArtistResource extends JsonResource
     }
     public static function isFollowedArtist($artistId): bool
     {
-        return ArtistFollower::where(['user_id' => auth()->user()->id(), 'artist_id' => $artistId])->exists();
+        return ArtistFollower::where(['user_id' => auth()->id(), 'artist_id' => $artistId])->exists();
     }
 }
