@@ -413,7 +413,12 @@ class SongController extends BaseController
                     $fallbackQuery->whereIn('user_id', $artistIds);
                 }
 
-                $fallbackQuery->inRandomOrder();
+                $seed = $request->seed;
+                if ($seed) {
+                    $fallbackQuery->inRandomOrder($seed);
+                } else {
+                    $fallbackQuery->inRandomOrder();
+                }
 
                 if ($request->has('dashboard')) {
                     $biggestHitsSongs = $fallbackQuery->take(3)->get();
@@ -464,20 +469,20 @@ class SongController extends BaseController
 
                 if (!empty($artistIds)) {
                     $query->whereIn('user_id', $artistIds);
-                } else {
-                    // Return no results if the user has no preferences or likes
-                    $query->whereRaw('1 = 0');
                 }
-            } else {
-                // Return no results if unauthenticated
-                $query->whereRaw('1 = 0');
             }
 
             if (!empty($excludedSongIds)) {
                 $query->whereNotIn('id', $excludedSongIds);
             }
 
-            $recommendedSongs = $query->inRandomOrder()->paginate($request->per_page ?? 15);
+            $seed = $request->seed;
+            if ($seed) {
+                $query->inRandomOrder($seed);
+            } else {
+                $query->inRandomOrder();
+            }
+            $recommendedSongs = $query->paginate($request->per_page ?? 15);
 
             return $this->responseJson(true, 200, 'Recommended songs fetched successfully', new PaginateSongCollection($recommendedSongs));
         } catch (\Exception $e) {
@@ -514,8 +519,14 @@ class SongController extends BaseController
                     if ($genreId) {
                         $q->orWhere('genre_id', $genreId);
                     }
-                })
-                ->inRandomOrder();
+                });
+
+            $seed = $request->seed;
+            if ($seed) {
+                $query->inRandomOrder($seed);
+            } else {
+                $query->inRandomOrder();
+            }
 
             $radioSongs = $query->paginate($perPage);
 
