@@ -114,7 +114,6 @@
 
                                     {{-- Row Number --}}
                                     <td class="ps-7 text-muted fw-bold fs-8">{{ str_pad($rowNum, 2, '0', STR_PAD_LEFT) }}</td>
-
                                     {{-- Profile --}}
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
