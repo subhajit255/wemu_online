@@ -124,7 +124,7 @@
                                                 <span class="wemu-avatar-dot {{ $detail->is_active == 1 ? 'wemu-dot-online' : 'wemu-dot-offline' }}"></span>
                                             </div>
                                             <div>
-                                                <a href="{{ route('admin.user.view', $detail->uuid) }}"
+                                                <a href="{{ $detail->user_type != 4 ? route('admin.user.view', $detail->uuid) : 'javascript:void(0)' }}"
                                                     class="fw-bold text-gray-900 text-hover-primary fs-6 d-block">
                                                     {{ $detail->name ?? 'Unnamed User' }}
                                                 </a>
