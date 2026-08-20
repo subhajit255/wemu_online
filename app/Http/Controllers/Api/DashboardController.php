@@ -243,7 +243,6 @@ class DashboardController extends BaseController
                 $section['is_seeall'] = isset($section['items']) && count($section['items']) >= 5;
             }
             unset($section); // break the reference with the last element
-
             $data = [
                 'sections' => $sections
             ];
