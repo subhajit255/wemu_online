@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use \Illuminate\Support\Facades\Cache;
 use \Illuminate\Support\Facades\Http;
+use \Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\ArtistResource;
 use App\Http\Resources\Api\PlayListResource;
@@ -236,6 +237,12 @@ class DashboardController extends BaseController
             $sections = array_values(array_filter($sections, function ($section) {
                 return isset($section['items']) && count($section['items']) > 0;
             }));
+
+            foreach ($sections as &$section) {
+                $section['type_id'] = Str::slug($section['title']);
+                $section['is_seeall'] = isset($section['items']) && count($section['items']) >= 5;
+            }
+            unset($section); // break the reference with the last element
 
             $data = [
                 'sections' => $sections
