@@ -74,6 +74,7 @@ Route::controller(ArtistController::class)->group(function () {
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+    Route::get('/dashboard/section-details', [DashboardController::class, 'sectionDetails'])->name('user.dashboard.sectionDetails');
     Route::get('/artist/analytics/streams', [AnalyticsController::class, 'artistStreamsChart'])->name('artist.analytics.streams');
 
     // Route::controller(UserController::class)->group(function () {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use \Illuminate\Support\Facades\Cache;
 use \Illuminate\Support\Facades\Http;
+use \Illuminate\Support\Facades\Validator;
 use \Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\ArtistResource;
@@ -248,6 +249,157 @@ class DashboardController extends BaseController
             ];
 
             return $this->responseJson(true, 200, 'Dashboard data fetched successfully', $data);
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
+
+    public function sectionDetails(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'type_id' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+            }
+
+            $typeId = $request->type_id;
+            $userId = auth()->id() ?? 0;
+            $perPage = $request->per_page ?? 15;
+
+            $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+            $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+            $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
+
+            $ip = $request->header('x-forwarded-for') ?? $request->header('ip') ?? $request->ip();
+            if (is_string($ip) && str_contains($ip, ',')) {
+                $ip = explode(',', $ip)[0];
+            }
+            $ip = trim($ip ?? '');
+            $country = 'California';
+            if ($ip && filter_var($ip, FILTER_VALIDATE_IP) && !in_array($ip, ['127.0.0.1', '::1'])) {
+                try {
+                    $country = Cache::remember("user_country_{$ip}", 86400, function () use ($ip) {
+                        try {
+                            $response = Http::timeout(2)->get("http://ip-api.com/json/{$ip}");
+                            if ($response->successful()) {
+                                $data = $response->json();
+                                if (isset($data['status']) && $data['status'] === 'success' && !empty($data['country'])) {
+                                    return $data['country'];
+                                }
+                            }
+                        } catch (\Exception $e) {
+                        }
+                        return 'California';
+                    });
+                } catch (\Exception $e) {
+                }
+            }
+
+            switch ($typeId) {
+                case 'made-for-you':
+                    $query = Song::where('status', 1);
+                    if (!empty($artistIds)) {
+                        $query->whereIn('user_id', $artistIds)->inRandomOrder();
+                    } else {
+                        $query->orderByDesc('play_count');
+                    }
+                    $paginator = $query->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+
+                case 'new-release':
+                    $paginator = Song::orderBy('published_at', 'desc')->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+
+                case 'recents':
+                    $paginator = PlayHistory::with(['song.artist', 'song.album', 'song.genre'])
+                        ->where('user_id', $userId)
+                        ->orderByDesc('last_played_at')
+                        ->paginate($perPage);
+
+                    $paginator->getCollection()->transform(function ($item) {
+                        return $item->song;
+                    });
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+
+                case 'artists-you-like':
+                    if (!empty($artistIds)) {
+                        $paginator = User::whereIn('id', $artistIds)->whereHas('profile')->paginate($perPage);
+                    } else {
+                        $paginator = User::whereHas('profile')->inRandomOrder()->paginate($perPage);
+                    }
+                    return $this->responseJson(true, 200, 'Data fetched successfully', [
+                        'result' => ArtistResource::collection($paginator),
+                        'pagination' => [
+                            'total' => $paginator->total(),
+                            'count' => $paginator->count(),
+                            'per_page' => $paginator->perPage(),
+                            'current_page' => $paginator->currentPage(),
+                            'total_pages' => $paginator->lastPage()
+                        ]
+                    ]);
+
+                case 'features-songs':
+                    $paginator = PlayList::where('is_public', 1)->inRandomOrder()->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+
+                case 'popular-radio':
+                    $paginator = User::whereHas('profile')->withCount('followers')->orderByDesc('followers_count')->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', [
+                        'result' => ArtistResource::collection($paginator),
+                        'pagination' => [
+                            'total' => $paginator->total(),
+                            'count' => $paginator->count(),
+                            'per_page' => $paginator->perPage(),
+                            'current_page' => $paginator->currentPage(),
+                            'total_pages' => $paginator->lastPage()
+                        ]
+                    ]);
+
+                case 'your-top-mixes':
+                    $paginator = PlayList::where('is_public', 1)->inRandomOrder()->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+
+                case Str::slug($country . '\'s Best'):
+                    $paginator = PlayList::where('is_public', 1)
+                        ->where(function ($q) use ($country) {
+                            $q->where('title', 'like', '%' . $country . '%');
+                            if ($country === 'India') {
+                                $q->orWhere('title', 'like', '%Hindi%')
+                                    ->orWhere('title', 'like', '%Bollywood%');
+                            }
+                        })->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+
+                case 'sad-songs':
+                    $paginator = PlayList::where('is_public', 1)
+                        ->where(function ($q) {
+                            $q->where('title', 'like', '%Sad%')
+                                ->orWhere('description', 'like', '%Sad%');
+                        })->paginate($perPage);
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+
+                default:
+                    if (Str::endsWith($typeId, '-for-you')) {
+                        $genreSlug = Str::replaceLast('-for-you', '', $typeId);
+                        $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                            return Str::slug($g->title) === $genreSlug;
+                        });
+
+                        if ($genre) {
+                            $paginator = Song::where('status', 1)
+                                ->where('genre_id', $genre->id)
+                                ->paginate($perPage);
+                            return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                        }
+                    }
+                    break;
+            }
+
+            return $this->responseJson(false, 404, 'Section not found', (object)[]);
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
