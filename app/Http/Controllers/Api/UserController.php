@@ -198,17 +198,20 @@ class UserController extends BaseController
         try {
             $artist = User::find($artistId);
             $alreadyFollowed = ArtistFollower::where(['user_id' => auth()->user()->id, 'artist_id' => $artistId])->exists();
+            $isFollowed = false;
             if ($alreadyFollowed) {
                 // Unfollow artist
                 ArtistFollower::where(['user_id' => auth()->user()->id, 'artist_id' => $artistId])->delete();
                 $message = 'Artist unfollowed successfully';
+                $isFollowed = false;
             } else {
                 // Follow artist
                 ArtistFollower::create(['user_id' => auth()->user()->id, 'artist_id' => $artistId]);
                 $message = 'Artist followed successfully';
+                $isFollowed = true;
             }
             DB::commit();
-            return $this->responseJson(true, 200, $message, []);
+            return $this->responseJson(true, 200, $message, $isFollowed);
         } catch (\Exception $e) {
             DB::rollBack();
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Models\SongLike;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -37,6 +38,7 @@ class SongResource extends JsonResource
             'artist' => new ArtistResource($this->artist),
             'album' => new AlbumResource($this->whenLoaded('album')),
             'genre' => $this->whenLoaded('genre'),
+            'is_liked' => auth()->user() ? $this->isSongLiked(auth()->id()) : false,
         ];
     }
     public function totalSongsDuration($totalSongDuration)
@@ -49,5 +51,13 @@ class SongResource extends JsonResource
         }
         $durationString .= $minutes . ' min';
         return $durationString;
+    }
+    public function isSongLiked($userId): bool
+    {
+        $isLiked = false;
+        if ($userId) {
+            $isLiked = SongLike::where('user_id', $userId)->where('song_id', $this->id)->exists();
+        }
+        return $isLiked;
     }
 }

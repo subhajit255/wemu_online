@@ -174,51 +174,61 @@ class DashboardController extends BaseController
 
             $sections = [
                 [
-                    'title' => 'Made for you',
+                    'title_in_english' => 'Made for you',
+                    'title_in_spanish' => 'Hecho para ti',
                     'type' => 'song',
                     'items' => SongResource::collection($recommendedSongs)
                 ],
                 [
-                    'title' => 'New Release',
+                    'title_in_english' => 'New Release',
+                    'title_in_spanish' => 'Lanzamiento',
                     'type' => 'song',
                     'items' => SongResource::collection($newRelease)
                 ],
                 [
-                    'title' => 'Recents',
+                    'title_in_english' => 'Recents',
+                    'title_in_spanish' => 'Recientes',
                     'type' => 'song',
                     'items' => SongResource::collection($recentSongsList)
                 ],
                 [
-                    'title' => 'Artists you like',
+                    'title_in_english' => 'Artists you like',
+                    'title_in_spanish' => 'Artistas que te gustan',
                     'type' => 'artist',
                     'items' => ArtistResource::collection($artistsYouLike)
                 ],
                 [
-                    'title' => 'Features songs',
+                    'title_in_english' => 'Features songs',
+                    'title_in_spanish' => 'Canciones destacadas',
                     'type' => 'song',
                     'items' => SongResource::collection($moreLike)
                 ],
                 [
-                    'title' => 'More of what you like',
+                    'title_in_english' => 'More of what you like',
+                    'title_in_spanish' => 'Más de lo que te gusta',
                     'type' => 'block',
                     'items' => [
                         [
-                            'title' => 'Top songs Spanish',
+                            'title_in_english' => 'Top songs Spanish',
+                            'title_in_spanish' => 'Canciones populares en español',
                             'description' => 'Spanish songs collections'
                         ],
                         [
-                            'title' => 'Global Songs',
+                            'title_in_english' => 'Global Songs',
+                            'title_in_spanish' => 'Canciones globales',
                             'description' => 'Global songs collections'
                         ]
                     ]
                 ],
                 [
-                    'title' => 'Popular radio',
+                    'title_in_english' => 'Popular radio',
+                    'title_in_spanish' => 'Radio popular',
                     'type' => 'radio',
                     'items' => ArtistResource::collection($popularRadio)
                 ],
                 [
-                    'title' => 'Your top mixes',
+                    'title_in_english' => 'Your top mixes',
+                    'title_in_spanish' => 'Tus mezclas principales',
                     'type' => 'playlist',
                     'items' => PlayListResource::collection($topMixes)
                 ]
@@ -229,7 +239,8 @@ class DashboardController extends BaseController
             }
 
             $sections[] = [
-                'title' => $country . '\'s Best',
+                'title_in_english' => $country . '\'s Best',
+                'title_in_spanish' => $country . '\'s Mejores',
                 'type' => 'playlist',
                 'items' => PlayListResource::collection($countryBestPlaylists)
             ];
