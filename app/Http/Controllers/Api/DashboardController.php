@@ -397,7 +397,7 @@ class DashboardController extends BaseController
                     if (Str::endsWith($typeId, '-for-you')) {
                         $genreSlug = Str::replaceLast('-for-you', '', $typeId);
                         $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
-                            return Str::slug($g->title) === $genreSlug;
+                            return Str::slug($g->title_in_english) === $genreSlug;
                         });
 
                         if ($genre) {
