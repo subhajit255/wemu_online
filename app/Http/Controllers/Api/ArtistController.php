@@ -27,6 +27,7 @@ class ArtistController extends BaseController
             })->whereNull('added_by')->get();
             return $this->responseJson(true, 200, 'Artists fetched successfully', ArtistResource::collection($artists));
         } catch (\Throwable $th) {
+            logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
