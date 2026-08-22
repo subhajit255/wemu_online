@@ -118,7 +118,8 @@ class DashboardController extends BaseController
 
                 if ($genreSongs->isNotEmpty()) {
                     $dynamicGenreSections[] = [
-                        'title' => $genre->title . ' for you',
+                        'title_in_english' => $genre->title . ' for you',
+                        'title_in_spanish' => $genre->title . ' para ti',
                         'type' => 'song',
                         'items' => SongResource::collection($genreSongs)
                     ];
@@ -133,7 +134,8 @@ class DashboardController extends BaseController
                             ->orWhere('description', 'like', '%Sad%');
                     })->take(5)->get();
                 $dynamicGenreSections[] = [
-                    'title' => 'Sad songs',
+                    'title_in_english' => 'Sad songs',
+                    'title_in_spanish' => 'Canciones tristes',
                     'type' => 'playlist',
                     'items' => PlayListResource::collection($sadSongs)
                 ];
