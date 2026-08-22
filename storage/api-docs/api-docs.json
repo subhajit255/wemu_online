@@ -1,98 +1,1117 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Warranty Tracker -- KYDIR",
+        "title": "WEMU API Documentation",
+        "description": "Swagger documentation for all APIs",
         "version": "1.0.0"
     },
+    "servers": [
+        {
+            "url": "http://localhost:8000/docs",
+            "description": "API Server"
+        }
+    ],
     "paths": {
+        "/api/albums": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Endpoint for api/albums",
+                "operationId": "albums",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/artist/analytics/streams": {
+            "get": {
+                "tags": [
+                    "Analytics"
+                ],
+                "summary": "Endpoint for api/artist/analytics/streams",
+                "operationId": "artist.analytics.streams",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/artist/details/{id}": {
+            "get": {
+                "tags": [
+                    "Artist"
+                ],
+                "summary": "Endpoint for api/artist/details/{id}",
+                "operationId": "artist.details",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/artists": {
+            "get": {
+                "tags": [
+                    "Artist"
+                ],
+                "summary": "Endpoint for api/artists",
+                "operationId": "artists",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/biggest-hits": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/biggest-hits",
+                "operationId": "biggest.hits",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/category/list": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/category/list",
+                "operationId": "category.list",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/change/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/change/password",
+                "operationId": "change.password",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/change/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/change/pin",
+                "operationId": "change.pin",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/cms": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/cms",
+                "operationId": "cms",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/contact-us": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/contact-us",
+                "operationId": "contact.us",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Endpoint for api/dashboard",
+                "operationId": "user.dashboard",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/section-details": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Endpoint for api/dashboard/section-details",
+                "operationId": "user.dashboard.sectionDetails",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/faq": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/faq",
+                "operationId": "faq",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/favourite-artists": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/favourite-artists",
+                "operationId": "favourite.artists",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/feature": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/feature",
+                "operationId": "feature",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/forgot/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/forgot/password",
+                "operationId": "forgot.password",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/forgot/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/forgot/pin",
+                "operationId": "forgot.pin",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/genres": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Endpoint for api/genres",
+                "operationId": "genres",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/liked-songs": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/liked-songs",
+                "operationId": "liked.songs",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/login",
+                "operationId": "login",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/login-email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/login-email",
+                "operationId": "login-email",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/login/verification": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/login/verification",
+                "operationId": "login.verification",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/logout",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/made-for-you": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/made-for-you",
+                "operationId": "made.for.you",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/my-current-subscription": {
+            "get": {
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Endpoint for api/my-current-subscription",
+                "operationId": "my-current-subscription",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/my-profile": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/my-profile",
+                "operationId": "my-profile",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pages": {
+            "get": {
+                "tags": [
+                    "Cms"
+                ],
+                "summary": "Endpoint for api/pages",
+                "operationId": "pages",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/playlist/add-remove-song": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/add-remove-song",
+                "operationId": "playlist.add-remove-song",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/bulk-add-remove-song": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/bulk-add-remove-song",
+                "operationId": "playlist.bulk-add-remove-song",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/create-or-update": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/create-or-update",
+                "operationId": "playlist.create-or-update",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/delete/{playlistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/delete/{playlistId}",
+                "operationId": "playlist.delete",
+                "parameters": [
+                    {
+                        "name": "playlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/details/{playlistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/details/{playlistId}",
+                "operationId": "playlist.details",
+                "parameters": [
+                    {
+                        "name": "playlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/my-playlists": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/playlist/my-playlists",
+                "operationId": "playlist.my-playlists",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/radio/artist/{artistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/radio/artist/{artistId}",
+                "operationId": "radio.artist",
+                "parameters": [
+                    {
+                        "name": "artistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/raise-help": {
+            "post": {
+                "tags": [
+                    "HelpAndSupport"
+                ],
+                "summary": "Endpoint for api/raise-help",
+                "operationId": "raise.help",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/recently-played": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/recently-played",
+                "operationId": "recently.played",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/recommend-songs": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/recommend-songs",
+                "operationId": "recommend.songs",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reset/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/reset/password",
+                "operationId": "reset.password",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/search": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/search",
+                "operationId": "search.songs",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/service/frequency/list": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/service/frequency/list",
+                "operationId": "service.frequency.list",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/setting": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/setting",
+                "operationId": "setting",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
         "/api/signup": {
             "post": {
                 "tags": [
-                    "Authentications"
+                    "Auth"
                 ],
-                "summary": "User Signup",
-                "operationId": "f886d970a4e3497817841e1dc8ca2348",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "mobile_number",
-                                    "phone_code",
-                                    "email",
-                                    "name"
-                                ],
-                                "properties": {
-                                    "mobile_number": {
-                                        "type": "string",
-                                        "example": "1234567890"
-                                    },
-                                    "phone_code": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@example.com"
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "pin": {
-                                        "type": "integer",
-                                        "example": 1234
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
+                "summary": "Endpoint for api/signup",
+                "operationId": "signup",
                 "responses": {
                     "200": {
-                        "description": "OTP send Successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 200
-                                        },
-                                        "response": {
-                                            "properties": {
-                                                "verification_code": {
-                                                    "type": "string",
-                                                    "example": "1234"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "OTP send Successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/song/add-play-history/{id}": {
+            "post": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Endpoint for api/song/add-play-history/{id}",
+                "operationId": "song.add-play-history",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/song/increase-play-count/{id}": {
+            "post": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Endpoint for api/song/increase-play-count/{id}",
+                "operationId": "song.increase-play-count",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/songs-by-album/{albumId}": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Endpoint for api/songs-by-album/{albumId}",
+                "operationId": "songs.by.album",
+                "parameters": [
+                    {
+                        "name": "albumId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/stripe/webhook": {
+            "post": {
+                "tags": [
+                    "StripeWebhook"
+                ],
+                "summary": "Endpoint for api/stripe/webhook",
+                "operationId": "api.stripe.webhook",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/subscriptions": {
+            "get": {
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Endpoint for api/subscriptions",
+                "operationId": "subscriptions",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/support-articles": {
+            "get": {
+                "tags": [
+                    "HelpAndSupport"
+                ],
+                "summary": "Endpoint for api/support-articles",
+                "operationId": "support.articles",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/todo/add": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/todo/add",
+                "operationId": "todo.add",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/todo/delete": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/todo/delete",
+                "operationId": "todo.delete",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/todo/list": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/todo/list",
+                "operationId": "todo.list",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/api/toggle-artist-follow/{artistId}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/toggle-artist-follow/{artistId}",
+                "operationId": "toggle.artist.follow",
+                "parameters": [
+                    {
+                        "name": "artistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/toggle-artist-preference": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/toggle-artist-preference",
+                "operationId": "toggle.artist.preference",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/toggle-song-like/{songId}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Endpoint for api/toggle-song-like/{songId}",
+                "operationId": "toggle.song.like",
+                "parameters": [
+                    {
+                        "name": "songId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/trending-search-items": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Endpoint for api/trending-search-items",
+                "operationId": "trending.search.items",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/update-profile": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/update-profile",
+                "operationId": "update-profile",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user/subscription/purchase": {
+            "post": {
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Endpoint for api/user/subscription/purchase",
+                "operationId": "user.subscription.purchase",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/verify/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Endpoint for api/verify/pin",
+                "operationId": "verify.pin",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
                     }
                 }
             }
         }
     },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
     "tags": [
         {
-            "name": "Authentications",
-            "description": "Authentications"
+            "name": "Master",
+            "description": "Master"
+        },
+        {
+            "name": "Analytics",
+            "description": "Analytics"
+        },
+        {
+            "name": "Artist",
+            "description": "Artist"
+        },
+        {
+            "name": "Song",
+            "description": "Song"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Subscription",
+            "description": "Subscription"
+        },
+        {
+            "name": "Cms",
+            "description": "Cms"
+        },
+        {
+            "name": "HelpAndSupport",
+            "description": "HelpAndSupport"
+        },
+        {
+            "name": "StripeWebhook",
+            "description": "StripeWebhook"
         }
     ]
 }
