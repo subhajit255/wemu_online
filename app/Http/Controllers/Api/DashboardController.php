@@ -22,6 +22,15 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends BaseController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/dashboard",
+     *     summary="Get user dashboard",
+     *     tags={"Dashboard"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Dashboard fetched successfully")
+     * )
+     */
     public function index(Request $request)
     {
         try {
@@ -266,6 +275,28 @@ class DashboardController extends BaseController
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/dashboard/section-details",
+     *     summary="Get section details",
+     *     tags={"Dashboard"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="type_id",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=15)
+     *     ),
+     *     @OA\Response(response=200, description="Section details fetched successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function sectionDetails(Request $request)
     {
         try {

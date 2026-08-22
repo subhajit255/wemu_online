@@ -49,6 +49,15 @@ class UserController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/recently-played",
+     *     summary="Get recently played songs",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
     public function recentlyPlayedSongs(Request $request)
     {
         try {
@@ -75,6 +84,21 @@ class UserController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/toggle-song-like/{songId}",
+     *     summary="Like or unlike a song",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="songId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Status updated successfully")
+     * )
+     */
     public function toggleSongLike($songId)
     {
         $validator = Validator::make(
@@ -113,6 +137,15 @@ class UserController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', false);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/liked-songs",
+     *     summary="Get liked songs",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
     public function likedSong(Request $request)
     {
         try {
@@ -140,6 +173,15 @@ class UserController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/made-for-you",
+     *     summary="Get made for you songs",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
     public function madeForYouSongs(Request $request)
     {
         try {
@@ -183,6 +225,21 @@ class UserController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/toggle-artist-follow/{artistId}",
+     *     summary="Follow or unfollow an artist",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="artistId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Follow status updated")
+     * )
+     */
     public function toggleArtistFollow($artistId)
     {
         $validator = Validator::make(
@@ -219,6 +276,15 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/favourite-artists",
+     *     summary="Get favourite artists",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Artists fetched successfully")
+     * )
+     */
     public function favouriteArtists()
     {
         try {
@@ -231,6 +297,25 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/toggle-artist-preference",
+     *     summary="Toggle artist preference",
+     *     tags={"User"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="artist_id", type="string", description="Comma separated artist IDs"),
+     *                 required={"artist_id"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Preference updated")
+     * )
+     */
     public function toggleArtistPreference(Request $request)
     {
         $validator = Validator::make(

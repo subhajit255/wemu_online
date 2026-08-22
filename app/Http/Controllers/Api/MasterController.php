@@ -16,6 +16,14 @@ use App\Http\Resources\Api\MasterResource;
 
 class MasterController extends BaseController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/albums",
+     *     summary="Get all albums",
+     *     tags={"Master"},
+     *     @OA\Response(response=200, description="Albums fetched successfully")
+     * )
+     */
     public function albums(Request $request)
     {
         try {
@@ -29,6 +37,14 @@ class MasterController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/genres",
+     *     summary="Get all genres",
+     *     tags={"Master"},
+     *     @OA\Response(response=200, description="Genres fetched successfully")
+     * )
+     */
     public function genres()
     {
         try {
@@ -38,6 +54,20 @@ class MasterController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/song/increase-play-count/{id}",
+     *     summary="Increase song play count",
+     *     tags={"Master"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Count increased successfully")
+     * )
+     */
     public function songsCountIncrease($id)
     {
         $validator = Validator::make(
@@ -57,6 +87,21 @@ class MasterController extends BaseController
         increaseSongPlayCount($id, auth()->id());
         return response()->json(['success' => true]);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/song/add-play-history/{id}",
+     *     summary="Add song to play history",
+     *     tags={"Master"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Added to play history")
+     * )
+     */
     public function songsPlayed($id)
     {
         $validator = Validator::make(
@@ -101,6 +146,20 @@ class MasterController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/songs-by-album/{albumId}",
+     *     summary="Get songs by album",
+     *     tags={"Master"},
+     *     @OA\Parameter(
+     *         name="albumId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
     public function songsByAlbum($albumId)
     {
         $validator = Validator::make(

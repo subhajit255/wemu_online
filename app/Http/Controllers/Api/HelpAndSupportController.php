@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Validator;
 
 class HelpAndSupportController extends BaseController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/support-articles",
+     *     summary="Get support articles",
+     *     tags={"Help & Support"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Articles fetched successfully")
+     * )
+     */
     public function supportArticles(Request $request)
     {
         try {
@@ -26,6 +35,27 @@ class HelpAndSupportController extends BaseController
             return $this->responseJson(false, 500, "something went wrong");
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/raise-help",
+     *     summary="Raise a help request",
+     *     tags={"Help & Support"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="subject", type="string", description="Max 255 chars"),
+     *                 @OA\Property(property="queries", type="string", description="Help query text"),
+     *                 required={"subject", "queries"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Help requested successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function raiseHelp(Request $request)
     {
         $validator = Validator::make($request->all(), [

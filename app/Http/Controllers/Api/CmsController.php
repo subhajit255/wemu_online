@@ -8,6 +8,14 @@ use App\Http\Controllers\BaseController;
 
 class CmsController extends BaseController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/pages",
+     *     summary="Get CMS pages",
+     *     tags={"CMS"},
+     *     @OA\Response(response=200, description="Pages fetched successfully")
+     * )
+     */
     public function cmsPages(Request $request)
     {
         try {

@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Validator;
 
 class ArtistController extends BaseController
 {
+    /**
+     * @OA\Get(
+     *     path="/api/artists",
+     *     summary="Get all artists",
+     *     tags={"Artist"},
+     *     @OA\Response(response=200, description="Artists fetched successfully")
+     * )
+     */
     public function artists()
     {
         try {
@@ -22,6 +30,20 @@ class ArtistController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/artist/details/{id}",
+     *     summary="Get artist details",
+     *     tags={"Artist"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Artist details fetched")
+     * )
+     */
     public function artistDetails($id)
     {
         $validator = Validator::make(['id' => $id], [

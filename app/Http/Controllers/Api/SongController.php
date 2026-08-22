@@ -26,6 +26,28 @@ class SongController extends BaseController
 {
     use UploadAble;
 
+    /**
+     * @OA\Post(
+     *     path="/api/playlist/create-or-update",
+     *     summary="Create or update a playlist",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="playlist_id", type="integer", description="ID of playlist to update (leave empty to create new)"),
+     *                 @OA\Property(property="title", type="string", description="Required if creating new playlist"),
+     *                 @OA\Property(property="description", type="string"),
+     *                 @OA\Property(property="cover_image", type="string", format="binary", description="Image file (jpeg, png, jpg, gif, svg) max 10MB")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Playlist created/updated successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function createUpdatePlaylist(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -99,6 +121,15 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/playlist/my-playlists",
+     *     summary="Get my playlists",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Playlists fetched successfully")
+     * )
+     */
     public function myPlayLists(Request $request)
     {
         try {
@@ -112,6 +143,27 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/playlist/add-remove-song",
+     *     summary="Add or remove a single song from playlist",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="playlist_id", type="integer"),
+     *                 @OA\Property(property="song_id", type="integer"),
+     *                 required={"playlist_id", "song_id"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Song added/removed successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function songAddRemovePlayList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -154,6 +206,22 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/playlist/details/{playlistId}",
+     *     summary="Get playlist details",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="playlistId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Playlist details fetched"),
+     *     @OA\Response(response=404, description="Playlist not found")
+     * )
+     */
     public function playListDetails($playlistId, Request $request)
     {
         $validator = Validator::make(
@@ -184,6 +252,22 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/playlist/delete/{playlistId}",
+     *     summary="Delete a playlist",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="playlistId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Playlist deleted successfully"),
+     *     @OA\Response(response=404, description="Playlist not found")
+     * )
+     */
     public function deletePlaylist($playlistId)
     {
         $validator = Validator::make(
@@ -225,6 +309,32 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/playlist/bulk-add-remove-song",
+     *     summary="Bulk add or remove songs from a playlist",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(property="playlist_id", type="integer"),
+     *                 @OA\Property(
+     *                     property="song_ids",
+     *                     type="array",
+     *                     @OA\Items(type="integer")
+     *                 ),
+     *                 @OA\Property(property="action", type="string", enum={"add", "remove"}),
+     *                 required={"playlist_id", "song_ids", "action"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Songs added/removed successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function bulkSongAddRemovePlayList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -279,6 +389,26 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/search",
+     *     summary="Search songs by keywords",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="keywords", type="string"),
+     *                 required={"keywords"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Search results fetched"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function searchSongs(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -355,6 +485,15 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/trending-search-items",
+     *     summary="Get trending search keywords",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Trending searches fetched")
+     * )
+     */
     public function trendingSearches()
     {
         try {
@@ -376,6 +515,14 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/biggest-hits",
+     *     summary="Get biggest hits songs",
+     *     tags={"Song"},
+     *     @OA\Response(response=200, description="Biggest hits fetched")
+     * )
+     */
     public function biggestHits(Request $request)
     {
         try {
@@ -436,6 +583,22 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/recommend-songs",
+     *     summary="Get recommended songs",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="playlist_id",
+     *         in="query",
+     *         description="Optional playlist ID to exclude its songs",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Recommended songs fetched")
+     * )
+     */
     public function recomendateSongs(Request $request)
     {
         try {
@@ -493,6 +656,27 @@ class SongController extends BaseController
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/radio/artist/{artistId}",
+     *     summary="Get artist radio songs",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="artistId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Artist radio fetched")
+     * )
+     */
     public function artistRadio($artistId, Request $request)
     {
         $validator = Validator::make(

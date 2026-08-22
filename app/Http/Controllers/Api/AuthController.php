@@ -48,6 +48,31 @@ class AuthController extends BaseController
     use UploadAble;
     use StripeTrait;
 
+    /**
+     * @OA\Post(
+     *     path="/api/signup",
+     *     summary="Register a new user",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string", description="User's full name"),
+     *                 @OA\Property(property="email", type="string", format="email", description="User's email"),
+     *                 @OA\Property(property="password", type="string", format="password", description="Minimum 6 characters"),
+     *                 @OA\Property(property="confirm_password", type="string", format="password", description="Must match password"),
+     *                 @OA\Property(property="mobile_number", type="string", description="8-13 digits"),
+     *                 @OA\Property(property="phone_code", type="integer", description="Country code, e.g., 61"),
+     *                 required={"name", "email", "password", "confirm_password", "mobile_number", "phone_code"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent successfully"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Something went wrong")
+     * )
+     */
     public function signup(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -116,6 +141,26 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Login using mobile number",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="mobile_number", type="string", description="8-13 digits"),
+     *                 @OA\Property(property="phone_code", type="integer", description="Country code, e.g., 61"),
+     *                 required={"mobile_number", "phone_code"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent successfully / Account not found / Account inactive"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -196,6 +241,30 @@ class AuthController extends BaseController
             return $this->responseJson($status, $code, $message, $response);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/login/verification",
+     *     summary="Verify OTP for login",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="mobile_number", type="string", description="Registered mobile number"),
+     *                 @OA\Property(property="phone_code", type="integer"),
+     *                 @OA\Property(property="verification_code", type="string", description="6 digit OTP"),
+     *                 @OA\Property(property="device_token", type="string"),
+     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}),
+     *                 required={"mobile_number", "phone_code", "verification_code"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Login successful (Returns Bearer token)"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=400, description="Invalid OTP")
+     * )
+     */
     public function loginVerification(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -246,6 +315,29 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/login-email",
+     *     summary="Login using email and password",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 @OA\Property(property="password", type="string", format="password"),
+     *                 @OA\Property(property="device_token", type="string"),
+     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}),
+     *                 required={"email", "password"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Login successful (Returns Bearer token)"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=401, description="Invalid credentials")
+     * )
+     */
     public function loginViaEmail(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -312,6 +404,16 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/my-profile",
+     *     summary="Get current user profile",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Profile fetched successfully"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function myProfile()
     {
         try {
@@ -321,6 +423,29 @@ class AuthController extends BaseController
             return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG'), []);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/update-profile",
+     *     summary="Update user profile",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="username", type="string"),
+     *                 @OA\Property(property="dob", type="string", format="date", description="YYYY-MM-DD"),
+     *                 @OA\Property(property="gender", type="string", enum={"Male", "Female", "Other"}),
+     *                 @OA\Property(property="profile_image", type="string", format="binary")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Profile updated successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function updateProfile(Request $request)
     {
         try {
@@ -362,6 +487,16 @@ class AuthController extends BaseController
             return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG'), (object)[]);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Logout the user",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Logout successfully"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
     public function logout(Request $request)
     {
         $token = auth()->user()->token();
@@ -379,6 +514,25 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/forgot/password",
+     *     summary="Request a password reset OTP",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 required={"email"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent to email"),
+     *     @OA\Response(response=422, description="Validation error / Email not found")
+     * )
+     */
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -470,6 +624,28 @@ class AuthController extends BaseController
             return $this->responseJson($status, $code, $message, $response);
         }
     }
+    /**
+     * @OA\Post(
+     *     path="/api/reset/password",
+     *     summary="Reset password using OTP",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="mobile_number", type="string"),
+     *                 @OA\Property(property="phone_code", type="integer"),
+     *                 @OA\Property(property="password", type="string", format="password"),
+     *                 @OA\Property(property="password_confirmation", type="string", format="password"),
+     *                 required={"mobile_number", "phone_code", "password", "password_confirmation"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Password updated successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -522,6 +698,28 @@ class AuthController extends BaseController
 
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/change/password",
+     *     summary="Change account password",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="old_password", type="string", format="password"),
+     *                 @OA\Property(property="new_password", type="string", format="password"),
+     *                 @OA\Property(property="confirm_password", type="string", format="password"),
+     *                 required={"old_password", "new_password", "confirm_password"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Password changed successfully"),
+     *     @OA\Response(response=400, description="Old password incorrect")
+     * )
+     */
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -614,6 +812,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/category/list",
+     *     summary="List categories",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="Categories fetched")
+     * )
+     */
     public function categoryList(Request $request)
     {
         try {
@@ -677,6 +883,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/setting",
+     *     summary="Get app settings",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="Settings fetched")
+     * )
+     */
     public function setting()
     {
         try {
@@ -700,6 +914,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/feature",
+     *     summary="Get app features",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="Features fetched")
+     * )
+     */
     public function feature()
     {
         try {
@@ -723,6 +945,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/cms",
+     *     summary="Get CMS content",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="CMS content fetched")
+     * )
+     */
     public function cms(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -759,6 +989,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/service/frequency/list",
+     *     summary="Get service frequencies",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="List of frequencies")
+     * )
+     */
     public function serviceFrequencyList()
     {
         try {
@@ -783,6 +1021,27 @@ class AuthController extends BaseController
         return $this->responseJson($status, $code, $message, $response);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/contact-us",
+     *     summary="Submit contact us form",
+     *     tags={"General"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 @OA\Property(property="subject", type="string"),
+     *                 @OA\Property(property="message", type="string"),
+     *                 required={"name", "email", "subject", "message"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Form submitted successfully")
+     * )
+     */
     public function contactUs(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -827,6 +1086,25 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/forgot/pin",
+     *     summary="Request OTP to reset PIN",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="mobile_number", type="string"),
+     *                 @OA\Property(property="phone_code", type="integer"),
+     *                 required={"mobile_number", "phone_code"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP sent")
+     * )
+     */
     public function forgotPin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -879,6 +1157,26 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/verify/pin",
+     *     summary="Verify PIN",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="mobile_number", type="string"),
+     *                 @OA\Property(property="phone_code", type="integer"),
+     *                 @OA\Property(property="pin", type="string"),
+     *                 required={"mobile_number", "phone_code", "pin"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="PIN verified")
+     * )
+     */
     public function verifyPin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -920,6 +1218,27 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/change/pin",
+     *     summary="Change security PIN",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="old_pin", type="string"),
+     *                 @OA\Property(property="new_pin", type="string"),
+     *                 @OA\Property(property="confirm_pin", type="string"),
+     *                 required={"old_pin", "new_pin", "confirm_pin"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="PIN changed successfully")
+     * )
+     */
     public function changePin(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -954,6 +1273,14 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/faq",
+     *     summary="Get Frequently Asked Questions",
+     *     tags={"General"},
+     *     @OA\Response(response=200, description="FAQs fetched")
+     * )
+     */
     public function faq()
     {
         try {
@@ -977,6 +1304,26 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/todo/add",
+     *     summary="Add a new Todo item",
+     *     tags={"Todo"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="title", type="string"),
+     *                 @OA\Property(property="description", type="string"),
+     *                 required={"title"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Todo added successfully")
+     * )
+     */
     public function todoAdd(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1006,6 +1353,25 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Post(
+     *     path="/api/todo/delete",
+     *     summary="Delete a Todo item",
+     *     tags={"Todo"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="todo_id", type="integer"),
+     *                 required={"todo_id"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Todo deleted successfully")
+     * )
+     */
     public function todoDelete(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -1032,6 +1398,22 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+    /**
+     * @OA\Get(
+     *     path="/api/todo/list",
+     *     summary="List Todo items",
+     *     tags={"Todo"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number",
+     *         required=false,
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Response(response=200, description="Todos fetched successfully")
+     * )
+     */
     public function todoList(Request $request)
     {
         DB::beginTransaction();

@@ -17,6 +17,14 @@ class SubscriptionController extends BaseController
 {
     use StripeTrait;
 
+    /**
+     * @OA\Get(
+     *     path="/api/subscriptions",
+     *     summary="Get available subscriptions",
+     *     tags={"Subscription"},
+     *     @OA\Response(response=200, description="Subscriptions fetched successfully")
+     * )
+     */
     public function subscriptions(Request $request)
     {
         try {
@@ -27,6 +35,15 @@ class SubscriptionController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/my-current-subscription",
+     *     summary="Get current user subscription",
+     *     tags={"Subscription"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Subscription fetched successfully")
+     * )
+     */
     public function myCurrentSubscription(Request $request)
     {
         try {
@@ -38,6 +55,27 @@ class SubscriptionController extends BaseController
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/user/subscription/purchase",
+     *     summary="Purchase a subscription",
+     *     tags={"Subscription"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="subscription_id", type="integer"),
+     *                 @OA\Property(property="payment_method_id", type="string"),
+     *                 required={"subscription_id", "payment_method_id"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Subscription purchased successfully"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
     public function purchase(Request $request)
     {
         $validator = Validator::make($request->all(), [

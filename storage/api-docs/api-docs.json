@@ -12,37 +12,18 @@
         }
     ],
     "paths": {
-        "/api/albums": {
+        "/api/artists": {
             "get": {
                 "tags": [
-                    "Master"
+                    "Artist"
                 ],
-                "summary": "Endpoint for api/albums",
-                "operationId": "albums",
+                "summary": "Get all artists",
+                "operationId": "da6193af3211a284ff733ce49ca4e260",
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Artists fetched successfully"
                     }
                 }
-            }
-        },
-        "/api/artist/analytics/streams": {
-            "get": {
-                "tags": [
-                    "Analytics"
-                ],
-                "summary": "Endpoint for api/artist/analytics/streams",
-                "operationId": "artist.analytics.streams",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
             }
         },
         "/api/artist/details/{id}": {
@@ -50,683 +31,21 @@
                 "tags": [
                     "Artist"
                 ],
-                "summary": "Endpoint for api/artist/details/{id}",
-                "operationId": "artist.details",
+                "summary": "Get artist details",
+                "operationId": "2196fc66981f70a2d683f27cdfcdef89",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/artists": {
-            "get": {
-                "tags": [
-                    "Artist"
-                ],
-                "summary": "Endpoint for api/artists",
-                "operationId": "artists",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/biggest-hits": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/biggest-hits",
-                "operationId": "biggest.hits",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/category/list": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/category/list",
-                "operationId": "category.list",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/change/password": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/change/password",
-                "operationId": "change.password",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/change/pin": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/change/pin",
-                "operationId": "change.pin",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/cms": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/cms",
-                "operationId": "cms",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/contact-us": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/contact-us",
-                "operationId": "contact.us",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/dashboard": {
-            "get": {
-                "tags": [
-                    "Dashboard"
-                ],
-                "summary": "Endpoint for api/dashboard",
-                "operationId": "user.dashboard",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/dashboard/section-details": {
-            "get": {
-                "tags": [
-                    "Dashboard"
-                ],
-                "summary": "Endpoint for api/dashboard/section-details",
-                "operationId": "user.dashboard.sectionDetails",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/faq": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/faq",
-                "operationId": "faq",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/favourite-artists": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/favourite-artists",
-                "operationId": "favourite.artists",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/feature": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/feature",
-                "operationId": "feature",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/forgot/password": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/forgot/password",
-                "operationId": "forgot.password",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/forgot/pin": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/forgot/pin",
-                "operationId": "forgot.pin",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/genres": {
-            "get": {
-                "tags": [
-                    "Master"
-                ],
-                "summary": "Endpoint for api/genres",
-                "operationId": "genres",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/liked-songs": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/liked-songs",
-                "operationId": "liked.songs",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/login": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/login",
-                "operationId": "login",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/login-email": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/login-email",
-                "operationId": "login-email",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/login/verification": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/login/verification",
-                "operationId": "login.verification",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/logout": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/logout",
-                "operationId": "logout",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/made-for-you": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/made-for-you",
-                "operationId": "made.for.you",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/my-current-subscription": {
-            "get": {
-                "tags": [
-                    "Subscription"
-                ],
-                "summary": "Endpoint for api/my-current-subscription",
-                "operationId": "my-current-subscription",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/my-profile": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/my-profile",
-                "operationId": "my-profile",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/pages": {
-            "get": {
-                "tags": [
-                    "Cms"
-                ],
-                "summary": "Endpoint for api/pages",
-                "operationId": "pages",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/playlist/add-remove-song": {
-            "post": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/add-remove-song",
-                "operationId": "playlist.add-remove-song",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/playlist/bulk-add-remove-song": {
-            "post": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/bulk-add-remove-song",
-                "operationId": "playlist.bulk-add-remove-song",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/playlist/create-or-update": {
-            "post": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/create-or-update",
-                "operationId": "playlist.create-or-update",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/playlist/delete/{playlistId}": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/delete/{playlistId}",
-                "operationId": "playlist.delete",
-                "parameters": [
-                    {
-                        "name": "playlistId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/playlist/details/{playlistId}": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/details/{playlistId}",
-                "operationId": "playlist.details",
-                "parameters": [
-                    {
-                        "name": "playlistId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/playlist/my-playlists": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/playlist/my-playlists",
-                "operationId": "playlist.my-playlists",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/radio/artist/{artistId}": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/radio/artist/{artistId}",
-                "operationId": "radio.artist",
-                "parameters": [
-                    {
-                        "name": "artistId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/raise-help": {
-            "post": {
-                "tags": [
-                    "HelpAndSupport"
-                ],
-                "summary": "Endpoint for api/raise-help",
-                "operationId": "raise.help",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/recently-played": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/recently-played",
-                "operationId": "recently.played",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/recommend-songs": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/recommend-songs",
-                "operationId": "recommend.songs",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/reset/password": {
-            "post": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/reset/password",
-                "operationId": "reset.password",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/search": {
-            "post": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/search",
-                "operationId": "search.songs",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/service/frequency/list": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/service/frequency/list",
-                "operationId": "service.frequency.list",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/setting": {
-            "get": {
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Endpoint for api/setting",
-                "operationId": "setting",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
+                        "description": "Artist details fetched"
                     }
                 }
             }
@@ -736,268 +55,236 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Endpoint for api/signup",
-                "operationId": "signup",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/song/add-play-history/{id}": {
-            "post": {
-                "tags": [
-                    "Master"
-                ],
-                "summary": "Endpoint for api/song/add-play-history/{id}",
-                "operationId": "song.add-play-history",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                "summary": "Register a new user",
+                "operationId": "f886d970a4e3497817841e1dc8ca2348",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "confirm_password",
+                                    "mobile_number",
+                                    "phone_code"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "User's full name",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "description": "User's email",
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "description": "Minimum 6 characters",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "confirm_password": {
+                                        "description": "Must match password",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "mobile_number": {
+                                        "description": "8-13 digits",
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "description": "Country code, e.g., 61",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
                     }
                 },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/song/increase-play-count/{id}": {
-            "post": {
-                "tags": [
-                    "Master"
-                ],
-                "summary": "Endpoint for api/song/increase-play-count/{id}",
-                "operationId": "song.increase-play-count",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "OTP sent successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Something went wrong"
                     }
                 }
             }
         },
-        "/api/songs-by-album/{albumId}": {
-            "get": {
-                "tags": [
-                    "Master"
-                ],
-                "summary": "Endpoint for api/songs-by-album/{albumId}",
-                "operationId": "songs.by.album",
-                "parameters": [
-                    {
-                        "name": "albumId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/stripe/webhook": {
-            "post": {
-                "tags": [
-                    "StripeWebhook"
-                ],
-                "summary": "Endpoint for api/stripe/webhook",
-                "operationId": "api.stripe.webhook",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/subscriptions": {
-            "get": {
-                "tags": [
-                    "Subscription"
-                ],
-                "summary": "Endpoint for api/subscriptions",
-                "operationId": "subscriptions",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/support-articles": {
-            "get": {
-                "tags": [
-                    "HelpAndSupport"
-                ],
-                "summary": "Endpoint for api/support-articles",
-                "operationId": "support.articles",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/todo/add": {
+        "/api/login": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Endpoint for api/todo/add",
-                "operationId": "todo.add",
+                "summary": "Login using mobile number",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "mobile_number",
+                                    "phone_code"
+                                ],
+                                "properties": {
+                                    "mobile_number": {
+                                        "description": "8-13 digits",
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "description": "Country code, e.g., 61",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "OTP sent successfully / Account not found / Account inactive"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 }
             }
         },
-        "/api/todo/delete": {
+        "/api/login/verification": {
             "post": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Endpoint for api/todo/delete",
-                "operationId": "todo.delete",
+                "summary": "Verify OTP for login",
+                "operationId": "916b9703ea3676a0ff46891dd456c43d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "mobile_number",
+                                    "phone_code",
+                                    "verification_code"
+                                ],
+                                "properties": {
+                                    "mobile_number": {
+                                        "description": "Registered mobile number",
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "type": "integer"
+                                    },
+                                    "verification_code": {
+                                        "description": "6 digit OTP",
+                                        "type": "string"
+                                    },
+                                    "device_token": {
+                                        "type": "string"
+                                    },
+                                    "device_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "android",
+                                            "ios",
+                                            "web"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Login successful (Returns Bearer token)"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "400": {
+                        "description": "Invalid OTP"
                     }
                 }
             }
         },
-        "/api/todo/list": {
+        "/api/login-email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login using email and password",
+                "operationId": "e084b3fedd2963a24dbde0c60e0f2ef4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "device_token": {
+                                        "type": "string"
+                                    },
+                                    "device_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "android",
+                                            "ios",
+                                            "web"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful (Returns Bearer token)"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/my-profile": {
             "get": {
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Endpoint for api/todo/list",
-                "operationId": "todo.list",
+                "summary": "Get current user profile",
+                "operationId": "dc1e6e34d78fd1c56bde478d69bdd3f9",
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
-                    }
-                }
-            }
-        },
-        "/api/toggle-artist-follow/{artistId}": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/toggle-artist-follow/{artistId}",
-                "operationId": "toggle.artist.follow",
-                "parameters": [
-                    {
-                        "name": "artistId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/toggle-artist-preference": {
-            "post": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/toggle-artist-preference",
-                "operationId": "toggle.artist.preference",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/toggle-song-like/{songId}": {
-            "get": {
-                "tags": [
-                    "User"
-                ],
-                "summary": "Endpoint for api/toggle-song-like/{songId}",
-                "operationId": "toggle.song.like",
-                "parameters": [
-                    {
-                        "name": "songId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/trending-search-items": {
-            "get": {
-                "tags": [
-                    "Song"
-                ],
-                "summary": "Endpoint for api/trending-search-items",
-                "operationId": "trending.search.items",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
+                        "description": "Profile fetched successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -1012,11 +299,1214 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Endpoint for api/update-profile",
-                "operationId": "update-profile",
+                "summary": "Update user profile",
+                "operationId": "bd8e6c9e1c1621847f5f084628a00088",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "username": {
+                                        "type": "string"
+                                    },
+                                    "dob": {
+                                        "description": "YYYY-MM-DD",
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Male",
+                                            "Female",
+                                            "Other"
+                                        ]
+                                    },
+                                    "profile_image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Profile updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout the user",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Logout successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/forgot/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request a password reset OTP",
+                "operationId": "21649e9d2f970338e67816bdbccbf110",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent to email"
+                    },
+                    "422": {
+                        "description": "Validation error / Email not found"
+                    }
+                }
+            }
+        },
+        "/api/reset/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password using OTP",
+                "operationId": "b832ebb6ab77e65c3d8a5952064d4ad1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "mobile_number",
+                                    "phone_code",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "mobile_number": {
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "type": "integer"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/change/password": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change account password",
+                "operationId": "29d63ad619ccb0915b2bbe2f91b27797",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "old_password",
+                                    "new_password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully"
+                    },
+                    "400": {
+                        "description": "Old password incorrect"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/category/list": {
+            "post": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "List categories",
+                "operationId": "a81fd81205d694ab292b196257f8fc1a",
+                "responses": {
+                    "200": {
+                        "description": "Categories fetched"
+                    }
+                }
+            }
+        },
+        "/api/setting": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get app settings",
+                "operationId": "a671ed3bf487aa0a68c764a1ee638911",
+                "responses": {
+                    "200": {
+                        "description": "Settings fetched"
+                    }
+                }
+            }
+        },
+        "/api/feature": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get app features",
+                "operationId": "7490d6cb0d4de4703c4d1dab468751eb",
+                "responses": {
+                    "200": {
+                        "description": "Features fetched"
+                    }
+                }
+            }
+        },
+        "/api/cms": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get CMS content",
+                "operationId": "74041420fe0d33782e6d354b6a6997eb",
+                "responses": {
+                    "200": {
+                        "description": "CMS content fetched"
+                    }
+                }
+            }
+        },
+        "/api/service/frequency/list": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get service frequencies",
+                "operationId": "d88c21b8a336184b311afeb14ceaa55b",
+                "responses": {
+                    "200": {
+                        "description": "List of frequencies"
+                    }
+                }
+            }
+        },
+        "/api/contact-us": {
+            "post": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Submit contact us form",
+                "operationId": "d67f7059c2eae523785252ec358184a8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "subject",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "subject": {
+                                        "type": "string"
+                                    },
+                                    "message": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Form submitted successfully"
+                    }
+                }
+            }
+        },
+        "/api/forgot/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request OTP to reset PIN",
+                "operationId": "a21a8d37f15b5981c693c88cbd1522be",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "mobile_number",
+                                    "phone_code"
+                                ],
+                                "properties": {
+                                    "mobile_number": {
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent"
+                    }
+                }
+            }
+        },
+        "/api/verify/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify PIN",
+                "operationId": "49b7f9d76d1d42176efc7f9331f2d749",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "mobile_number",
+                                    "phone_code",
+                                    "pin"
+                                ],
+                                "properties": {
+                                    "mobile_number": {
+                                        "type": "string"
+                                    },
+                                    "phone_code": {
+                                        "type": "integer"
+                                    },
+                                    "pin": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PIN verified"
+                    }
+                }
+            }
+        },
+        "/api/change/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Change security PIN",
+                "operationId": "b6093a004c6669a6be5855d479be909c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "old_pin",
+                                    "new_pin",
+                                    "confirm_pin"
+                                ],
+                                "properties": {
+                                    "old_pin": {
+                                        "type": "string"
+                                    },
+                                    "new_pin": {
+                                        "type": "string"
+                                    },
+                                    "confirm_pin": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PIN changed successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/faq": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Get Frequently Asked Questions",
+                "operationId": "8fc4de8542020513e8128f2ab7728067",
+                "responses": {
+                    "200": {
+                        "description": "FAQs fetched"
+                    }
+                }
+            }
+        },
+        "/api/todo/add": {
+            "post": {
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "Add a new Todo item",
+                "operationId": "67c9f8174ccdd3526761f4ca77e88a7f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Todo added successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/todo/delete": {
+            "post": {
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "Delete a Todo item",
+                "operationId": "e8dfbea9568819e6602542b1bba4f573",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "todo_id"
+                                ],
+                                "properties": {
+                                    "todo_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Todo deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/todo/list": {
+            "get": {
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "List Todo items",
+                "operationId": "532a5956cf075f03d3e6ac81a191fe3b",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todos fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pages": {
+            "get": {
+                "tags": [
+                    "CMS"
+                ],
+                "summary": "Get CMS pages",
+                "operationId": "56c712d548b2e6c1a6849b1e8eed2427",
+                "responses": {
+                    "200": {
+                        "description": "Pages fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get user dashboard",
+                "operationId": "d5fcadff7c52501c317a59bc00886f22",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/section-details": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get section details",
+                "operationId": "388ab6e0a1eea5b06bd1d4db814f03a0",
+                "parameters": [
+                    {
+                        "name": "type_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Section details fetched successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/support-articles": {
+            "get": {
+                "tags": [
+                    "Help & Support"
+                ],
+                "summary": "Get support articles",
+                "operationId": "4b7335e379e1163992895b4400af06db",
+                "responses": {
+                    "200": {
+                        "description": "Articles fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/raise-help": {
+            "post": {
+                "tags": [
+                    "Help & Support"
+                ],
+                "summary": "Raise a help request",
+                "operationId": "ab35dceb6d62961c987dc786b5a1e0ec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "subject",
+                                    "queries"
+                                ],
+                                "properties": {
+                                    "subject": {
+                                        "description": "Max 255 chars",
+                                        "type": "string"
+                                    },
+                                    "queries": {
+                                        "description": "Help query text",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Help requested successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/albums": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get all albums",
+                "operationId": "e95c495160fa902652056802ac490b5d",
+                "responses": {
+                    "200": {
+                        "description": "Albums fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/genres": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get all genres",
+                "operationId": "e628e09d5f53dc275620b59843ceeeec",
+                "responses": {
+                    "200": {
+                        "description": "Genres fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/song/increase-play-count/{id}": {
+            "post": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Increase song play count",
+                "operationId": "2aab47137707ac7ed0a530f189e590b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Count increased successfully"
+                    }
+                }
+            }
+        },
+        "/api/song/add-play-history/{id}": {
+            "post": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Add song to play history",
+                "operationId": "1c65f6e1b84f9ba48279d4c7e8f202f9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Added to play history"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/songs-by-album/{albumId}": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get songs by album",
+                "operationId": "4d3cba98586453c29c5a0d7007e3e6b0",
+                "parameters": [
+                    {
+                        "name": "albumId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Songs fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/playlist/create-or-update": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Create or update a playlist",
+                "operationId": "f02692bf55847f788000646223ac6cd4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "playlist_id": {
+                                        "description": "ID of playlist to update (leave empty to create new)",
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "description": "Required if creating new playlist",
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "cover_image": {
+                                        "description": "Image file (jpeg, png, jpg, gif, svg) max 10MB",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Playlist created/updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/my-playlists": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get my playlists",
+                "operationId": "8f27b178dcd99360562e8d9cf4c56c69",
+                "responses": {
+                    "200": {
+                        "description": "Playlists fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/add-remove-song": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Add or remove a single song from playlist",
+                "operationId": "dc0285041633c29722e9e4eda2b9963a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "playlist_id",
+                                    "song_id"
+                                ],
+                                "properties": {
+                                    "playlist_id": {
+                                        "type": "integer"
+                                    },
+                                    "song_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Song added/removed successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/details/{playlistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get playlist details",
+                "operationId": "23ec93cb65a527ed6495ebf679492891",
+                "parameters": [
+                    {
+                        "name": "playlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Playlist details fetched"
+                    },
+                    "404": {
+                        "description": "Playlist not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/delete/{playlistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Delete a playlist",
+                "operationId": "b5e998a6520e6794c90c2d661aaddf67",
+                "parameters": [
+                    {
+                        "name": "playlistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Playlist deleted successfully"
+                    },
+                    "404": {
+                        "description": "Playlist not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/bulk-add-remove-song": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Bulk add or remove songs from a playlist",
+                "operationId": "8b2e19441a6178d89da87cba42fe0fd7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "playlist_id",
+                                    "song_ids",
+                                    "action"
+                                ],
+                                "properties": {
+                                    "playlist_id": {
+                                        "type": "integer"
+                                    },
+                                    "song_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "action": {
+                                        "type": "string",
+                                        "enum": [
+                                            "add",
+                                            "remove"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Songs added/removed successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/search": {
+            "post": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Search songs by keywords",
+                "operationId": "fd0ce67ab3a7632d3e6046cc7d22dcf2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "keywords"
+                                ],
+                                "properties": {
+                                    "keywords": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Search results fetched"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/trending-search-items": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get trending search keywords",
+                "operationId": "a3b0aa09bc6c470b7fed3ed20baeb209",
+                "responses": {
+                    "200": {
+                        "description": "Trending searches fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/biggest-hits": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get biggest hits songs",
+                "operationId": "0351f146825aa9d5e94e51290a1a6b4b",
+                "responses": {
+                    "200": {
+                        "description": "Biggest hits fetched"
+                    }
+                }
+            }
+        },
+        "/api/recommend-songs": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get recommended songs",
+                "operationId": "e26b06da2be9f0d738c0e3ee7c064a32",
+                "parameters": [
+                    {
+                        "name": "playlist_id",
+                        "in": "query",
+                        "description": "Optional playlist ID to exclude its songs",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recommended songs fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/radio/artist/{artistId}": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get artist radio songs",
+                "operationId": "94fd4033c48ad4b04285643068588e7f",
+                "parameters": [
+                    {
+                        "name": "artistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Artist radio fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subscriptions": {
+            "get": {
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get available subscriptions",
+                "operationId": "b19e549b79b67f2a0ef1c0e769192377",
+                "responses": {
+                    "200": {
+                        "description": "Subscriptions fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/my-current-subscription": {
+            "get": {
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Get current user subscription",
+                "operationId": "468adeb270a9423276450257986b4cc0",
+                "responses": {
+                    "200": {
+                        "description": "Subscription fetched successfully"
                     }
                 },
                 "security": [
@@ -1031,11 +1521,36 @@
                 "tags": [
                     "Subscription"
                 ],
-                "summary": "Endpoint for api/user/subscription/purchase",
-                "operationId": "user.subscription.purchase",
+                "summary": "Purchase a subscription",
+                "operationId": "e7b7ede197f2d6f9d85121d2db5e95aa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "subscription_id",
+                                    "payment_method_id"
+                                ],
+                                "properties": {
+                                    "subscription_id": {
+                                        "type": "integer"
+                                    },
+                                    "payment_method_id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Subscription purchased successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -1045,18 +1560,176 @@
                 ]
             }
         },
-        "/api/verify/pin": {
-            "post": {
+        "/api/recently-played": {
+            "get": {
                 "tags": [
-                    "Auth"
+                    "User"
                 ],
-                "summary": "Endpoint for api/verify/pin",
-                "operationId": "verify.pin",
+                "summary": "Get recently played songs",
+                "operationId": "f65f9c900dc99d4ca85ce9f894799007",
                 "responses": {
                     "200": {
-                        "description": "Successful operation"
+                        "description": "Songs fetched successfully"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/toggle-song-like/{songId}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Like or unlike a song",
+                "operationId": "41086265806c05fbb1d1dd826f7bc7fb",
+                "parameters": [
+                    {
+                        "name": "songId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/liked-songs": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get liked songs",
+                "operationId": "ffd206a0c2b9cff164dcdf6f45164517",
+                "responses": {
+                    "200": {
+                        "description": "Songs fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/made-for-you": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get made for you songs",
+                "operationId": "13aaf03efcd1cb1c9ab092436b5f5918",
+                "responses": {
+                    "200": {
+                        "description": "Songs fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/toggle-artist-follow/{artistId}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Follow or unfollow an artist",
+                "operationId": "04ad6a8184109300d7aaab97a576efc4",
+                "parameters": [
+                    {
+                        "name": "artistId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Follow status updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favourite-artists": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get favourite artists",
+                "operationId": "cebd7d28841e43d761a828dd1a3a371b",
+                "responses": {
+                    "200": {
+                        "description": "Artists fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/toggle-artist-preference": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Toggle artist preference",
+                "operationId": "ee6d2d1d6de7457830e81495573570aa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "artist_id"
+                                ],
+                                "properties": {
+                                    "artist_id": {
+                                        "description": "Comma separated artist IDs",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Preference updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -1070,48 +1743,48 @@
     },
     "tags": [
         {
-            "name": "Master",
-            "description": "Master"
-        },
-        {
-            "name": "Analytics",
-            "description": "Analytics"
-        },
-        {
             "name": "Artist",
             "description": "Artist"
-        },
-        {
-            "name": "Song",
-            "description": "Song"
         },
         {
             "name": "Auth",
             "description": "Auth"
         },
         {
+            "name": "General",
+            "description": "General"
+        },
+        {
+            "name": "Todo",
+            "description": "Todo"
+        },
+        {
+            "name": "CMS",
+            "description": "CMS"
+        },
+        {
             "name": "Dashboard",
             "description": "Dashboard"
         },
         {
-            "name": "User",
-            "description": "User"
+            "name": "Help & Support",
+            "description": "Help & Support"
+        },
+        {
+            "name": "Master",
+            "description": "Master"
+        },
+        {
+            "name": "Song",
+            "description": "Song"
         },
         {
             "name": "Subscription",
             "description": "Subscription"
         },
         {
-            "name": "Cms",
-            "description": "Cms"
-        },
-        {
-            "name": "HelpAndSupport",
-            "description": "HelpAndSupport"
-        },
-        {
-            "name": "StripeWebhook",
-            "description": "StripeWebhook"
+            "name": "User",
+            "description": "User"
         }
     ]
 }
