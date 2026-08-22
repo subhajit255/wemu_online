@@ -2,11 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
+use \App\Models\User;
+use App\Models\Album;
 use App\Models\AudienceLog;
 use App\Models\Song;
-use App\Models\Album;
+use Closure;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CaptureClientInfo
@@ -72,24 +73,35 @@ class CaptureClientInfo
                     }
                     return null;
                 });
-                
+
                 // Added null-checks to prevent server crashes if the ID doesn't exist
                 if ($songId != null) {
                     $song = Song::find($songId);
                     if ($song) {
                         $artistId = $song->user_id;
                         $albumId = $song->album_id;
+                    } else {
+                        $songId = null;
                     }
                 }
-                
+
                 if ($albumId != null) {
                     $album = Album::find($albumId);
                     if ($album) {
                         $artistId = $album->user_id;
+                    } else {
+                        $albumId = null;
+                    }
+                }
+
+                if ($artistId != null) {
+                    $artist = User::find($artistId);
+                    if (!$artist) {
+                        $artistId = null;
                     }
                 }
                 // dd($songId, $artistId, $albumId);
-                
+
                 AudienceLog::create([
                     'ip_address' => $ip,
                     'country' => $locationData['country'] ?? null,
