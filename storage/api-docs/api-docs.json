@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/docs",
+            "url": "https://wemu.swastechinfoinnovations.in/web/public",
             "description": "API Server"
         }
     ],
