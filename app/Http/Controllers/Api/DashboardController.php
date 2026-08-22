@@ -251,7 +251,7 @@ class DashboardController extends BaseController
             }));
 
             foreach ($sections as &$section) {
-                $section['type_id'] = Str::slug($section['title']);
+                $section['type_id'] = Str::slug($section['title_in_english']);
                 $section['is_seeall'] = isset($section['items']) && count($section['items']) >= 5;
             }
             unset($section); // break the reference with the last element
