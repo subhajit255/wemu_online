@@ -20,9 +20,9 @@ class ArtistResource extends JsonResource
             'uuid' => $this->uuid,
             'name' => $this->name,
             'username' => $this->username,
-            'image_path' => $this->profile->image_path,
-            'cover_image_path' => $this->profile->cover_image_path,
-            'bio' => $this->profile->bio ?? null,
+            'image_path' => $this->profile?->image_path,
+            'cover_image_path' => $this->profile?->cover_image_path,
+            'bio' => $this->profile?->bio ?? null,
             'total_followers' => self::totalFollowers($this->id) ?? 0,
             'is_followed' => self::isFollowedArtist($this->id) ?? false
         ];
