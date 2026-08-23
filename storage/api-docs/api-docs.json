@@ -27,8 +27,7 @@
                 "security": [
                     {
                         "bearerAuth": []
-                    },
-                    {}
+                    }
                 ]
             }
         },
@@ -57,8 +56,7 @@
                 "security": [
                     {
                         "bearerAuth": []
-                    },
-                    {}
+                    }
                 ]
             }
         },

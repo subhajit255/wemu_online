@@ -16,7 +16,7 @@ class ArtistController extends BaseController
      *     path="/api/artists",
      *     summary="Get all artists",
      *     tags={"Artist"},
-     *     security={{"bearerAuth": {}}, {}},
+     *     security={{"bearerAuth": {}}},
      *     @OA\Response(response=200, description="Artists fetched successfully")
      * )
      */
@@ -43,7 +43,7 @@ class ArtistController extends BaseController
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
-     *     security={{"bearerAuth": {}}, {}},
+     *     security={{"bearerAuth": {}}},
      *     @OA\Response(response=200, description="Artist details fetched")
      * )
      */
