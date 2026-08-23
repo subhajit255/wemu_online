@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Api\SongResource;
+use App\Models\ArtistFollower;
 
 class AuthResource extends JsonResource
 {
@@ -27,7 +28,8 @@ class AuthResource extends JsonResource
                 'profile_image' => $this->image_path,
                 'songs' => SongResource::collection($this->songs),
                 'total_streams' => 0,
-                'total_duration' => $this->totalSongsDuration($this->songs->sum('duration'))
+                'total_duration' => $this->totalSongsDuration($this->songs->sum('duration')),
+                'is_followed' => $this->is_followed($this->id) ?? false
             ];
         } else {
             return [
@@ -54,5 +56,9 @@ class AuthResource extends JsonResource
         }
         $durationString .= $minutes . ' min';
         return $durationString;
+    }
+    public function is_followed($artist_id): bool
+    {
+        return auth()->check() ? ArtistFollower::where(['artist_id' => $artist_id, 'user_id' => auth()->id()])->exists() : false;
     }
 }
