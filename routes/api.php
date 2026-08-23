@@ -67,7 +67,7 @@ Route::controller(SubscriptionController::class)->group(function () {
     Route::get('/subscriptions', 'subscriptions')->name('subscriptions');
 });
 
-Route::controller(ArtistController::class)->group(function () {
+Route::middleware('auth.optional:api')->controller(ArtistController::class)->group(function () {
     Route::get('/artists', 'artists')->name('artists');
     Route::get('/artist/details/{id}', 'artistDetails')->name('artist.details');
 });

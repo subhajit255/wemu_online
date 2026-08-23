@@ -23,7 +23,13 @@
                     "200": {
                         "description": "Artists fetched successfully"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ]
             }
         },
         "/api/artist/details/{id}": {
@@ -47,7 +53,13 @@
                     "200": {
                         "description": "Artist details fetched"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ]
             }
         },
         "/api/signup": {
