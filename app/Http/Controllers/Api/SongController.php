@@ -615,6 +615,14 @@ class SongController extends BaseController
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
+     *         description="Number of items per page",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
