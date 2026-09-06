@@ -414,6 +414,7 @@ class SongController extends BaseController
      *             @OA\Schema(
      *                 @OA\Property(property="keywords", type="string"),
      *                 @OA\Property(property="per_page", type="integer", description="Number of items per page (default: 15)"),
+     *                 @OA\Property(property="page", type="integer", description="Page number for pagination (default: 1)"),
      *                 required={"keywords"}
      *             )
      *         )

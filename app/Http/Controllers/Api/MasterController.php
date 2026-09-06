@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Api\MasterResource;
+use App\Http\Resources\Api\PaginateMasterCollection;
 
 
 class MasterController extends BaseController
@@ -28,18 +29,33 @@ class MasterController extends BaseController
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (default: 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(response=200, description="Albums fetched successfully")
      * )
      */
     public function albums(Request $request)
     {
         try {
+            $perPage = $request->per_page ?? 15;
             $query = Album::where('status', 1);
             // Filter by genre_id if provided
             if ($request->filled('genre_id')) $query->where('genre_id', $request->genre_id);
             if ($request->filled('keyword')) $query->where('title', 'like', '%' . $request->keyword . '%');
-            $albums = $query->latest()->get();
-            return $this->responseJson(true, 200, 'Albums fetched successfully', MasterResource::collection($albums));
+            $albums = $query->latest()->paginate($perPage);
+            return $this->responseJson(true, 200, 'Albums fetched successfully', new PaginateMasterCollection($albums));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', []);

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\AuthResource;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\ArtistResource;
+use App\Http\Resources\Api\PaginateArtistCollection;
 use Illuminate\Support\Facades\Validator;
 
 class ArtistController extends BaseController
@@ -24,20 +25,35 @@ class ArtistController extends BaseController
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (default: 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(response=200, description="Artists fetched successfully")
      * )
      */
     public function artists(Request $request)
     {
         try {
+            $perPage = $request->per_page ?? 15;
             $artists = User::whereHas('roles', function ($q) {
                 $q->where('slug', 'artist');
             })
             ->when($request->filled('keyword'), function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->keyword . '%');
             })
-            ->whereNull('added_by')->get();
-            return $this->responseJson(true, 200, 'Artists fetched successfully', ArtistResource::collection($artists));
+            ->whereNull('added_by')->paginate($perPage);
+            return $this->responseJson(true, 200, 'Artists fetched successfully', new PaginateArtistCollection($artists));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', []);
