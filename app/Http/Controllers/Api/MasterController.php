@@ -21,6 +21,13 @@ class MasterController extends BaseController
      *     path="/api/albums",
      *     summary="Get all albums",
      *     tags={"Master"},
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="Search keyword for album title",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(response=200, description="Albums fetched successfully")
      * )
      */
@@ -30,6 +37,7 @@ class MasterController extends BaseController
             $query = Album::where('status', 1);
             // Filter by genre_id if provided
             if ($request->filled('genre_id')) $query->where('genre_id', $request->genre_id);
+            if ($request->filled('keyword')) $query->where('title', 'like', '%' . $request->keyword . '%');
             $albums = $query->latest()->get();
             return $this->responseJson(true, 200, 'Albums fetched successfully', MasterResource::collection($albums));
         } catch (\Throwable $th) {

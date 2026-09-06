@@ -20,6 +20,8 @@ use App\Http\Resources\Api\SongResource;
 use App\Http\Resources\Api\AlbumResource;
 use App\Http\Resources\Api\ArtistResource;
 use App\Http\Resources\Api\PaginateSongCollection;
+use App\Http\Resources\Api\PaginateAlbumCollection;
+use App\Http\Resources\Api\PaginateArtistCollection;
 use App\Models\StreamLog;
 
 class SongController extends BaseController
@@ -127,6 +129,13 @@ class SongController extends BaseController
      *     summary="Get my playlists",
      *     tags={"Song"},
      *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="Search keyword for playlist title",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(response=200, description="Playlists fetched successfully")
      * )
      */
@@ -135,6 +144,9 @@ class SongController extends BaseController
         try {
             $perPage = $request->per_page ?? 15;
             $playlists = PlayList::where('user_id', auth()->user()->id)
+                ->when($request->filled('keyword'), function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->keyword . '%');
+                })
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
             return $this->responseJson(true, 200, 'Playlists fetched successfully', new PaginatePlayListResource($playlists));
@@ -401,6 +413,7 @@ class SongController extends BaseController
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 @OA\Property(property="keywords", type="string"),
+     *                 @OA\Property(property="per_page", type="integer", description="Number of items per page (default: 15)"),
      *                 required={"keywords"}
      *             )
      *         )
@@ -428,6 +441,8 @@ class SongController extends BaseController
                 'keyword' => trim($keywords),
             ]);
 
+            $perPage = $request->per_page ?? 15;
+
             // Search Songs
             $songs = Song::where(function ($q) use ($keywords) {
                 $q->where('title', 'like', "%{$keywords}%")
@@ -436,7 +451,7 @@ class SongController extends BaseController
             })
                 ->where('status', 1)
                 ->with(['artist', 'album', 'genre'])
-                ->get();
+                ->paginate($perPage);
 
             // Search Albums
             $albums = Album::where(function ($q) use ($keywords) {
@@ -448,7 +463,7 @@ class SongController extends BaseController
             })
                 ->where('status', 1)
                 ->with('user')
-                ->get();
+                ->paginate($perPage);
 
             // Search Artists
             $artists = User::where(function ($q) use ($keywords) {
@@ -458,7 +473,7 @@ class SongController extends BaseController
                 // });
             })
                 ->whereHas('profile') // Profile usually means artist in this app
-                ->get();
+                ->paginate($perPage);
 
             // Search Public Playlists
             $playlists = PlayList::where('is_public', 1)
@@ -470,13 +485,13 @@ class SongController extends BaseController
                         });
                 })
                 ->with('user')
-                ->get();
+                ->paginate($perPage);
 
             $data = [
-                'songs' => SongResource::collection($songs),
-                'albums' => AlbumResource::collection($albums),
-                'artists' => ArtistResource::collection($artists),
-                'playlists' => PlayListResource::collection($playlists),
+                'songs' => new PaginateSongCollection($songs),
+                'albums' => new PaginateAlbumCollection($albums),
+                'artists' => new PaginateArtistCollection($artists),
+                'playlists' => new PaginatePlayListResource($playlists),
             ];
 
             return $this->responseJson(true, 200, 'Search results fetched successfully', $data);
@@ -596,6 +611,12 @@ class SongController extends BaseController
      *         required=false,
      *         @OA\Schema(type="integer")
      *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(response=200, description="Recommended songs fetched")
      * )
      */
@@ -632,7 +653,8 @@ class SongController extends BaseController
                 $artistIds = array_unique(array_merge($followedArtistIds, $chosenArtistIds, $likedSongArtistIds));
 
                 if (!empty($artistIds)) {
-                    $query->whereIn('user_id', $artistIds);
+                    $artistIdsStr = implode(',', $artistIds);
+                    $query->orderByRaw("user_id IN ($artistIdsStr) DESC");
                 }
             }
 

@@ -17,15 +17,26 @@ class ArtistController extends BaseController
      *     summary="Get all artists",
      *     tags={"Artist"},
      *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="Search keyword for artist name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(response=200, description="Artists fetched successfully")
      * )
      */
-    public function artists()
+    public function artists(Request $request)
     {
         try {
             $artists = User::whereHas('roles', function ($q) {
                 $q->where('slug', 'artist');
-            })->whereNull('added_by')->get();
+            })
+            ->when($request->filled('keyword'), function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->keyword . '%');
+            })
+            ->whereNull('added_by')->get();
             return $this->responseJson(true, 200, 'Artists fetched successfully', ArtistResource::collection($artists));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
