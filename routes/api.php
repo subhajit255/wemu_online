@@ -140,6 +140,7 @@ Route::middleware('auth:api')->group(function () {
     Route::controller(SongController::class)->group(function () {
         Route::post('/playlist/create-or-update', 'createUpdatePlaylist')->name('playlist.create-or-update');
         Route::get('/playlist/my-playlists', 'myPlayLists')->name('playlist.my-playlists');
+        Route::get('/playlist/songs-to-add', 'songsToAdd')->name('playlist.songs-to-add');
         Route::post('/playlist/add-remove-song', 'songAddRemovePlayList')->name('playlist.add-remove-song');
         Route::get('/playlist/details/{playlistId}', 'playListDetails')->name('playlist.details');
         Route::get('/playlist/delete/{playlistId}', 'deletePlaylist')->name('playlist.delete');

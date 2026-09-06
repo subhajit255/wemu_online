@@ -169,6 +169,54 @@ class SongController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/playlist/songs-to-add",
+     *     summary="Get songs list to add to playlist",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="keyword",
+     *         in="query",
+     *         description="Search keyword for song title",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (default: 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
+    public function songsToAdd(Request $request)
+    {
+        try {
+            $perPage = $request->per_page ?? 15;
+            $songs = Song::where('status', 1)
+                ->when($request->filled('keyword'), function ($q) use ($request) {
+                    $q->where('title', 'like', '%' . $request->keyword . '%');
+                })
+                ->latest()
+                ->paginate($perPage);
+
+            return $this->responseJson(true, 200, 'Songs fetched successfully', new PaginateSongCollection($songs));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
     /**
      * @OA\Post(
      *     path="/api/playlist/add-remove-song",
