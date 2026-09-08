@@ -489,6 +489,7 @@ class SongController extends BaseController
     {
         $validator = Validator::make($request->all(), [
             'keywords' => 'required|string',
+            'type' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -497,6 +498,12 @@ class SongController extends BaseController
 
         try {
             $keywords = $request->keywords;
+            $type = $request->type;
+
+            $validTypes = ['song', 'album', 'artist', 'playlist'];
+            if (!in_array($type, $validTypes)) {
+                $type = 'song';
+            }
 
             // Log search history
             SearchHistory::create([
@@ -505,57 +512,63 @@ class SongController extends BaseController
             ]);
 
             $perPage = $request->per_page ?? 15;
+            $data = [];
 
             // Search Songs
-            $songs = Song::where(function ($q) use ($keywords) {
-                $q->where('title', 'like', "%{$keywords}%")
-                    ->orWhere('artist_name', 'like', "%{$keywords}%")
-                    ->orWhere('description', 'like', "%{$keywords}%");
-            })
-                ->where('status', 1)
-                ->with(['artist', 'album', 'genre'])
-                ->paginate($perPage);
+            if ($type === 'song') {
+                $songs = Song::where(function ($q) use ($keywords) {
+                    $q->where('title', 'like', "%{$keywords}%")
+                        ->orWhere('artist_name', 'like', "%{$keywords}%")
+                        ->orWhere('description', 'like', "%{$keywords}%");
+                })
+                    ->where('status', 1)
+                    ->with(['artist', 'album', 'genre'])
+                    ->paginate($perPage);
+                $data['songs'] = new PaginateSongCollection($songs);
+            }
 
             // Search Albums
-            $albums = Album::where(function ($q) use ($keywords) {
-                $q->where('title', 'like', "%{$keywords}%")
-                    ->orWhereHas('songs', function ($sq) use ($keywords) {
-                        $sq->where('title', 'like', "%{$keywords}%")
-                            ->orWhere('artist_name', 'like', "%{$keywords}%");
-                    });
-            })
-                ->where('status', 1)
-                ->with('user')
-                ->paginate($perPage);
-
-            // Search Artists
-            $artists = User::where(function ($q) use ($keywords) {
-                $q->where('name', 'like', "%{$keywords}%");
-                // ->orWhereHas('songs', function ($sq) use ($keywords) {
-                //     $sq->where('title', 'like', "%{$keywords}%");
-                // });
-            })
-                ->whereHas('profile') // Profile usually means artist in this app
-                ->paginate($perPage);
-
-            // Search Public Playlists
-            $playlists = PlayList::where('is_public', 1)
-                ->where(function ($q) use ($keywords) {
+            if ($type === 'album') {
+                $albums = Album::where(function ($q) use ($keywords) {
                     $q->where('title', 'like', "%{$keywords}%")
                         ->orWhereHas('songs', function ($sq) use ($keywords) {
                             $sq->where('title', 'like', "%{$keywords}%")
                                 ->orWhere('artist_name', 'like', "%{$keywords}%");
                         });
                 })
-                ->with('user')
-                ->paginate($perPage);
+                    ->where('status', 1)
+                    ->with('user')
+                    ->paginate($perPage);
+                $data['albums'] = new PaginateAlbumCollection($albums);
+            }
 
-            $data = [
-                'songs' => new PaginateSongCollection($songs),
-                'albums' => new PaginateAlbumCollection($albums),
-                'artists' => new PaginateArtistCollection($artists),
-                'playlists' => new PaginatePlayListResource($playlists),
-            ];
+            // Search Artists
+            if ($type === 'artist') {
+                $artists = User::where(function ($q) use ($keywords) {
+                    $q->where('name', 'like', "%{$keywords}%");
+                    // ->orWhereHas('songs', function ($sq) use ($keywords) {
+                    //     $sq->where('title', 'like', "%{$keywords}%");
+                    // });
+                })
+                    ->whereHas('profile') // Profile usually means artist in this app
+                    ->paginate($perPage);
+                $data['artists'] = new PaginateArtistCollection($artists);
+            }
+
+            // Search Public Playlists
+            if ($type === 'playlist') {
+                $playlists = PlayList::where('is_public', 1)
+                    ->where(function ($q) use ($keywords) {
+                        $q->where('title', 'like', "%{$keywords}%")
+                            ->orWhereHas('songs', function ($sq) use ($keywords) {
+                                $sq->where('title', 'like', "%{$keywords}%")
+                                    ->orWhere('artist_name', 'like', "%{$keywords}%");
+                            });
+                    })
+                    ->with('user')
+                    ->paginate($perPage);
+                $data['playlists'] = new PaginatePlayListResource($playlists);
+            }
 
             return $this->responseJson(true, 200, 'Search results fetched successfully', $data);
         } catch (\Exception $e) {
