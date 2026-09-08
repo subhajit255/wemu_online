@@ -475,6 +475,7 @@ class SongController extends BaseController
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 @OA\Property(property="keywords", type="string"),
+     *                 @OA\Property(property="type", type="string", description="Type of search (song, album, artist, playlist). Defaults to song if absent or invalid."),
      *                 @OA\Property(property="per_page", type="integer", description="Number of items per page (default: 15)"),
      *                 @OA\Property(property="page", type="integer", description="Page number for pagination (default: 1)"),
      *                 required={"keywords"}
