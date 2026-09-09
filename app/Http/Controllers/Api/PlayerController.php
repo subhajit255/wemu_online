@@ -24,7 +24,7 @@ class PlayerController extends BaseController
      *     summary="Get player queue with autoplay support",
      *     tags={"Player"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(name="source_type", in="query", required=true, @OA\Schema(type="string", enum={"album", "artist", "playlist", "made_for_you", "new_release", "search", "recently_played", "liked_songs"})),
+     *     @OA\Parameter(name="source_type", in="query", required=true, description="Type of source. Examples: album, artist, playlist, made-for-you, new-release, search, recents, liked-songs, or dynamic genres like rock-for-you", @OA\Schema(type="string")),
      *     @OA\Parameter(name="source_id", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="keyword", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
@@ -36,7 +36,7 @@ class PlayerController extends BaseController
     public function playerQueue(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'source_type' => 'required|string|in:album,artist,playlist,made_for_you,new_release,search,recently_played,liked_songs',
+            'source_type' => 'required|string', // Loosened because of dynamic '*-for-you' types from dashboard
             'source_id' => 'required_if:source_type,album,artist,playlist|integer|nullable',
             'keyword' => 'required_if:source_type,search|string|nullable',
         ]);
@@ -68,6 +68,7 @@ class PlayerController extends BaseController
                         $q->select('song_id')->from('play_list_songs')->where('play_list_id', $sourceId);
                     });
                     break;
+                case 'new-release':
                 case 'new_release':
                     $baseQuery->orderBy('created_at', 'desc');
                     $isAutoplaySupported = false; // New releases are just the newest songs
@@ -80,6 +81,7 @@ class PlayerController extends BaseController
                     });
                     $isAutoplaySupported = false; // Usually don't autoplay after a search query ends
                     break;
+                case 'recents':
                 case 'recently_played':
                     if (auth('api')->check()) {
                         $songIds = PlayHistory::where('user_id', auth('api')->id())
@@ -98,6 +100,7 @@ class PlayerController extends BaseController
                     $isAutoplaySupported = false;
                     break;
                 case 'liked_songs':
+                case 'liked-songs':
                     if (auth('api')->check()) {
                         $songIds = SongLike::where('user_id', auth('api')->id())
                             ->orderByDesc('created_at')
@@ -113,6 +116,7 @@ class PlayerController extends BaseController
                         $baseQuery->whereRaw('1 = 0');
                     }
                     break;
+                case 'made-for-you':
                 case 'made_for_you':
                     if (auth('api')->check()) {
                         $playedSongIds = PlayHistory::where('user_id', auth('api')->id())->pluck('song_id');
@@ -124,6 +128,24 @@ class PlayerController extends BaseController
                         }
                     } else {
                         $baseQuery->inRandomOrder();
+                    }
+                    break;
+                default:
+                    // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
+                    if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you')) {
+                        $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
+                        $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                            return \Illuminate\Support\Str::slug($g->title_in_english) === $genreSlug;
+                        });
+
+                        if ($genre) {
+                            $baseQuery->where('genre_id', $genre->id);
+                        } else {
+                            $baseQuery->whereRaw('1 = 0'); // Empty if genre not found
+                        }
+                    } else {
+                        // Fallback to empty if unsupported
+                        $baseQuery->whereRaw('1 = 0');
                     }
                     break;
             }

@@ -19,6 +19,35 @@
                 ],
                 "summary": "Get all artists",
                 "operationId": "da6193af3211a284ff733ce49ca4e260",
+                "parameters": [
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "Search keyword for artist name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Artists fetched successfully"
@@ -1023,6 +1052,35 @@
                 ],
                 "summary": "Get all albums",
                 "operationId": "e95c495160fa902652056802ac490b5d",
+                "parameters": [
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "Search keyword for album title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Albums fetched successfully"
@@ -1121,6 +1179,76 @@
                 }
             }
         },
+        "/api/player/queue": {
+            "get": {
+                "tags": [
+                    "Player"
+                ],
+                "summary": "Get player queue with autoplay support",
+                "operationId": "3cd1bceed9a313ab2b79998dc46fdffd",
+                "parameters": [
+                    {
+                        "name": "source_type",
+                        "in": "query",
+                        "description": "Type of source. Examples: album, artist, playlist, made-for-you, new-release, search, recents, liked-songs, or dynamic genres like rock-for-you",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "source_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "last_played_song_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Player queue fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/playlist/create-or-update": {
             "post": {
                 "tags": [
@@ -1178,9 +1306,86 @@
                 ],
                 "summary": "Get my playlists",
                 "operationId": "8f27b178dcd99360562e8d9cf4c56c69",
+                "parameters": [
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "Search keyword for playlist title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Playlists fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/playlist/songs-to-add": {
+            "get": {
+                "tags": [
+                    "Song"
+                ],
+                "summary": "Get songs list to add to playlist",
+                "operationId": "0807d5c8a32002004e7557d041310f40",
+                "parameters": [
+                    {
+                        "name": "keyword",
+                        "in": "query",
+                        "description": "Search keyword for song title",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 15)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Songs fetched successfully"
                     }
                 },
                 "security": [
@@ -1371,6 +1576,18 @@
                                 "properties": {
                                     "keywords": {
                                         "type": "string"
+                                    },
+                                    "type": {
+                                        "description": "Type of search (song, album, artist, playlist). Defaults to song if absent or invalid.",
+                                        "type": "string"
+                                    },
+                                    "per_page": {
+                                        "description": "Number of items per page (default: 15)",
+                                        "type": "integer"
+                                    },
+                                    "page": {
+                                        "description": "Page number for pagination (default: 1)",
+                                        "type": "integer"
                                     }
                                 },
                                 "type": "object"
@@ -1438,6 +1655,24 @@
                         "name": "playlist_id",
                         "in": "query",
                         "description": "Optional playlist ID to exclude its songs",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -1783,6 +2018,10 @@
         {
             "name": "Master",
             "description": "Master"
+        },
+        {
+            "name": "Player",
+            "description": "Player"
         },
         {
             "name": "Song",
