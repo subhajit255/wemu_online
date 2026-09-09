@@ -32,7 +32,9 @@ class CmsController extends BaseController
 
                 // Map the frontend slugs to database aliases
                 $aliasMap = [
+                    'terms-condition'      => 'wemu_terms_of_use',
                     'terms-conditions'     => 'wemu_terms_of_use',
+                    'terms-and-condition'  => 'wemu_terms_of_use',
                     'terms-and-conditions' => 'wemu_terms_of_use',
                     'privacy-policy'       => 'privacy_policy',
                     'contact-us'           => 'contact_us',
