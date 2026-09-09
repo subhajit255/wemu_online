@@ -913,6 +913,17 @@
                 ],
                 "summary": "Get CMS pages",
                 "operationId": "56c712d548b2e6c1a6849b1e8eed2427",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "query",
+                        "description": "Slug of the page (e.g., terms-conditions, privacy-policy, contact-us, community-guidelines)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Pages fetched successfully"
