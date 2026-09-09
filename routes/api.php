@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\HelpAndSupportController;
 use App\Http\Controllers\Api\MasterController;
+use App\Http\Controllers\Api\PlayerController;
 use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -70,6 +71,10 @@ Route::controller(SubscriptionController::class)->group(function () {
 Route::middleware('auth.optional:api')->controller(ArtistController::class)->group(function () {
     Route::get('/artists', 'artists')->name('artists');
     Route::get('/artist/details/{id}', 'artistDetails')->name('artist.details');
+});
+
+Route::middleware('auth.optional:api')->controller(PlayerController::class)->group(function () {
+    Route::get('/player/queue', 'playerQueue')->name('player.queue');
 });
 
 Route::middleware('auth:api')->group(function () {

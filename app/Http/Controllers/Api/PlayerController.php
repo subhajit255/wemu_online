@@ -1,0 +1,216 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Models\Song;
+use App\Models\Album;
+use App\Models\User;
+use App\Models\PlayList;
+use App\Models\SongLike;
+use App\Models\PlayHistory;
+use App\Models\ArtistFollower;
+use App\Models\UserPreference;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\BaseController;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Api\PaginateSongCollection;
+
+class PlayerController extends BaseController
+{
+    /**
+     * @OA\Get(
+     *     path="/api/player/queue",
+     *     summary="Get player queue with autoplay support",
+     *     tags={"Player"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(name="source_type", in="query", required=true, @OA\Schema(type="string", enum={"album", "artist", "playlist", "made_for_you", "new_release", "search", "recently_played", "liked_songs"})),
+     *     @OA\Parameter(name="source_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="keyword", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="last_played_song_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Player queue fetched successfully")
+     * )
+     */
+    public function playerQueue(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'source_type' => 'required|string|in:album,artist,playlist,made_for_you,new_release,search,recently_played,liked_songs',
+            'source_id' => 'required_if:source_type,album,artist,playlist|integer|nullable',
+            'keyword' => 'required_if:source_type,search|string|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+        }
+
+        try {
+            $sourceType = $request->source_type;
+            $sourceId = $request->source_id;
+            $perPage = $request->per_page ?? 15;
+            $page = $request->page ?? 1;
+
+            // 1. Get Base Query
+            $baseQuery = Song::where('status', 1)->with(['artist', 'album', 'genre']);
+
+            $isAutoplaySupported = true; // Most sources support fallback to autoplay
+
+            switch ($sourceType) {
+                case 'album':
+                    $baseQuery->where('album_id', $sourceId);
+                    break;
+                case 'artist':
+                    $baseQuery->where('user_id', $sourceId);
+                    break;
+                case 'playlist':
+                    $baseQuery->whereIn('id', function ($q) use ($sourceId) {
+                        $q->select('song_id')->from('play_list_songs')->where('play_list_id', $sourceId);
+                    });
+                    break;
+                case 'new_release':
+                    $baseQuery->orderBy('created_at', 'desc');
+                    $isAutoplaySupported = false; // New releases are just the newest songs
+                    break;
+                case 'search':
+                    $keywords = $request->keyword;
+                    $baseQuery->where(function ($q) use ($keywords) {
+                        $q->where('title', 'like', "%{$keywords}%")
+                            ->orWhere('artist_name', 'like', "%{$keywords}%");
+                    });
+                    $isAutoplaySupported = false; // Usually don't autoplay after a search query ends
+                    break;
+                case 'recently_played':
+                    if (auth('api')->check()) {
+                        $songIds = PlayHistory::where('user_id', auth('api')->id())
+                            ->orderByDesc('last_played_at')
+                            ->pluck('song_id');
+                        if ($songIds->isNotEmpty()) {
+                            $idsStr = implode(',', $songIds->toArray());
+                            $baseQuery->whereIn('id', $songIds)
+                                ->orderByRaw("FIELD(id, {$idsStr})");
+                        } else {
+                            $baseQuery->whereRaw('1 = 0');
+                        }
+                    } else {
+                        $baseQuery->whereRaw('1 = 0');
+                    }
+                    $isAutoplaySupported = false;
+                    break;
+                case 'liked_songs':
+                    if (auth('api')->check()) {
+                        $songIds = SongLike::where('user_id', auth('api')->id())
+                            ->orderByDesc('created_at')
+                            ->pluck('song_id');
+                        if ($songIds->isNotEmpty()) {
+                            $idsStr = implode(',', $songIds->toArray());
+                            $baseQuery->whereIn('id', $songIds)
+                                ->orderByRaw("FIELD(id, {$idsStr})");
+                        } else {
+                            $baseQuery->whereRaw('1 = 0');
+                        }
+                    } else {
+                        $baseQuery->whereRaw('1 = 0');
+                    }
+                    break;
+                case 'made_for_you':
+                    if (auth('api')->check()) {
+                        $playedSongIds = PlayHistory::where('user_id', auth('api')->id())->pluck('song_id');
+                        $genreIds = Song::whereIn('id', $playedSongIds)->pluck('genre_id')->filter()->unique();
+                        if ($genreIds->isNotEmpty()) {
+                            $baseQuery->whereIn('genre_id', $genreIds)->inRandomOrder();
+                        } else {
+                            $baseQuery->inRandomOrder();
+                        }
+                    } else {
+                        $baseQuery->inRandomOrder();
+                    }
+                    break;
+            }
+
+            // Pagination setup
+            $totalBaseRecords = $baseQuery->count();
+
+            // Standard Pagination
+            $songs = $baseQuery->paginate($perPage, ['*'], 'page', $page);
+            $items = $songs->items();
+            $fetchedCount = count($items);
+
+            // Add 'is_autoplay' flag to base songs
+            foreach ($items as $item) {
+                $item->is_autoplay = false;
+            }
+
+            // Check if we need to append recommended songs (Autoplay)
+            if ($isAutoplaySupported && $fetchedCount < $perPage) {
+                $needed = $perPage - $fetchedCount;
+
+                // 2. Recommendation Logic (Autoplay)
+                $recommendQuery = Song::where('status', 1)->with(['artist', 'album', 'genre']);
+
+                // Exclude songs we already fetched in base query to avoid duplicates
+                $excludedSongIds = collect($items)->pluck('id')->toArray();
+
+                // Context-based recommendations
+                if ($sourceType === 'album') {
+                    $album = Album::find($sourceId);
+                    if ($album) {
+                        $recommendQuery->where(function ($q) use ($album) {
+                            $q->where('genre_id', $album->genre_id)
+                                ->orWhere('user_id', $album->user_id);
+                        });
+                    }
+                } elseif ($sourceType === 'artist') {
+                    $recommendQuery->where('user_id', $sourceId);
+                } elseif ($request->last_played_song_id) {
+                    $lastSong = Song::find($request->last_played_song_id);
+                    if ($lastSong) {
+                        $recommendQuery->where(function ($q) use ($lastSong) {
+                            $q->where('genre_id', $lastSong->genre_id)
+                                ->orWhere('user_id', $lastSong->user_id);
+                        });
+                    }
+                } else {
+                    // General recommendation based on user taste
+                    if (auth('api')->check()) {
+                        $userId = auth('api')->id();
+                        $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                        $chosenArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+
+                        $likedSongIds = DB::table('song_likes')->where('user_id', $userId)->pluck('song_id');
+                        $likedSongArtistIds = Song::whereIn('id', $likedSongIds)->pluck('user_id')->toArray();
+
+                        $artistIds = array_unique(array_merge($followedArtistIds, $chosenArtistIds, $likedSongArtistIds));
+                        if (!empty($artistIds)) {
+                            $artistIdsStr = implode(',', $artistIds);
+                            $recommendQuery->orderByRaw("user_id IN ($artistIdsStr) DESC");
+                        }
+                    }
+                }
+
+                if (!empty($excludedSongIds)) {
+                    $recommendQuery->whereNotIn('id', $excludedSongIds);
+                }
+
+                $recommendQuery->inRandomOrder(); // Add randomness to Autoplay
+
+                // We use limit offset for the recommendation part
+                $recommendOffset = max(0, ($page - 1) * $perPage - $totalBaseRecords + $fetchedCount);
+                $recommendedSongs = $recommendQuery->offset($recommendOffset)->limit($needed)->get();
+
+                foreach ($recommendedSongs as $rSong) {
+                    $rSong->is_autoplay = true;
+                    $items[] = $rSong; // Append to items
+                }
+
+                // Adjust paginator
+                $songs->setCollection(collect($items));
+            }
+
+            return $this->responseJson(true, 200, 'Player queue fetched successfully', new PaginateSongCollection($songs));
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
+}
