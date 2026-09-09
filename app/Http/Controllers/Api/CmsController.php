@@ -41,7 +41,9 @@ class CmsController extends BaseController
                 $dbAlias = $aliasMap[$slug] ?? str_replace('-', '_', $slug);
                 
                 // Fallback to exactly matching the alias if no map matched
-                $query->where('alias', $dbAlias)->orWhere('alias', $slug);
+                $query->where(function ($q) use ($dbAlias, $slug) {
+                    $q->where('alias', $dbAlias)->orWhere('alias', $slug);
+                });
 
                 // When a specific slug is requested, return the single page object
                 $cmsPage = $query->first();
