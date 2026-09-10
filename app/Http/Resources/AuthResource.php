@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Api\SongResource;
 use App\Models\ArtistFollower;
+use App\Models\PlayList;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AuthResource extends JsonResource
 {
@@ -39,7 +40,10 @@ class AuthResource extends JsonResource
                 'email' => $this->email,
                 'mobile' => $this->mobile_number,
                 'phone_code' => $this->phone_code,
-                'profile_image' => $this->image_path
+                'profile_image' => $this->image_path,
+                'playlists_count' => $this->totalPlaylists($this->id),
+                'following_count' => $this->totalFollowing($this->id),
+                'followers_count' => 0
             ];
         }
 
@@ -60,5 +64,13 @@ class AuthResource extends JsonResource
     public function is_followed($artist_id): bool
     {
         return auth()->check() ? ArtistFollower::where(['artist_id' => $artist_id, 'user_id' => auth()->id()])->exists() : false;
+    }
+    public function totalPlaylists($userId): int
+    {
+        return PlayList::where('user_id', $userId)->count();
+    }
+    public function totalFollowing($userId): int
+    {
+        return ArtistFollower::where('user_id', $userId)->count();
     }
 }
