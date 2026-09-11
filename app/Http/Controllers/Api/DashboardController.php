@@ -214,23 +214,23 @@ class DashboardController extends BaseController
                     'type' => 'song',
                     'items' => SongResource::collection($moreLike)
                 ],
-                [
-                    'title_in_english' => 'More of what you like',
-                    'title_in_spanish' => 'Más de lo que te gusta',
-                    'type' => 'block',
-                    'items' => [
-                        [
-                            'title_in_english' => 'Top songs Spanish',
-                            'title_in_spanish' => 'Canciones populares en español',
-                            'description' => 'Spanish songs collections'
-                        ],
-                        [
-                            'title_in_english' => 'Global Songs',
-                            'title_in_spanish' => 'Canciones globales',
-                            'description' => 'Global songs collections'
-                        ]
-                    ]
-                ],
+                // [
+                //     'title_in_english' => 'More of what you like',
+                //     'title_in_spanish' => 'Más de lo que te gusta',
+                //     'type' => 'block',
+                //     'items' => [
+                //         [
+                //             'title_in_english' => 'Top songs Spanish',
+                //             'title_in_spanish' => 'Canciones populares en español',
+                //             'description' => 'Spanish songs collections'
+                //         ],
+                //         [
+                //             'title_in_english' => 'Global Songs',
+                //             'title_in_spanish' => 'Canciones globales',
+                //             'description' => 'Global songs collections'
+                //         ]
+                //     ]
+                // ],
                 [
                     'title_in_english' => 'Popular radio',
                     'title_in_spanish' => 'Radio popular',
