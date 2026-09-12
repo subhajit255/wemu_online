@@ -169,6 +169,16 @@
                     </a>
                 </div>
 
+                <!-- Genres -->
+                <div class="menu-item">
+                    <a href="{{ route('admin.genre.list') }}">
+                        <span class="menu-link {{ request()->routeIs('admin.genre.*') ? 'active' : '' }}">
+                            <span class="menu-icon"><i class="fa-solid fa-list fs-5"></i></span>
+                            <span class="menu-title">Genres</span>
+                        </span>
+                    </a>
+                </div>
+
                 <!-- FAQs -->
                 <div class="menu-item">
                     <a href="{{ route('admin.faq.list') }}">

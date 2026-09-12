@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\GenreController;
 use App\Http\Controllers\Admin\BroadcastController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\NotificationController;
@@ -96,6 +97,11 @@ Route::as('admin.')->group(function () {
             Route::get('list', 'index')->name('list')->can('view-category');
             Route::any('add', 'add')->name('add')->can('add-category');
             Route::any('add/{uuid}', 'add')->name('edit')->can('edit-category');
+        });
+        Route::controller(GenreController::class)->as('genre.')->prefix('genre')->group(function () {
+            Route::get('list', 'index')->name('list');
+            Route::post('add', 'add')->name('add');
+            Route::post('delete', 'delete')->name('delete');
         });
         Route::controller(SettingController::class)->as('setting.')->prefix('setting')->group(function () {
             Route::any('update', 'index')->name('update')->can('view-setting');
