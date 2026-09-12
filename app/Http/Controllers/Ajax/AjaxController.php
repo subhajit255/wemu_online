@@ -122,6 +122,19 @@ class AjaxController extends BaseController
                     $data->delete();
                     $message = 'Coupon Deleted';
                     break;
+                case 'genres':
+                    $id = $request->uuid; // Genres use standard ID, not UUID
+                    $data = \App\Models\Genre::find($id);
+                    if ($data) {
+                        $songsCount = \App\Models\Song::where('genre_id', $id)->count();
+                        $albumsCount = \App\Models\Album::where('genre_id', $id)->count();
+                        if ($songsCount > 0 || $albumsCount > 0) {
+                            return $this->responseJson(false, 400, "Cannot delete genre. It is associated with songs or albums.");
+                        }
+                        $data->delete();
+                        $message = 'Genre Deleted';
+                    }
+                    break;
             }
             if ($data) {
                 return $this->responseJson(true, 200, $message);
@@ -188,6 +201,13 @@ class AjaxController extends BaseController
                     $id = uuidtoid($request->uuid, $table);
                     $data = Coupon::find($id);
                     $data->update(['is_active' => $request->status]);
+                    break;
+                case 'genres':
+                    $id = $request->uuid; // Genres use standard ID, not UUID
+                    $data = \App\Models\Genre::find($id);
+                    if ($data) {
+                        $data->update(['is_active' => $request->status]);
+                    }
                     break;
             }
             if ($data) {
