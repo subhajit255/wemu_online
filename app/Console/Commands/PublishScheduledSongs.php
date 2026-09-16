@@ -26,14 +26,14 @@ class PublishScheduledSongs extends Command
      */
     public function handle()
     {
-        // $updatedCount = Song::where('status', 0)
-        //     ->whereNotNull('published_at')
-        //     ->where('published_at', '<=', now())
-        //     ->update(['status' => 1]);
+        $updatedCount = Song::where('status', 0)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->update(['status' => 1]);
 
-        // if ($updatedCount > 0) {
-        //     logger()->info("Successfully published {$updatedCount} scheduled songs.");
-        // }
-        logger()->info('Cron is running fine');
+        if ($updatedCount > 0) {
+            logger()->info("Successfully published {$updatedCount} scheduled songs.");
+        }
+        // logger()->info('Cron is running fine');
     }
 }

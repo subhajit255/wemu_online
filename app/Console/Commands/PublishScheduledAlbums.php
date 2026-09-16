@@ -27,7 +27,7 @@ class PublishScheduledAlbums extends Command
     public function handle()
     {
         $currentDate = date('Y-m-d');
-        
+
         $albumCount = Album::where('status', 0)
             ->whereNotNull('release_date')
             ->where('release_date', '<=', $currentDate)
