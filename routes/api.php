@@ -170,12 +170,6 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']
 
 Route::post('/cron/publish-scheduled-songs', function () {
 
-    $secret = request()->header('X-Cron-Secret');
-
-    if ($secret !== env('CRON_SECRET')) {
-        abort(403);
-    }
-
     Artisan::call('songs:publish-scheduled');
 
     return response()->json([
