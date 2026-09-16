@@ -34,6 +34,6 @@ class PublishScheduledSongs extends Command
         if ($updatedCount > 0) {
             logger()->info("Successfully published {$updatedCount} scheduled songs.");
         }
-        // logger()->info('Cron is running fine');
+        logger()->info('song Cron is running fine');
     }
 }
