@@ -355,7 +355,7 @@ class DashboardController extends BaseController
                     return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
 
                 case 'new-release':
-                    $paginator = Song::orderBy('published_at', 'desc')->paginate($perPage);
+                    $paginator = Song::where("status", 1)->orderBy('published_at', 'desc')->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
 
                 case 'recents':
