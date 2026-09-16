@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Artist;
 
+use \App\Models\User;
 use App\Http\Controllers\BaseController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\Song;
+use App\Models\Album;
 use App\Models\Genre;
 use App\Models\Language;
-use App\Models\Album;
+use App\Models\Song;
 use App\Traits\UploadAble;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SongController extends BaseController
 {
@@ -34,7 +35,7 @@ class SongController extends BaseController
     {
         $currentDateTime = date('Y-m-d H:i:s');
         $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
-        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
         $query = Song::whereIn('user_id', $teamIds);
 
@@ -189,7 +190,7 @@ class SongController extends BaseController
         $genres    = Genre::where('is_active', 1)->get();
         $languages = Language::get();
         $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
-        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
         $albums    = Album::whereIn('user_id', $teamIds)->latest()->get();
 
         return view('artist.songs.form', compact('details', 'genres', 'languages', 'albums'));
