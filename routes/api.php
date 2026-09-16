@@ -177,3 +177,14 @@ Route::post('/cron/publish-scheduled-songs', function () {
         'message' => 'Scheduled songs command executed successfully.'
     ]);
 });
+
+
+Route::post('/cron/publish-scheduled-albums', function () {
+
+    Artisan::call('albums:publish-scheduled');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Scheduled albums command executed successfully.'
+    ]);
+});
