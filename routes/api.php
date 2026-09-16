@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 
@@ -166,3 +167,19 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('api.stripe.webhook');
+
+Route::post('/cron/publish-scheduled-songs', function () {
+
+    $secret = request()->header('X-Cron-Secret');
+
+    if ($secret !== env('CRON_SECRET')) {
+        abort(403);
+    }
+
+    Artisan::call('songs:publish-scheduled');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Scheduled songs command executed successfully.'
+    ]);
+});
