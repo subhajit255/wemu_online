@@ -207,4 +207,24 @@ class SongController extends BaseController
         $song = Song::with(['album', 'genre', 'language'])->findOrFail($id);
         return view('artist.songs.play', compact('song'));
     }
+
+    public function destroy($id)
+    {
+        $song = Song::findOrFail($id);
+        
+        // Delete related files
+        if ($song->cover_image) {
+            $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->cover_image);
+        }
+        if ($song->audio_file) {
+            $this->deleteOne(config('constants.SITE_SONG_UPLOAD_PATH') . '/' . $song->audio_file);
+        }
+        if ($song->background) {
+            $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->background);
+        }
+        
+        $song->delete();
+        
+        return redirect()->back()->with('success', 'Song deleted successfully.');
+    }
 }

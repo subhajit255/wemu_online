@@ -102,9 +102,21 @@
                                     <span class="text-dark fw-semibold d-block fs-7">{{ $song->created_at->format('M d, Y') }}</span>
                                 </td>
                                 <td class="text-end pe-6">
-                                    <a href="{{ route('artist.songs.show', $song->id) }}" class="btn btn-icon btn-light btn-sm w-30px h-30px" title="Play / View Details">
-                                        <i class="fa-solid fa-play fs-7 text-dark"></i>
-                                    </a>
+                                    <div class="d-flex justify-content-end align-items-center gap-1">
+                                        <a href="{{ route('artist.songs.show', $song->id) }}" class="btn btn-icon btn-light btn-sm w-30px h-30px" title="Play / View Details">
+                                            <i class="fa-solid fa-play fs-7 text-dark"></i>
+                                        </a>
+                                        <a href="{{ route('artist.songs.storeOrUpdate', $song->id) }}" class="btn btn-icon btn-light-primary btn-sm w-30px h-30px" title="Edit">
+                                            <i class="fa-solid fa-pen-to-square fs-7"></i>
+                                        </a>
+                                        <form action="{{ route('artist.songs.destroy', $song->id) }}" method="POST" class="d-inline form-delete">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-icon btn-light-danger btn-sm w-30px h-30px btn-delete" title="Delete">
+                                                <i class="fa-solid fa-trash fs-7"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -240,5 +252,28 @@
             outline: 0;
         }
     </style>
+    @endpush
+    @push('script')
+    <script>
+        $(document).ready(function() {
+            $('.btn-delete').on('click', function(e) {
+                e.preventDefault();
+                let form = $(this).closest('form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
     @endpush
     @endsection

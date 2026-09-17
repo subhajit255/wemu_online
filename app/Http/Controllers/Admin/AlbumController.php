@@ -107,4 +107,32 @@ class AlbumController extends BaseController
         $albumDetails = Album::with('songs')->find($id);
         return view('admin.album.show', compact('albumDetails'));
     }
+
+    public function destroy($id)
+    {
+        $album = Album::with('songs')->findOrFail($id);
+        
+        // Delete all associated songs and their files
+        foreach ($album->songs as $song) {
+            if ($song->cover_image) {
+                $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->cover_image);
+            }
+            if ($song->audio_file) {
+                $this->deleteOne(config('constants.SITE_SONG_UPLOAD_PATH') . '/' . $song->audio_file);
+            }
+            if ($song->background) {
+                $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->background);
+            }
+            $song->delete();
+        }
+
+        // Delete album cover image
+        if ($album->cover_image) {
+            $this->deleteOne(config('constants.SITE_ALBUM_UPLOAD_PATH') . '/' . $album->cover_image);
+        }
+
+        $album->delete();
+
+        return redirect()->back()->with('success', 'Album and all associated songs deleted successfully.');
+    }
 }

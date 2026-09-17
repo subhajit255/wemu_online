@@ -74,7 +74,13 @@
                                 </div>
                                 <div class="separator my-2"></div>
                                 <div class="menu-item px-3">
-                                    <a href="#" class="menu-link px-3 text-danger deleteData" data-uuid="{{ $album->uuid }}" data-table="albums"><i class="fa-solid fa-trash me-2 text-danger"></i> Delete Album</a>
+                                    <form action="{{ route('artist.albums.destroy', $album->id) }}" method="POST" class="d-inline form-delete">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="menu-link px-3 text-danger border-0 bg-transparent w-100 text-start btn-delete" style="cursor: pointer;">
+                                            <i class="fa-solid fa-trash me-2 text-danger"></i> Delete Album
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                             <!--end::Menu-->
@@ -165,5 +171,28 @@
         outline: 0;
     }
 </style>
+@endpush
+@push('script')
+<script>
+    $(document).ready(function() {
+        $('.btn-delete').on('click', function(e) {
+            e.preventDefault();
+            let form = $(this).closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "After delete all associated songs will be deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 @endpush
 @endsection

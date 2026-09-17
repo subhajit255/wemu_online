@@ -164,12 +164,14 @@ Route::as('admin.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::match(['get', 'post'], 'add-or-update/{id?}', 'storeOrUpdate')->name('storeOrUpdate');
             Route::get('details/{id}', 'show')->name('show');
+            Route::delete('delete/{id}', 'destroy')->name('destroy');
         });
         
         Route::controller(\App\Http\Controllers\Admin\AlbumController::class)->as('albums.')->prefix('albums')->group(function () {
             Route::match(['get', 'post'], '/', 'index')->name('index');
             Route::match(['get', 'post'], 'add-or-update/{id?}', 'storeOrUpdate')->name('storeOrUpdate');
             Route::get('{id}', 'show')->name('show');
+            Route::delete('delete/{id}', 'destroy')->name('destroy');
         });
         
         Route::controller(\App\Http\Controllers\Admin\ReportController::class)->as('report.')->prefix('report')->group(function () {
