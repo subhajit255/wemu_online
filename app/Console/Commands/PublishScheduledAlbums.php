@@ -36,6 +36,6 @@ class PublishScheduledAlbums extends Command
         if ($albumCount > 0) {
             logger()->info("Successfully published {$albumCount} scheduled albums.");
         }
-        logger()->info('album Cron is running fine');
+        // logger()->info('album Cron is running fine');
     }
 }
