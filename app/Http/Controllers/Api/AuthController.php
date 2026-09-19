@@ -99,6 +99,7 @@ class AuthController extends BaseController
                 'phone_code' => $request->phone_code,
                 'verification_code' => $otp,
                 'registration_ip' => request()->ip(),
+                'auth_provider' => 'email',
             ]);
 
             try {
@@ -1306,123 +1307,91 @@ class AuthController extends BaseController
     }
     /**
      * @OA\Post(
-     *     path="/api/todo/add",
-     *     summary="Add a new Todo item",
-     *     tags={"Todo"},
-     *     security={{"bearerAuth": {}}},
+     *     path="/api/social-login",
+     *     summary="Login using social provider",
+     *     tags={"Auth"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="title", type="string"),
-     *                 @OA\Property(property="description", type="string"),
-     *                 required={"title"}
+     *                 @OA\Property(property="name", type="string", description="User's full name"),
+     *                 @OA\Property(property="email", type="string", format="email", description="User's email"),
+     *                 @OA\Property(property="phone", type="string", description="User's phone number"),
+     *                 @OA\Property(property="profile_pic", type="string", description="Profile picture URL"),
+     *                 @OA\Property(property="provider", type="string", description="Social provider name (e.g., google, facebook)"),
+     *                 @OA\Property(property="provider_id", type="string", description="Social provider unique ID"),
+     *                 @OA\Property(property="fcm_token", type="string"),
+     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}),
+     *                 required={"name", "email", "provider", "provider_id"}
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Todo added successfully")
+     *     @OA\Response(response=200, description="Login successful (Returns Bearer token)"),
+     *     @OA\Response(response=422, description="Validation error")
      * )
      */
-    public function todoAdd(Request $request)
+    public function socialLogin(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id' => 'nullable|exists:todos,id',
-            'title' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:15',
+            'profile_pic' => 'nullable|string|max:255',
+            'provider' => 'required|string|max:255',
+            'provider_id' => 'required|string|max:255',
         ]);
         if ($validator->fails()) {
             return $this->responseJson(false, 422, $validator->errors()->first(), []);
         }
+
         DB::beginTransaction();
         try {
-            $todo = Todo::updateOrCreate(['id' => $request->id], [
-                'title' => $request->title,
-                'status' => 1,
-            ]);
+            $user = User::where('email', $request->email)->first();
+
+            if ($user) {
+                if ($user->provider == $request->provider && $user->provider_id == $request->provider_id) {
+                    $user->update([
+                        'name' => $request->name,
+                        'phone' => $request->phone,
+                        'profile_pic' => $request->profile_pic,
+                        'fcm_token' => $request->fcm_token ?? null,
+                        'device_type' => $request->device_type ?? 1,
+                    ]);
+                } else {
+                    $status = false;
+                    $code = 422;
+                    $response = [];
+                    $message = "User already exists with different provider";
+                    return $this->responseJson($status, $code, $message, $response);
+                }
+            } else {
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'profile_pic' => $request->profile_pic,
+                    'provider' => $request->provider,
+                    'provider_id' => $request->provider_id,
+                    'fcm_token' => $request->fcm_token ?? null,
+                    'device_type' => $request->device_type ?? 1,
+                ]);
+            }
+
             DB::commit();
-            $status = true;
-            $code = 200;
-            $response = new TodoCollection($todo);
-            $message = $request->id ? "Todo Updated Successfully" : "Todo Added Successfully";
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            $status = false;
-            $code = 500;
-            $response = ['Message' => $th->getMessage(), 'File Path' => $th->getFile(), 'Line Number' => $th->getLine()];
-            $message = config('constants.CATCH_ERROR_MSG');
-        }
-        return $this->responseJson($status, $code, $message, $response);
-    }
-    /**
-     * @OA\Post(
-     *     path="/api/todo/delete",
-     *     summary="Delete a Todo item",
-     *     tags={"Todo"},
-     *     security={{"bearerAuth": {}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="multipart/form-data",
-     *             @OA\Schema(
-     *                 @OA\Property(property="todo_id", type="integer"),
-     *                 required={"todo_id"}
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Todo deleted successfully")
-     * )
-     */
-    public function todoDelete(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'todo_id' => 'required|exists:todos,id',
-        ]);
-        if ($validator->fails()) {
-            return $this->responseJson(false, 422, $validator->errors()->first(), []);
-        }
-        DB::beginTransaction();
-        try {
-            $todo = Todo::find($request->todo_id);
-            $todo->delete();
-            DB::commit();
-            $status = true;
-            $code = 200;
-            $response = [];
-            $message = "Todo Deleted Successfully";
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            $status = false;
-            $code = 500;
-            $response = ['Message' => $th->getMessage(), 'File Path' => $th->getFile(), 'Line Number' => $th->getLine()];
-            $message = config('constants.CATCH_ERROR_MSG');
-        }
-        return $this->responseJson($status, $code, $message, $response);
-    }
-    /**
-     * @OA\Get(
-     *     path="/api/todo/list",
-     *     summary="List Todo items",
-     *     tags={"Todo"},
-     *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number",
-     *         required=false,
-     *         @OA\Schema(type="integer", default=1)
-     *     ),
-     *     @OA\Response(response=200, description="Todos fetched successfully")
-     * )
-     */
-    public function todoList(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            $todo = Todo::all();
-            $status = true;
-            $code = 200;
-            $response = TodoCollection::collection($todo);
-            $message = "Todo List";
+            $token = $user->createToken('Login Successfully')->accessToken;
+
+            if ($token) {
+                $status = true;
+                $code = 200;
+                $response = ['token' => $token, 'user' => new AuthResource($user)];
+                $message = 'Login Successfully';
+            } else {
+                $status = false;
+                $code = 500;
+                $response = [];
+                $message = 'Something went wrong';
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             $status = false;

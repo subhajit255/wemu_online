@@ -49,11 +49,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/cms', 'cms')->name('cms');
     Route::get('/faq', 'faq')->name('faq');
     Route::post('/contact-us', 'contactUs')->name('contact.us');
-
-
-    Route::get('/todo/list', 'todoList')->name('todo.list');
-    Route::post('/todo/add', 'todoAdd')->name('todo.add');
-    Route::post('/todo/delete', 'todoDelete')->name('todo.delete');
+    Route::post('/social-login', 'socialLogin')->name('social.login');
 });
 Route::controller(CmsController::class)->group(function () {
     Route::get('/pages', 'cmsPages')->name('pages');
