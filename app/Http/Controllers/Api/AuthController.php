@@ -338,9 +338,8 @@ class AuthController extends BaseController
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=200, description="Login successful (Returns Bearer token)"),
+     *     @OA\Response(response=200, description="Login successful (Returns Bearer token) | Account not found / account inactive / device limit reached"),
      *     @OA\Response(response=422, description="Validation error or invalid credentials"),
-     *     @OA\Response(response=200, description="Account not found / account inactive / device limit reached"),
      *     @OA\Response(response=500, description="Something went wrong")
      * )
      */
