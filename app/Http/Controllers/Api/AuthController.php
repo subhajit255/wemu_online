@@ -328,17 +328,20 @@ class AuthController extends BaseController
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="password", type="string", format="password"),
-     *                 @OA\Property(property="device_token", type="string"),
-     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}),
+     *                 @OA\Property(property="email", type="string", format="email", description="User email address"),
+     *                 @OA\Property(property="password", type="string", format="password", description="User password"),
+     *                 @OA\Property(property="device_token", type="string", description="Unique device token to identify the login session"),
+     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}, description="Device type"),
+     *                 @OA\Property(property="device_name", type="string", description="Optional device name"),
+     *                 @OA\Property(property="fcm_token", type="string", description="Firebase cloud messaging token"),
      *                 required={"email", "password"}
      *             )
      *         )
      *     ),
      *     @OA\Response(response=200, description="Login successful (Returns Bearer token)"),
-     *     @OA\Response(response=422, description="Validation error"),
-     *     @OA\Response(response=401, description="Invalid credentials")
+     *     @OA\Response(response=422, description="Validation error or invalid credentials"),
+     *     @OA\Response(response=200, description="Account not found / account inactive / device limit reached"),
+     *     @OA\Response(response=500, description="Something went wrong")
      * )
      */
     public function loginViaEmail(Request $request)
@@ -534,8 +537,19 @@ class AuthController extends BaseController
      *     summary="Logout the user",
      *     tags={"Auth"},
      *     security={{"bearerAuth": {}}},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="device_token", type="string", description="Device token used to revoke the matching logged-in session"),
+     *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}, description="Device type for logout tracking")
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(response=200, description="Logout successfully"),
-     *     @OA\Response(response=401, description="Unauthenticated")
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=500, description="Something went wrong")
      * )
      */
     public function logout(Request $request)
