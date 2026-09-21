@@ -2,43 +2,45 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Role;
-use App\Models\Cms;
-use App\Models\Faq;
-use App\Models\Blog;
-use App\Models\User;
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\Api\Auth\BannerCollection;
+use App\Http\Resources\Api\Auth\BlogCollection;
+use App\Http\Resources\Api\Auth\CategoryCollection;
+use App\Http\Resources\Api\Auth\CmsCollection;
+use App\Http\Resources\Api\Auth\FaqCollection;
+use App\Http\Resources\Api\Auth\FeatureCollection;
+use App\Http\Resources\Api\Auth\ProductCollection;
+use App\Http\Resources\Api\Auth\ServiceFrequencyCollection;
+use App\Http\Resources\Api\Auth\SettingCollection;
+use App\Http\Resources\Api\Auth\TodoCollection;
+use App\Http\Resources\AuthResource;
 use App\Models\Banner;
+use App\Models\Blog;
+use App\Models\Category;
+use App\Models\Cms;
 use App\Models\Contact;
+use App\Models\DeviceDetails;
+use App\Models\Faq;
 use App\Models\Feature;
 use App\Models\Product;
-use App\Models\Setting;
-use App\Models\Category;
-use App\Traits\SmsTrait;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\DeviceDetails;
-use App\Traits\CommonFunction;
+use App\Models\Role;
 use App\Models\ServiceFrequency;
+use App\Models\Setting;
+use App\Models\Todo;
+use App\Models\User;
+use App\Models\UserDevice;
+use App\Models\UserSubscription;
+use App\Traits\CommonFunction;
 use App\Traits\NotificationTrait;
+use App\Traits\SmsTrait;
+use App\Traits\StripeTrait;
+use App\Traits\UploadAble;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\Api\Auth\CmsCollection;
-use App\Http\Resources\Api\Auth\FaqCollection;
-use App\Http\Resources\Api\Auth\BlogCollection;
-use App\Http\Resources\Api\Auth\BannerCollection;
-use App\Http\Resources\Api\Auth\FeatureCollection;
-use App\Http\Resources\Api\Auth\ProductCollection;
-use App\Http\Resources\Api\Auth\SettingCollection;
-use App\Http\Resources\Api\Auth\CategoryCollection;
-use App\Http\Resources\Api\Auth\ServiceFrequencyCollection;
-use App\Http\Resources\Api\Auth\TodoCollection;
-use App\Http\Resources\AuthResource;
-use App\Models\Todo;
-use App\Traits\UploadAble;
-use App\Traits\StripeTrait;
+use Illuminate\Support\Str;
 
 class AuthController extends BaseController
 {
@@ -375,6 +377,44 @@ class AuthController extends BaseController
                     'fcm_token' => $request->fcm_token ?? null,
                     'device_type' => $request->device_type ?? 1,
                 ]);
+                // check user subscription info
+                $userSubscription = UserSubscription::where('user_id', $user->id)->where('status', 1)->latest()->first();
+                if (is_object($userSubscription) && $userSubscription->subscription()) {
+                    $subscription = $userSubscription->subscription();
+                    $isSubscriptionTypeFree = $subscription->is_default;
+
+                    if ($isSubscriptionTypeFree == 1) {
+                        $maxDevices = 1;
+                    } else {
+                        // Use max_users from subscription table for standard, premium, etc.
+                        $maxDevices = $subscription->max_users ?? 1;
+                    }
+
+                    // check user logged in device count, excluding the current device if it's already logged in
+                    $deviceQuery = UserDevice::where('user_id', $user->id)->where('is_logged_in', 1);
+                    if ($request->device_token) {
+                        $deviceQuery->where('device_token', '!=', $request->device_token);
+                    }
+                    $userDeviceCount = $deviceQuery->count();
+
+                    if ($userDeviceCount >= $maxDevices) {
+                        $status = false;
+                        $code = 200;
+                        $response = [];
+                        $message = 'You have already logged in from ' . $userDeviceCount . ' device(s). Please logout from other device(s) to continue.';
+                        return $this->responseJson($status, $code, $message, $response);
+                    }
+                }
+                // register the login device details
+                UserDevice::updateOrCreate(
+                    ['user_id' => $user->id, 'device_token' => $request->device_token ?? null],
+                    [
+                        'device_token' => $request->device_token ?? null,
+                        'device_type' => $request->device_type ?? 1,
+                        'device_name' => $request->device_name ?? null,
+                        'is_logged_in' => true
+                    ]
+                );
 
                 DB::commit();
                 $token = $user->createToken('Login Successfully')->accessToken;
@@ -500,9 +540,16 @@ class AuthController extends BaseController
      */
     public function logout(Request $request)
     {
-        $token = auth()->user()->token();
+        $user = auth()->user();
+        $token = $user->token();
         $tokenRevoke = $token->revoke();
         if ($tokenRevoke) {
+            if ($request->device_token) {
+                UserDevice::where('user_id', $user->id)
+                    ->where('device_token', $request->device_token)
+                    ->delete();
+            }
+
             $status = true;
             $code = 200;
             $response = [];

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use \App\Models\UserSubscription;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Stripe\Webhook;
+use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Webhook;
 
 class StripeWebhookController extends Controller
 {
@@ -46,6 +48,14 @@ class StripeWebhookController extends Controller
                 }
                 break;
 
+            case 'invoice.payment_failed':
+                $invoice = $event->data->object;
+
+                if ($invoice->billing_reason == 'subscription_cycle') {
+                    $this->handleFailedPayment($invoice);
+                }
+                break;
+
             case 'customer.subscription.updated':
             case 'customer.subscription.deleted':
                 $subscription = $event->data->object;
@@ -67,7 +77,7 @@ class StripeWebhookController extends Controller
             $customerId = $invoice->customer;
 
             // Find local user subscription
-            $userSub = \App\Models\UserSubscription::where('stripe_id', $subscriptionId)->first();
+            $userSub = UserSubscription::where('stripe_id', $subscriptionId)->first();
 
             if ($userSub) {
                 // Update dates
@@ -81,7 +91,7 @@ class StripeWebhookController extends Controller
                 ]);
 
                 // Record transaction
-                \App\Models\Transaction::create([
+                Transaction::create([
                     'user_id' => $userSub->user_id,
                     'transaction_id' => $invoice->payment_intent ?? $invoice->id,
                     'payment_type' => 'stripe_recurring',
@@ -106,12 +116,29 @@ class StripeWebhookController extends Controller
         try {
             $subscriptionId = $stripeSubscription->id;
 
-            $status = in_array($stripeSubscription->status, ['active', 'trialing']) ? 1 : 0;
+            $status = 0; // 0: in-active
+            switch ($stripeSubscription->status) {
+                case 'active':
+                case 'trialing':
+                    $status = 1; // 1: active
+                    break;
+                case 'canceled':
+                    $status = 3; // 3: cancelled
+                    break;
+                case 'unpaid':
+                case 'incomplete_expired':
+                    $status = 2; // 2: expired
+                    break;
+                case 'past_due':
+                default:
+                    $status = 0; // 0: in-active
+                    break;
+            }
             $cancelAt = $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null;
             $periodStart = \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start);
             $periodEnd = \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end);
 
-            \App\Models\UserSubscription::where('stripe_id', $subscriptionId)
+            UserSubscription::where('stripe_id', $subscriptionId)
                 ->update([
                     'stripe_status' => $stripeSubscription->status,
                     'status' => $status,
@@ -123,6 +150,40 @@ class StripeWebhookController extends Controller
             Log::info("Successfully updated subscription state for {$subscriptionId} to {$stripeSubscription->status}");
         } catch (\Exception $e) {
             Log::error('Error processing subscription change: ' . $e->getMessage());
+        }
+    }
+
+    private function handleFailedPayment($invoice)
+    {
+        try {
+            $subscriptionId = $invoice->subscription;
+            $customerId = $invoice->customer;
+
+            // Find local user subscription
+            $userSub = UserSubscription::where('stripe_id', $subscriptionId)->first();
+
+            if ($userSub) {
+                // Update subscription status to 0 (in-active) on failed payment
+                $userSub->update(['status' => 0]);
+
+                // Record failed transaction
+                Transaction::create([
+                    'user_id' => $userSub->user_id,
+                    'transaction_id' => $invoice->payment_intent ?? $invoice->id,
+                    'payment_type' => 'stripe_recurring_failed',
+                    'amount' => $invoice->amount_due / 100, // Use amount_due for failed
+                    'currency' => strtoupper($invoice->currency),
+                    'payment_status' => 'failed',
+                    'payment_details' => json_encode($invoice),
+                    'description' => 'Failed recurring subscription payment',
+                ]);
+
+                Log::info("Successfully logged failed recurring payment for subscription {$subscriptionId}");
+            } else {
+                Log::warning("Received payment_failed for unknown subscription {$subscriptionId}");
+            }
+        } catch (\Exception $e) {
+            Log::error('Error processing failed payment cycle: ' . $e->getMessage());
         }
     }
 }
