@@ -381,30 +381,32 @@ class AuthController extends BaseController
                 ]);
                 // check user subscription info
                 $userSubscription = UserSubscription::where('user_id', $user->id)->where('status', 1)->latest()->first();
-                if (is_object($userSubscription) && $userSubscription->subscription()) {
-                    $subscription = $userSubscription->subscription();
-                    $isSubscriptionTypeFree = $subscription->is_default;
+                if ($userSubscription) {
+                    $subscription = $userSubscription->subscription;
 
-                    if ($isSubscriptionTypeFree == 1) {
-                        $maxDevices = 1;
-                    } else {
-                        // Use max_users from subscription table for standard, premium, etc.
-                        $maxDevices = $subscription->max_users ?? 1;
-                    }
+                    if ($subscription) {
+                        $isSubscriptionTypeFree = (int) ($subscription->is_default ?? 0);
 
-                    // check user logged in device count, excluding the current device if it's already logged in
-                    $deviceQuery = UserDevice::where('user_id', $user->id)->where('is_logged_in', 1);
-                    if ($request->device_token) {
-                        $deviceQuery->where('device_token', '!=', $request->device_token);
-                    }
-                    $userDeviceCount = $deviceQuery->count();
+                        if ($isSubscriptionTypeFree == 1) {
+                            $maxDevices = 1;
+                        } else {
+                            $maxDevices = (int) ($subscription->max_users ?? 1);
+                        }
 
-                    if ($userDeviceCount >= $maxDevices) {
-                        $status = false;
-                        $code = 200;
-                        $response = [];
-                        $message = 'You have already logged in from ' . $userDeviceCount . ' device(s). Please logout from other device(s) to continue.';
-                        return $this->responseJson($status, $code, $message, $response);
+                        // check user logged in device count, excluding the current device if it's already logged in
+                        $deviceQuery = UserDevice::where('user_id', $user->id)->where('is_logged_in', 1);
+                        if ($request->device_token) {
+                            $deviceQuery->where('device_token', '!=', $request->device_token);
+                        }
+                        $userDeviceCount = $deviceQuery->count();
+
+                        if ($userDeviceCount >= $maxDevices) {
+                            $status = false;
+                            $code = 200;
+                            $response = [];
+                            $message = 'You have already logged in from ' . $userDeviceCount . ' device(s). Please logout from other device(s) to continue.';
+                            return $this->responseJson($status, $code, $message, $response);
+                        }
                     }
                 }
                 // register the login device details
