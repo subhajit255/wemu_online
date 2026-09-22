@@ -409,12 +409,13 @@ class AuthController extends BaseController
                         }
                     }
                 }
+                $deviceType = $request->device_type == 'android' ? 1 : ($request->device_type == 'ios' ? 2 : 3);
                 // register the login device details
                 UserDevice::updateOrCreate(
                     ['user_id' => $user->id, 'device_token' => $request->device_token ?? null],
                     [
                         'device_token' => $request->device_token ?? null,
-                        'device_type' => $request->device_type ?? 1,
+                        'device_type' => $deviceType,
                         'device_name' => $request->device_name ?? null,
                         'is_logged_in' => true
                     ]
