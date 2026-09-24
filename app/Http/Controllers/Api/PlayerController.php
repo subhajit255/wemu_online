@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Song;
+use \App\Http\Resources\Api\SongResource;
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\Api\PaginateSongCollection;
 use App\Models\Album;
-use App\Models\User;
-use App\Models\PlayList;
-use App\Models\SongLike;
-use App\Models\PlayHistory;
 use App\Models\ArtistFollower;
+use App\Models\PlayHistory;
+use App\Models\PlayList;
+use App\Models\Song;
+use App\Models\SongLike;
+use App\Models\User;
 use App\Models\UserPreference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Resources\Api\PaginateSongCollection;
 
 class PlayerController extends BaseController
 {
@@ -30,6 +31,7 @@ class PlayerController extends BaseController
      *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="last_played_song_id", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="direction", in="query", required=false, description="Direction for local queue generation: next or prev", @OA\Schema(type="string", enum={"next", "prev"})),
      *     @OA\Response(response=200, description="Player queue fetched successfully")
      * )
      */
@@ -39,6 +41,7 @@ class PlayerController extends BaseController
             'source_type' => 'required|string', // Loosened because of dynamic '*-for-you' types from dashboard
             'source_id' => 'required_if:source_type,album,artist,playlist|integer|nullable',
             'keyword' => 'required_if:source_type,search|string|nullable',
+            'direction' => 'nullable|in:next,prev',
         ]);
 
         if ($validator->fails()) {
@@ -236,7 +239,30 @@ class PlayerController extends BaseController
                 $songs->setCollection(collect($items));
             }
 
-            return $this->responseJson(true, 200, 'Player queue fetched successfully', new PaginateSongCollection($songs));
+            $responseArray = (new PaginateSongCollection($songs))->toArray($request);
+            $localQueue = [];
+
+            if ($request->direction && $request->last_played_song_id) {
+                $foundIndex = -1;
+                foreach ($items as $index => $item) {
+                    if ($item->id == $request->last_played_song_id) {
+                        $foundIndex = $index;
+                        break;
+                    }
+                }
+
+                if ($foundIndex !== -1) {
+                    if ($request->direction === 'next') {
+                        $localQueue = array_slice($items, $foundIndex + 1);
+                    } elseif ($request->direction === 'prev') {
+                        $localQueue = array_reverse(array_slice($items, 0, $foundIndex));
+                    }
+                }
+            }
+
+            $responseArray['local_queue'] = SongResource::collection(collect($localQueue));
+
+            return $this->responseJson(true, 200, 'Player queue fetched successfully', $responseArray);
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
