@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use \App\Http\Resources\Api\PaginateSongCollection;
 use \Illuminate\Support\Facades\Cache;
 use \Illuminate\Support\Facades\Http;
 use \Illuminate\Support\Facades\Validator;
 use \Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\ArtistResource;
+use App\Http\Resources\Api\PaginatePlayListResource;
 use App\Http\Resources\Api\PlayListResource;
 use App\Http\Resources\Api\SongResource;
 use App\Models\ArtistFollower;
@@ -352,11 +354,11 @@ class DashboardController extends BaseController
                         $query->orderByDesc('play_count');
                     }
                     $paginator = $query->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'new-release':
                     $paginator = Song::where("status", 1)->orderBy('published_at', 'desc')->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'recents':
                     $paginator = PlayHistory::with(['song.artist', 'song.album', 'song.genre'])
@@ -367,7 +369,7 @@ class DashboardController extends BaseController
                     $paginator->getCollection()->transform(function ($item) {
                         return $item->song;
                     });
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'artists-you-like':
                     if (!empty($artistIds)) {
@@ -388,7 +390,7 @@ class DashboardController extends BaseController
 
                 case 'features-songs':
                     $paginator = PlayList::where('is_public', 1)->inRandomOrder()->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'popular-radio':
                     $paginator = User::whereHas('profile')->withCount('followers')->orderByDesc('followers_count')->paginate($perPage);
@@ -405,7 +407,7 @@ class DashboardController extends BaseController
 
                 case 'your-top-mixes':
                     $paginator = PlayList::where('is_public', 1)->inRandomOrder()->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginatePlayListResource($paginator));
 
                 case Str::slug($country . '\'s Best'):
                     $paginator = PlayList::where('is_public', 1)
@@ -416,7 +418,7 @@ class DashboardController extends BaseController
                                     ->orWhere('title', 'like', '%Bollywood%');
                             }
                         })->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginatePlayListResource($paginator));
 
                 case 'sad-songs':
                     $paginator = PlayList::where('is_public', 1)
@@ -424,7 +426,7 @@ class DashboardController extends BaseController
                             $q->where('title', 'like', '%Sad%')
                                 ->orWhere('description', 'like', '%Sad%');
                         })->paginate($perPage);
-                    return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginatePlayListResource($paginator));
+                    return $this->responseJson(true, 200, 'Data fetched successfully', new PaginatePlayListResource($paginator));
 
                 default:
                     if (Str::endsWith($typeId, '-for-you')) {
@@ -437,7 +439,7 @@ class DashboardController extends BaseController
                             $paginator = Song::where('status', 1)
                                 ->where('genre_id', $genre->id)
                                 ->paginate($perPage);
-                            return $this->responseJson(true, 200, 'Data fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($paginator));
+                            return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
                         }
                     }
                     break;

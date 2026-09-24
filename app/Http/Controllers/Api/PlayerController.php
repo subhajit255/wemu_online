@@ -70,7 +70,7 @@ class PlayerController extends BaseController
                     break;
                 case 'new-release':
                 case 'new_release':
-                    $baseQuery->orderBy('created_at', 'desc');
+                    $baseQuery->orderBy('published_at', 'desc');
                     $isAutoplaySupported = false; // New releases are just the newest songs
                     break;
                 case 'search':
