@@ -252,10 +252,13 @@ class PlayerController extends BaseController
                 }
 
                 if ($foundIndex !== -1) {
+                    $before = array_slice($items, 0, $foundIndex);
+                    $after = array_slice($items, $foundIndex + 1);
+
                     if ($request->direction === 'next') {
-                        $localQueue = array_slice($items, $foundIndex + 1);
+                        $localQueue = array_merge($after, $before);
                     } elseif ($request->direction === 'prev') {
-                        $localQueue = array_reverse(array_slice($items, 0, $foundIndex));
+                        $localQueue = array_merge(array_reverse($before), array_reverse($after));
                     }
                 }
             }
