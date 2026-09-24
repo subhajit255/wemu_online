@@ -1417,7 +1417,7 @@ class AuthController extends BaseController
                     $user->update([
                         'name' => $request->name,
                         'mobile_number' => $request->phone,
-                        'profile_pic' => $request->profile_pic,
+                        'profile_image' => $request->profile_pic,
                         'fcm_token' => $request->fcm_token ?? null,
                         'device_type' => $request->device_type ?? 1,
                     ]);
@@ -1433,7 +1433,7 @@ class AuthController extends BaseController
                     'name' => $request->name,
                     'email' => $request->email,
                     'mobile_number' => $request->phone,
-                    'profile_pic' => $request->profile_pic,
+                    'profile_image' => $request->profile_pic,
                     'provider' => $request->provider,
                     'provider_id' => $request->provider_id,
                     'fcm_token' => $request->fcm_token ?? null,
