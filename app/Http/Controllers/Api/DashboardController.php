@@ -182,8 +182,8 @@ class DashboardController extends BaseController
                     }
                 })->take(5)->get();
 
-            // 8. More of what you like
-            $moreLike = PlayList::where('is_public', 1)->inRandomOrder()->take(5)->get();
+            // 8. More of what you like / Features songs
+            $moreLike = Song::where('status', 1)->inRandomOrder()->take(5)->get();
 
             $sections = [
                 [
@@ -389,7 +389,7 @@ class DashboardController extends BaseController
                     ]);
 
                 case 'features-songs':
-                    $paginator = PlayList::where('is_public', 1)->inRandomOrder()->paginate($perPage);
+                    $paginator = Song::where('status', 1)->inRandomOrder()->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'popular-radio':

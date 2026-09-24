@@ -119,16 +119,23 @@ class PlayerController extends BaseController
                 case 'made-for-you':
                 case 'made_for_you':
                     if (auth('api')->check()) {
-                        $playedSongIds = PlayHistory::where('user_id', auth('api')->id())->pluck('song_id');
-                        $genreIds = Song::whereIn('id', $playedSongIds)->pluck('genre_id')->filter()->unique();
-                        if ($genreIds->isNotEmpty()) {
-                            $baseQuery->whereIn('genre_id', $genreIds)->inRandomOrder();
+                        $userId = auth('api')->id();
+                        $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                        $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+                        $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
+
+                        if (!empty($artistIds)) {
+                            $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
                         } else {
-                            $baseQuery->inRandomOrder();
+                            $baseQuery->orderByDesc('play_count');
                         }
                     } else {
-                        $baseQuery->inRandomOrder();
+                        $baseQuery->orderByDesc('play_count');
                     }
+                    break;
+                case 'features-songs':
+                case 'features_songs':
+                    $baseQuery->inRandomOrder();
                     break;
                 default:
                     // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
