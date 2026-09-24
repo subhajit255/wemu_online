@@ -1434,7 +1434,7 @@ class AuthController extends BaseController
                     'email' => $request->email,
                     'mobile_number' => $request->phone,
                     'profile_image' => $request->profile_pic,
-                    'provider' => $request->provider,
+                    'auth_provider' => $request->provider,
                     'provider_id' => $request->provider_id,
                     'fcm_token' => $request->fcm_token ?? null,
                     'device_type' => $request->device_type ?? 1,
