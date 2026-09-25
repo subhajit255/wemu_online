@@ -25,7 +25,7 @@ class PlayerController extends BaseController
      *     summary="Get player queue with autoplay support",
      *     tags={"Player"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Parameter(name="source_type", in="query", required=true, description="Type of source. Examples: album, artist, playlist, made-for-you, new-release, search, recents, liked-songs, or dynamic genres like rock-for-you", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="source_type", in="query", required=true, description="Type of source. Examples: album, artist, playlist, made-for-you, artists-you-like, new-release, search, recents, liked-songs, or dynamic genres like rock-for-you", @OA\Schema(type="string")),
      *     @OA\Parameter(name="source_id", in="query", required=false, @OA\Schema(type="integer")),
      *     @OA\Parameter(name="keyword", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
