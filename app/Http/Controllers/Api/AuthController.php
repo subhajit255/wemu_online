@@ -402,7 +402,7 @@ class AuthController extends BaseController
 
                         if ($userDeviceCount >= $maxDevices) {
                             $status = false;
-                            $code = 200;
+                            $code = 401;
                             $response = [];
                             $message = 'You have already logged in from ' . $userDeviceCount . ' device(s). Please logout from other device(s) to continue.';
                             return $this->responseJson($status, $code, $message, $response);
