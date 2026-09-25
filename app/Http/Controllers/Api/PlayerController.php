@@ -267,7 +267,7 @@ class PlayerController extends BaseController
             }
 
             $responseArray = (new PaginateSongCollection($songs))->toArray($request);
-            $localQueue = [];
+            $localQueue = $items;
 
             if ($request->direction && $request->last_played_song_id) {
                 $foundIndex = -1;
@@ -281,11 +281,12 @@ class PlayerController extends BaseController
                 if ($foundIndex !== -1) {
                     $before = array_slice($items, 0, $foundIndex);
                     $after = array_slice($items, $foundIndex + 1);
+                    $current = [$items[$foundIndex]];
 
                     if ($request->direction == 'next') {
-                        $localQueue = array_merge($after, $before);
+                        $localQueue = array_merge($after, $before, $current);
                     } elseif ($request->direction == 'prev') {
-                        $localQueue = array_merge(array_reverse($before), array_reverse($after));
+                        $localQueue = array_merge(array_reverse($before), array_reverse($after), $current);
                     }
                 }
             }
