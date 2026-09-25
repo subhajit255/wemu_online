@@ -27,10 +27,10 @@ class AuthResource extends JsonResource
                 'uuid' => $this->uuid,
                 'name' => $this->name,
                 'profile_image' => $this->image_path,
-                'songs' => SongResource::collection($this->songs),
+                'songs' => SongResource::collection($this->songs->sortByDesc('published_at')->values()),
                 'total_streams' => 0,
                 'total_duration' => $this->totalSongsDuration($this->songs->sum('duration')),
-                'is_followed' => $this->is_followed($this->id) ?? false
+                'is_followed' => $this->is_followed($this->id)
             ];
         } else {
             return [
