@@ -28,7 +28,7 @@ class AuthResource extends JsonResource
                 'name' => $this->name,
                 'profile_image' => $this->image_path,
                 'songs' => SongResource::collection($this->songs->sortByDesc('published_at')->values()),
-                'total_streams' => 0,
+                'total_streams' => $this->stream_count,
                 'total_duration' => $this->totalSongsDuration($this->songs->sum('duration')),
                 'is_followed' => $this->is_followed($this->id)
             ];

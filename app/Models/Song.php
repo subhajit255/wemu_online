@@ -63,4 +63,12 @@ class Song extends Model
         }
         return asset($filePath);
     }
+    public function getStreamCountAttribute()
+    {
+        return $this->streamLogs()->count();
+    }
+    public function streamLogs()
+    {
+        return $this->hasMany(StreamLog::class);
+    }
 }

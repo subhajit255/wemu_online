@@ -28,7 +28,7 @@ class SongResource extends JsonResource
             'lyrics' => $this->lyrics ?? null,
             'duration' => $this->totalSongsDuration($this->duration),
             'is_explicit' => $this->is_explicit ?? 0,
-            'play_count' => $this->play_count,
+            'play_count' => $this->stream_count,
             'likes_count' => $this->likes_count ?? 0,
             'download_count' => $this->download_count ?? 0,
             'audio_file_path' => $this->audio_file_path ?? null,
