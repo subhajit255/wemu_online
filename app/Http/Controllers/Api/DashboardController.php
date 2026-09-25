@@ -297,6 +297,12 @@ class DashboardController extends BaseController
      *         required=false,
      *         @OA\Schema(type="integer", default=15)
      *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(response=200, description="Section details fetched successfully"),
      *     @OA\Response(response=422, description="Validation error")
      * )
