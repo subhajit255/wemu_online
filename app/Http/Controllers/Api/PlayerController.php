@@ -64,7 +64,7 @@ class PlayerController extends BaseController
                     $baseQuery->where('album_id', $sourceId);
                     break;
                 case 'artist':
-                    $baseQuery->where('user_id', $sourceId);
+                    $baseQuery->where('user_id', $sourceId)->orderBy('published_at', 'desc');
                     break;
                 case 'playlist':
                     $baseQuery->whereIn('id', function ($q) use ($sourceId) {
@@ -121,19 +121,25 @@ class PlayerController extends BaseController
                     break;
                 case 'made-for-you':
                 case 'made_for_you':
-                    if (auth('api')->check()) {
-                        $userId = auth('api')->id();
-                        $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
-                        $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
-                        $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
+                case 'artists-you-like':
+                case 'artists_you_like':
+                    if ($sourceId) {
+                        $baseQuery->where('user_id', $sourceId)->orderBy('published_at', 'desc');
+                    } else {
+                        if (auth('api')->check()) {
+                            $userId = auth('api')->id();
+                            $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                            $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+                            $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
 
-                        if (!empty($artistIds)) {
-                            $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
+                            if (!empty($artistIds)) {
+                                $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
+                            } else {
+                                $baseQuery->orderByDesc('play_count');
+                            }
                         } else {
                             $baseQuery->orderByDesc('play_count');
                         }
-                    } else {
-                        $baseQuery->orderByDesc('play_count');
                     }
                     break;
                 case 'features-songs':
