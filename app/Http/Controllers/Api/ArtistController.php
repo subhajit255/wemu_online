@@ -82,7 +82,7 @@ class ArtistController extends BaseController
         if ($validator->fails()) {
             return $this->responseJson(false, 422, $validator->errors()->first(), []);
         }
-        $artist = User::with(['songs', 'albums'])->find($id);
+        $artist = User::with(['songs.album', 'songs.genre', 'albums'])->find($id);
         return $this->responseJson(true, 200, 'Artist details fetched successfully', new AuthResource($artist));
     }
 }
