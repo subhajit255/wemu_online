@@ -64,9 +64,15 @@ class PlayerController extends BaseController
                     $baseQuery->where('album_id', $sourceId);
                     break;
                 case 'artist':
+                case 'popular-radio':
+                case 'popular_radio':
                     $baseQuery->where('user_id', $sourceId)->orderBy('published_at', 'desc');
                     break;
                 case 'playlist':
+                case 'your-top-mixes':
+                case 'your_top_mixes':
+                case 'sad-songs':
+                case 'sad_songs':
                     $baseQuery->whereIn('id', function ($q) use ($sourceId) {
                         $q->select('song_id')->from('play_list_songs')->where('play_list_id', $sourceId);
                     });
@@ -121,6 +127,21 @@ class PlayerController extends BaseController
                     break;
                 case 'made-for-you':
                 case 'made_for_you':
+                    if (auth('api')->check()) {
+                        $userId = auth('api')->id();
+                        $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                        $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+                        $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
+
+                        if (!empty($artistIds)) {
+                            $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
+                        } else {
+                            $baseQuery->orderByDesc('play_count');
+                        }
+                    } else {
+                        $baseQuery->orderByDesc('play_count');
+                    }
+                    break;
                 case 'artists-you-like':
                 case 'artists_you_like':
                     if ($sourceId) {

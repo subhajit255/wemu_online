@@ -85,4 +85,57 @@ class ArtistController extends BaseController
         $artist = User::with(['songs.album', 'songs.genre', 'albums'])->find($id);
         return $this->responseJson(true, 200, 'Artist details fetched successfully', new AuthResource($artist));
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/artist/songs/{id}",
+     *     summary="Get artist songs",
+     *     tags={"Artist"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (default: 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Artist songs fetched successfully")
+     * )
+     */
+    public function artistSongs($id, Request $request)
+    {
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+        }
+
+        try {
+            $perPage = $request->per_page ?? 15;
+            $songs = \App\Models\Song::where('user_id', $id)
+                ->where('status', 1)
+                ->with(['album', 'genre', 'artist'])
+                ->orderBy('published_at', 'desc')
+                ->paginate($perPage);
+
+            return $this->responseJson(true, 200, 'Artist songs fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($songs));
+        } catch (\Throwable $th) {
+            logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
 }
