@@ -260,10 +260,10 @@
             </div>
 
             <!-- Actions -->
-            <div class="actions">
+            {{-- <div class="actions">
                 <a href="#" class="btn btn-primary">Start Listening &rarr;</a>
                 <a href="#" class="btn btn-secondary">View My Profile</a>
-            </div>
+            </div> --}}
 
             <!-- Help Text -->
             <div class="help-text">
