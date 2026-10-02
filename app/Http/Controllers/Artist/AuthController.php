@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\StripeTrait;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LoginOtpMail;
 
 class AuthController extends BaseController
 {
@@ -38,8 +40,15 @@ class AuthController extends BaseController
             } else {
                 $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
                 $user->update(['verification_code' => $otp]);
+                
+                try {
+                    Mail::to($user->email)->send(new LoginOtpMail($otp, $user));
+                } catch (\Exception $e) {
+                    logger('Error sending OTP mail: ' . $e->getMessage());
+                }
+
                 session(['verify_user_id' => $user->id]);
-                $data = ['status' => true, 'message' => 'Please verify OTP sent to your mobile', 'data' => null, 'url' => route('artist.otp.verify')];
+                $data = ['status' => true, 'message' => 'Please verify OTP sent to your email', 'data' => null, 'url' => route('artist.otp.verify')];
             }
             return response($data);
         }
@@ -115,8 +124,14 @@ class AuthController extends BaseController
                 }
                 $newOtp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
                 $u->update(['verification_code' => $newOtp]);
-                // TODO: send email with $newOtp
-                return response(['status' => true, 'message' => 'OTP resent successfully.', 'otp' => $newOtp]);
+                
+                try {
+                    Mail::to($u->email)->send(new LoginOtpMail($newOtp, $u));
+                } catch (\Exception $e) {
+                    logger('Error sending OTP mail: ' . $e->getMessage());
+                }
+
+                return response(['status' => true, 'message' => 'OTP resent successfully to your email.', 'otp' => $newOtp]);
             }
 
             switch ($step) {
@@ -160,6 +175,12 @@ class AuthController extends BaseController
                         ]);
 
                         session(['verify_user_id' => $user->id]);
+
+                        try {
+                            Mail::to($user->email)->send(new LoginOtpMail($otp, $user));
+                        } catch (\Exception $e) {
+                            logger('Error sending OTP mail: ' . $e->getMessage());
+                        }
 
                         return response([
                             'status' => true,
@@ -549,7 +570,14 @@ class AuthController extends BaseController
                 if ($user) {
                     $newOtp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
                     $user->update(['verification_code' => $newOtp]);
-                    return response(['status' => true, 'message' => 'A new verification code has been sent!', 'otp' => $newOtp]);
+                    
+                    try {
+                        Mail::to($user->email)->send(new LoginOtpMail($newOtp, $user));
+                    } catch (\Exception $e) {
+                        logger('Error sending OTP mail: ' . $e->getMessage());
+                    }
+
+                    return response(['status' => true, 'message' => 'A new verification code has been sent to your email!', 'otp' => $newOtp]);
                 }
                 return response(['status' => false, 'message' => 'User not found.']);
             }

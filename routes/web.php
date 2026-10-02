@@ -35,3 +35,12 @@ Route::controller(HomeController::class)->group(function () {
 });
 
 Route::post('stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
+
+// Routes for previewing email templates
+Route::get('/mail/signup', function () {
+    return view('emails.user-signup');
+});
+
+Route::get('/mail/subscription', function () {
+    return view('emails.subscription');
+});

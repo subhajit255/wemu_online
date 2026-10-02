@@ -154,6 +154,23 @@ class SubscriptionController extends BaseController
 
             DB::commit();
 
+            if ($isActive) {
+                try {
+                    $subscriptionDetails = [
+                        'plan_name' => $subscription->title ?? 'WEMU Premium',
+                        'valid_through' => $currentPeriodEnd->format('F d, Y'),
+                        'order_ref' => $transactionId ?? $stripeSubscription->id,
+                        'order_date' => now()->format('M d, Y - h:i A'),
+                        'plan_price' => '$' . number_format($subscription->price, 2) . '/mo',
+                        'total_paid' => '$' . number_format($subscription->price, 2),
+                        'plan_description' => $subscription->description ?? 'Unlimited ad-free music.',
+                    ];
+                    \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\SubscriptionPurchasedMail($user, $subscriptionDetails));
+                } catch (\Exception $e) {
+                    logger('Subscription Purchased Mail Error: ' . $e->getMessage());
+                }
+            }
+
             // 6. Handle Payment Intent Action Required
             $clientSecret = null;
             if ($stripeSubscription->status === 'incomplete' && $stripeSubscription->latest_invoice->payment_intent) {

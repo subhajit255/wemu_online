@@ -114,6 +114,8 @@ class AuthController extends BaseController
             if ($user) {
                 $user->roles()->sync($userRole);
                 try {
+                    Mail::to($user->email)->queue(new \App\Mail\UserSignupMail($user));
+                    
                     // Mail::send('mail.verify-otp', ['otp' => $otp], function ($message) use ($request) {
                     //     $message->to($request->email);
                     //     $message->subject('Verification OTP');
@@ -121,7 +123,7 @@ class AuthController extends BaseController
                     // $mobileNumber = ($request->phone_code ?? 61) . $request->mobile_number;
                     // sendSms($mobileNumber, $otp);
                 } catch (\Exception $e) {
-                    //skip mail error
+                    logger('Signup Mail Error: ' . $e->getMessage());
                 }
 
                 DB::commit();
@@ -1411,27 +1413,11 @@ class AuthController extends BaseController
         DB::beginTransaction();
         try {
             $user = User::where('email', $request->email)->first();
+            $isNewUser = false;
 
             if ($user) {
-                if ($user->provider == $request->provider && $user->provider_id == $request->provider_id) {
-                    $user->update([
-                        'name' => $request->name,
-                        'mobile_number' => $request->phone,
-                        'profile_image' => $request->profile_pic,
-                        'fcm_token' => $request->fcm_token ?? null,
-                        'device_type' => $request->device_type ?? 1,
-                    ]);
-                } else {
-                    $status = false;
-                    $code = 422;
-                    $response = [];
-                    $message = "User already exists with different provider";
-                    return $this->responseJson($status, $code, $message, $response);
-                }
-            } else {
-                $user = User::create([
+                $user->update([
                     'name' => $request->name,
-                    'email' => $request->email,
                     'mobile_number' => $request->phone,
                     'profile_image' => $request->profile_pic,
                     'auth_provider' => $request->provider,
@@ -1439,9 +1425,43 @@ class AuthController extends BaseController
                     'fcm_token' => $request->fcm_token ?? null,
                     'device_type' => $request->device_type ?? 1,
                 ]);
+            } else {
+                $userRole = Role::where('slug', 'user')->first();
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'user_type' => $userRole->id ?? null,
+                    'mobile_number' => $request->phone,
+                    'profile_image' => $request->profile_pic,
+                    'auth_provider' => $request->provider,
+                    'provider_id' => $request->provider_id,
+                    'fcm_token' => $request->fcm_token ?? null,
+                    'device_type' => $request->device_type ?? 1,
+                ]);
+                if ($userRole) {
+                    $user->roles()->sync($userRole);
+                }
+                
+                try {
+                    $customer = $this->createCustomer($user->email, $user->name);
+                    $user->update(['stripe_id' => $customer->id]);
+                } catch (\Exception $e) {
+                    logger('Stripe customer creation failed during social login: ' . $e->getMessage());
+                }
+                
+                $isNewUser = true;
             }
 
             DB::commit();
+            
+            if ($isNewUser) {
+                try {
+                    Mail::to($user->email)->queue(new \App\Mail\UserSignupMail($user));
+                } catch (\Exception $e) {
+                    logger('Social Signup Mail Error: ' . $e->getMessage());
+                }
+            }
+
             $token = $user->createToken('Login Successfully')->accessToken;
 
             if ($token) {
