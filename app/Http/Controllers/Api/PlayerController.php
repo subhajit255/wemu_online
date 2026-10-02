@@ -211,7 +211,15 @@ class PlayerController extends BaseController
                 $excludedSongIds = collect($items)->pluck('id')->toArray();
 
                 // Context-based recommendations
-                if ($sourceType === 'album') {
+                if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you') {
+                    $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
+                    $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                        return \Illuminate\Support\Str::slug($g->title_in_english) === $genreSlug;
+                    });
+                    if ($genre) {
+                        $recommendQuery->where('genre_id', $genre->id);
+                    }
+                } elseif ($sourceType === 'album') {
                     $album = Album::find($sourceId);
                     if ($album) {
                         $recommendQuery->where(function ($q) use ($album) {
