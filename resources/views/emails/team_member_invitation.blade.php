@@ -93,6 +93,9 @@
     <div class="email-wrapper">
         <div class="email-container">
             <div class="header">
+                <div style="margin-bottom: 10px;">
+                    <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px;" />
+                </div>
                 <h1>Welcome to the WEMU Team!</h1>
             </div>
             <div class="content">

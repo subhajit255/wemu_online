@@ -213,7 +213,9 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-icon">🎧</div>
+            <div style="margin-bottom: 10px;">
+                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px;" />
+            </div>
             <h1>WEMU</h1>
             <p>SUBSCRIPTION & ORDER CONFIRMATION</p>
         </div>

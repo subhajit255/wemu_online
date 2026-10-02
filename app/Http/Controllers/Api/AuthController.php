@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use \App\Mail\LoginOtpMail;
+use \App\Mail\UserSignupMail;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\Auth\BannerCollection;
 use App\Http\Resources\Api\Auth\BlogCollection;
@@ -114,12 +116,9 @@ class AuthController extends BaseController
             if ($user) {
                 $user->roles()->sync($userRole);
                 try {
-                    Mail::to($user->email)->queue(new \App\Mail\UserSignupMail($user));
-                    
-                    // Mail::send('mail.verify-otp', ['otp' => $otp], function ($message) use ($request) {
-                    //     $message->to($request->email);
-                    //     $message->subject('Verification OTP');
-                    // });
+                    Mail::to($user->email)->queue(new UserSignupMail($user));
+                    Mail::to($user->email)->queue(new LoginOtpMail($otp, $user));
+
                     // $mobileNumber = ($request->phone_code ?? 61) . $request->mobile_number;
                     // sendSms($mobileNumber, $otp);
                 } catch (\Exception $e) {
@@ -1441,19 +1440,19 @@ class AuthController extends BaseController
                 if ($userRole) {
                     $user->roles()->sync($userRole);
                 }
-                
+
                 try {
                     $customer = $this->createCustomer($user->email, $user->name);
                     $user->update(['stripe_id' => $customer->id]);
                 } catch (\Exception $e) {
                     logger('Stripe customer creation failed during social login: ' . $e->getMessage());
                 }
-                
+
                 $isNewUser = true;
             }
 
             DB::commit();
-            
+
             if ($isNewUser) {
                 try {
                     Mail::to($user->email)->queue(new \App\Mail\UserSignupMail($user));
