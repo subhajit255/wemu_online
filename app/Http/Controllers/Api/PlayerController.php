@@ -172,7 +172,7 @@ class PlayerController extends BaseController
                     if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you')) {
                         $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
                         $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
-                            return \Illuminate\Support\Str::slug($g->title_in_english) === $genreSlug;
+                            return \Illuminate\Support\Str::slug($g->title) === $genreSlug;
                         });
 
                         if ($genre) {
@@ -214,7 +214,7 @@ class PlayerController extends BaseController
                 if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you') {
                     $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
                     $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
-                        return \Illuminate\Support\Str::slug($g->title_in_english) === $genreSlug;
+                        return \Illuminate\Support\Str::slug($g->title) === $genreSlug;
                     });
                     if ($genre) {
                         $recommendQuery->where('genre_id', $genre->id);
