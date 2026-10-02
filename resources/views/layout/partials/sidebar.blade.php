@@ -72,6 +72,7 @@
     <div class="app-sidebar-logo px-6 sideHead" id="kt_app_sidebar_logo" style="border-bottom: 1px solid #f3f4f6;">
         <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center" style="text-decoration: none;">
             <img alt="Logo" src="{{ asset('assets/media/logos/logo.png') }}" class="h-40px app-sidebar-logo-default" />
+            <h3 class="app-sidebar-logo-default m-0 ms-3 fw-bolder" style="font-size: 22px; color: #6366f1; letter-spacing: -0.5px;">Wemu</h3>
         </a>
         <div id="kt_app_sidebar_toggle"
             class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary body-bg h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"
