@@ -122,6 +122,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::controller(SubscriptionController::class)->group(function () {
         Route::post('/user/subscription/purchase', 'purchase')->name('user.subscription.purchase');
+        Route::get('/user/subscription/cancel', 'cancel')->name('user.subscription.cancel');
     });
     Route::controller(AuthController::class)->group(function () {
         Route::post('/logout', 'logout')->name('logout');

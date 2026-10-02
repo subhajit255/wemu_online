@@ -208,4 +208,50 @@ class SubscriptionController extends BaseController
             return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG', 'Something went wrong'), []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/user/subscription/cancel",
+     *     summary="Cancel current subscription",
+     *     tags={"Subscription"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Subscription canceled successfully"),
+     *     @OA\Response(response=404, description="No active subscription found")
+     * )
+     */
+    public function cancel(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $user = auth()->user();
+            
+            // Get current active subscription
+            $activeSubscription = UserSubscription::where(['user_id' => $user->id, 'status' => 1])->first();
+            
+            if (!$activeSubscription) {
+                return $this->responseJson(false, 404, 'No active subscription found', []);
+            }
+            
+            // Cancel in Stripe if Stripe ID exists
+            if ($activeSubscription->stripe_id) {
+                $this->cancelSubscription($activeSubscription->stripe_id);
+            }
+            
+            // Update local subscription status
+            $activeSubscription->update([
+                'status' => 0,
+                'stripe_status' => 'canceled'
+            ]);
+            
+            DB::commit();
+            return $this->responseJson(true, 200, 'Subscription canceled successfully. You are now on the Free plan.', []);
+            
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            DB::rollBack();
+            return $this->responseJson(false, 400, $e->getMessage(), []);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, config('constants.CATCH_ERROR_MSG', 'Something went wrong'), []);
+        }
+    }
 }

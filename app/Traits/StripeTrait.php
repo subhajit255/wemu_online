@@ -141,4 +141,9 @@ trait StripeTrait
 
         return $session;
     }
+    public function cancelSubscription(string $subscriptionId)
+    {
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+        return $stripe->subscriptions->cancel($subscriptionId);
+    }
 }
