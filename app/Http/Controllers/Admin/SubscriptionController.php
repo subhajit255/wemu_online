@@ -113,11 +113,7 @@ class SubscriptionController extends BaseController
                     $stripeProductId = $stripePrice->product;
                 }
 
-                $is_default = $request->has('is_default') ? 1 : 0;
-
-                if ($is_default == 1) {
-                    Subscription::query()->update(['is_default' => 0]);
-                }
+                // is_default is only applicable for free plans and shouldn't be edited by admin directly.
 
                 $postData = [
                     "name" => $request->name,
@@ -136,7 +132,6 @@ class SubscriptionController extends BaseController
                     "trial_days" => $request->trial_days ?? 0,
                     "max_song_skips" => $request->max_song_skips,
                     "requires_verification" => $request->has('requires_verification') ? 1 : 0,
-                    "is_default" => $is_default,
                 ];
                 $details = Subscription::updateOrCreate(['id' => $id], $postData);
                 DB::Commit();

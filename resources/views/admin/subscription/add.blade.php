@@ -103,12 +103,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-check form-check-custom form-check-solid">
-                                            <input class="form-check-input" type="checkbox" value="1" id="is_default" name="is_default" {{ !empty($details) && $details->is_default == 1 ? 'checked' : '' }} />
-                                            <label class="form-check-label fw-semibold text-gray-700" for="is_default">
-                                                Set as Default Plan (For both Artist and User)
-                                            </label>
-                                        </div>
+                                        <!-- Default plan setting is handled elsewhere, so removed from here per request -->
                                     </div>
                                 </div>
                             </div>
