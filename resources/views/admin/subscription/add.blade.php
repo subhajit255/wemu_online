@@ -88,6 +88,7 @@
                             <div class="col-md-3 modern-form-group">
                                 <label for="max_song_skips">Max Song Skips</label>
                                 <input type="number" class="modern-input" placeholder="e.g. 5" name="max_song_skips" id="max_song_skips" value="{{ $details->max_song_skips ?? '' }}">
+                                <small class="text-muted">Leave blank for unlimited skips.</small>
                             </div>
 
 
