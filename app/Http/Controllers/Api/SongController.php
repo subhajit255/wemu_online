@@ -839,7 +839,7 @@ class SongController extends BaseController
         }
     }
     /**
-     * @OA\Post(
+     * @OA\Get(
      *     path="/api/song/skip/{songId}",
      *     summary="Skip a song",
      *     tags={"Song"},
