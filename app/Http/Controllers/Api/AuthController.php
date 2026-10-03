@@ -255,12 +255,11 @@ class AuthController extends BaseController
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="mobile_number", type="string", description="Registered mobile number"),
-     *                 @OA\Property(property="phone_code", type="integer"),
+     *                 @OA\Property(property="email", type="string", format="email", description="Registered email address"),
      *                 @OA\Property(property="verification_code", type="string", description="6 digit OTP"),
      *                 @OA\Property(property="device_token", type="string"),
      *                 @OA\Property(property="device_type", type="string", enum={"android", "ios", "web"}),
-     *                 required={"mobile_number", "phone_code", "verification_code"}
+     *                 required={"email", "verification_code"}
      *             )
      *         )
      *     ),
@@ -272,7 +271,7 @@ class AuthController extends BaseController
     public function loginVerification(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile_number' => 'required|numeric|digits_between:8,13',
+            'email' => 'required|email',
             'verification_code' => 'required|numeric',
         ]);
         if ($validator->fails()) {
@@ -280,7 +279,7 @@ class AuthController extends BaseController
         }
         DB::beginTransaction();
         try {
-            $user = User::where(['mobile_number' => $request->mobile_number, 'verification_code' => $request->verification_code])->first();
+            $user = User::where(['email' => $request->email, 'verification_code' => $request->verification_code])->first();
             if ($user) {
                 $user->update([
                     'is_verified' => 1,
@@ -625,6 +624,12 @@ class AuthController extends BaseController
                         'verification_code' => $otp,
                     ]);
                     DB::commit();
+
+                    try {
+                        Mail::to($userDetails->email)->queue(new LoginOtpMail($otp, $userDetails));
+                    } catch (\Exception $e) {
+                        logger('Forgot Password Mail Error: ' . $e->getMessage());
+                    }
                     $status = true;
                     $code = 200;
                     $response = ['otp' => $otp];

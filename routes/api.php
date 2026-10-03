@@ -154,7 +154,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/search', 'searchSongs')->name('search.songs');
         Route::get('/trending-search-items', 'trendingSearches')->name('trending.search.items');
         Route::get('/biggest-hits', 'biggestHits')->name('biggest.hits');
-        Route::get('/song/skip/{songId}', 'skipSong')->name('song.skip');
+        Route::get('/song/skip', 'skipSong')->name('song.skip');
     });
     Route::controller(SubscriptionController::class)->group(function () {
         Route::get('/my-current-subscription', 'myCurrentSubscription')->name('my-current-subscription');
