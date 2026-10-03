@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use \App\Models\UserSkip;
+use \App\Models\UserSubscription;
 use App\Http\Resources\Api\SongResource;
 use App\Models\ArtistFollower;
 use App\Models\PlayList;
@@ -43,7 +45,8 @@ class AuthResource extends JsonResource
                 'profile_image' => $this->image_path,
                 'playlists_count' => $this->totalPlaylists($this->id),
                 'following_count' => $this->totalFollowing($this->id),
-                'followers_count' => 0
+                'followers_count' => 0,
+                'is_skipped' => $this->isSkippedAllowed($this->id)
             ];
         }
 
@@ -72,5 +75,35 @@ class AuthResource extends JsonResource
     public function totalFollowing($userId): int
     {
         return ArtistFollower::where('user_id', $userId)->count();
+    }
+    public function isSkippedAllowed($userId): bool
+    {
+        $userSubscription = UserSubscription::with('subscription')
+            ->where('user_id', $userId)
+            ->where('status', 1)
+            ->latest()
+            ->first();
+
+        $activeSubscription = $userSubscription ? $userSubscription->subscription : null;
+
+        if (!$activeSubscription) {
+            $activeSubscription = \App\Models\Subscription::where('is_default', 1)
+                ->where('available_for', 1)
+                ->first();
+        }
+
+        $maxSkips = $activeSubscription ? $activeSubscription->max_song_skips : null;
+
+        if (!is_null($maxSkips)) {
+            $skipsToday = UserSkip::where('user_id', $userId)
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->count();
+
+            if ($skipsToday >= $maxSkips) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
