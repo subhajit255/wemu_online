@@ -23,6 +23,9 @@ use App\Http\Resources\Api\PaginateSongCollection;
 use App\Http\Resources\Api\PaginateAlbumCollection;
 use App\Http\Resources\Api\PaginateArtistCollection;
 use App\Models\StreamLog;
+use App\Models\UserSkip;
+use App\Models\UserSubscription;
+use Carbon\Carbon;
 
 class SongController extends BaseController
 {
@@ -830,6 +833,71 @@ class SongController extends BaseController
                 'Artist radio fetched successfully',
                 new PaginateSongCollection($radioSongs)
             );
+        } catch (\Exception $e) {
+            logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
+    /**
+     * @OA\Post(
+     *     path="/api/song/skip/{songId}",
+     *     summary="Skip a song",
+     *     tags={"Song"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="songId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Song skipped successfully"),
+     *     @OA\Response(response=403, description="Maximum skip limit reached"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function skipSong($songId, Request $request)
+    {
+        $validator = Validator::make(
+            ['song_id' => $songId],
+            ['song_id' => 'required|exists:songs,id']
+        );
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+        }
+
+        try {
+            $userId = auth()->user()->id;
+
+            // Check current subscription
+            $userSubscription = UserSubscription::with('subscription')
+                ->where('user_id', $userId)
+                ->where('status', 1)
+                ->latest()
+                ->first();
+
+            $maxSkips = null; // Default to unlimited
+            if ($userSubscription && $userSubscription->subscription) {
+                $maxSkips = $userSubscription->subscription->max_song_skips;
+            }
+
+            // If maxSkips is not null (has a limit), check if they exceeded it for today
+            if (!is_null($maxSkips)) {
+                $skipsToday = UserSkip::where('user_id', $userId)
+                    ->whereDate('created_at', Carbon::today())
+                    ->count();
+
+                if ($skipsToday >= $maxSkips) {
+                    return $this->responseJson(false, 403, "Maximum allowed skips reached for your subscription plan. Upgrade your plan for unlimited skips.", (object)[]);
+                }
+            }
+
+            // Log the skip
+            UserSkip::create([
+                'user_id' => $userId,
+                'song_id' => $songId,
+            ]);
+
+            return $this->responseJson(true, 200, 'Song skipped', (object)[]);
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
