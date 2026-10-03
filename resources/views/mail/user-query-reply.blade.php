@@ -162,7 +162,10 @@
                     <!-- Header -->
                     <tr>
                         <td class="header">
-                            <h1>{{ config('app.name') }}</h1>
+                            <h1>
+                                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 32px; vertical-align: middle; margin-right: 10px;" />
+                                {{ config('app.name') }}
+                            </h1>
                         </td>
                     </tr>
                     
@@ -203,7 +206,10 @@
                         <td class="footer">
                             <p class="footer-text">
                                 Best regards,<br>
-                                <span class="footer-brand">The {{ config('app.name') }} Support Team</span>
+                                <span class="footer-brand">
+                                    <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 16px; vertical-align: middle; margin-right: 5px;" />
+                                    The {{ config('app.name') }} Support Team
+                                </span>
                             </p>
                             <p class="footer-text" style="margin-top: 16px; font-size: 11px;">
                                 &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.

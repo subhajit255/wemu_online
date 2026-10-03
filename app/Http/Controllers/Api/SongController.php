@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\PlayList;
-use App\Models\Album;
-use App\Models\Song;
-use App\Models\User;
-use App\Models\SearchHistory;
-use App\Models\ArtistFollower;
-use App\Models\UserPreference;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use \App\Models\Subscription;
 use App\Http\Controllers\BaseController;
-use Illuminate\Support\Facades\Validator;
-use App\Traits\UploadAble;
-use App\Http\Resources\Api\PaginatePlayListResource;
-use App\Http\Resources\Api\PlayListResource;
-use App\Http\Resources\Api\SongResource;
 use App\Http\Resources\Api\AlbumResource;
 use App\Http\Resources\Api\ArtistResource;
-use App\Http\Resources\Api\PaginateSongCollection;
 use App\Http\Resources\Api\PaginateAlbumCollection;
 use App\Http\Resources\Api\PaginateArtistCollection;
+use App\Http\Resources\Api\PaginatePlayListResource;
+use App\Http\Resources\Api\PaginateSongCollection;
+use App\Http\Resources\Api\PlayListResource;
+use App\Http\Resources\Api\SongResource;
+use App\Models\Album;
+use App\Models\ArtistFollower;
+use App\Models\PlayList;
+use App\Models\SearchHistory;
+use App\Models\Song;
 use App\Models\StreamLog;
+use App\Models\User;
+use App\Models\UserPreference;
 use App\Models\UserSkip;
 use App\Models\UserSubscription;
+use App\Traits\UploadAble;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SongController extends BaseController
 {
@@ -865,7 +866,7 @@ class SongController extends BaseController
 
             // If no active subscription, get the default free plan
             if (!$activeSubscription) {
-                $activeSubscription = \App\Models\Subscription::where('is_default', 1)
+                $activeSubscription = Subscription::where('is_default', 1)
                     ->where('available_for', 1)
                     ->first();
             }

@@ -93,10 +93,10 @@
     <div class="email-wrapper">
         <div class="email-container">
             <div class="header">
-                <div style="margin-bottom: 10px;">
-                    <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px;" />
-                </div>
-                <h1>Welcome to the WEMU Team!</h1>
+                <h1>
+                    <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;" />
+                    Welcome to the WEMU Team!
+                </h1>
             </div>
             <div class="content">
                 <h2>Hello {{ $user->name }},</h2>

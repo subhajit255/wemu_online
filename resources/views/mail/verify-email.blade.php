@@ -60,7 +60,10 @@
             If you did not create an account, no further action is required.
             <br><br>
             Regards,<br>
-            {{ config('app.name') }}
+            <span style="display: inline-block; margin-top: 10px;">
+                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 20px; vertical-align: middle; margin-right: 5px;" />
+                {{ config('app.name') }}
+            </span>
         </div>
     </div>
 </body>

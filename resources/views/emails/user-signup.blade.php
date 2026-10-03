@@ -184,10 +184,10 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div style="margin-bottom: 10px;">
-                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px;" />
-            </div>
-            <h1>WEMU</h1>
+            <h1>
+                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 40px; vertical-align: middle; margin-right: 10px;" />
+                WEMU
+            </h1>
             <p>YOUR ULTIMATE MUSIC EXPERIENCE</p>
         </div>
 
@@ -275,7 +275,10 @@
 
         <!-- Footer -->
         <div class="footer">
-            <h4>WEMU</h4>
+            <h4>
+                <img src="{{ asset('assets/media/logos/logo.png') }}" alt="WEMU Logo" style="height: 20px; vertical-align: middle; margin-right: 5px;" />
+                WEMU
+            </h4>
             <p>Your ultimate destination for endless music streaming and artist discovery.</p>
             <br>
             <p>&copy; {{ date('Y') }} WEMU. All rights reserved.</p>
