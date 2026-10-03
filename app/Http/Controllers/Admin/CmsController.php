@@ -114,7 +114,7 @@ class CmsController extends BaseController
 
             if ($userQuery->user && $userQuery->user->email) {
                 \Illuminate\Support\Facades\Mail::to($userQuery->user->email)
-                    ->send(new \App\Mail\EnquiryReplyMail($userQuery->query, $request->reply));
+                    ->send(new \App\Mail\UserQueryReplyMail($userQuery, $request->reply));
             }
 
             return response()->json([

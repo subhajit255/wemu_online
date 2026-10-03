@@ -32,6 +32,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/signup', 'signup')->name('signup');
     Route::post('/login', 'login')->name('login');
     Route::post('/login/verification', 'loginVerification')->name('login.verification');
+    Route::post('/resend-otp', 'resendOtp')->name('resend.otp');
     Route::post('/login-email', 'loginViaEmail')->name('login-email');
     Route::post('/logout', 'logout')->name('logout');
     Route::post('/forgot/password', 'forgotPassword')->name('forgot.password');

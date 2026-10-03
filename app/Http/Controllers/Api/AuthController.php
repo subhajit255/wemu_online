@@ -318,6 +318,72 @@ class AuthController extends BaseController
         }
         return $this->responseJson($status, $code, $message, $response);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/resend-otp",
+     *     summary="Resend OTP for login/signup",
+     *     tags={"Auth"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="email", type="string", format="email", description="Registered email address"),
+     *                 required={"email"}
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OTP resent successfully"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=404, description="User not found")
+     * )
+     */
+    public function resendOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), []);
+        }
+
+        DB::beginTransaction();
+        try {
+            $user = User::where('email', $request->email)->first();
+            if ($user) {
+                $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                $user->update(['verification_code' => $otp]);
+                
+                try {
+                    Mail::to($user->email)->queue(new LoginOtpMail($otp, $user));
+                    
+                    // $mobileNumber = ($user->phone_code ?? 61) . $user->mobile_number;
+                    // sendSms($mobileNumber, $otp);
+                } catch (\Exception $e) {
+                    logger('Resend OTP Mail Error: ' . $e->getMessage());
+                }
+
+                DB::commit();
+                $status = true;
+                $code = 200;
+                $response = ['verification_code' => $otp];
+                $message = 'OTP sent successfully';
+            } else {
+                $status = false;
+                $code = 404;
+                $response = [];
+                $message = 'User not found';
+            }
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            $status = false;
+            $code = 500;
+            $response = ['Message' => $th->getMessage(), 'File Path' => $th->getFile(), 'Line Number' => $th->getLine()];
+            $message = config('constants.CATCH_ERROR_MSG');
+        }
+        return $this->responseJson($status, $code, $message, $response);
+    }
     /**
      * @OA\Post(
      *     path="/api/login-email",
