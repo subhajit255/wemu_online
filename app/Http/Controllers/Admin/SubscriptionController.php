@@ -51,6 +51,7 @@ class SubscriptionController extends BaseController
                     'currency' => 'required|string',
                     'max_users' => 'required|numeric|min:1',
                     'trial_days' => 'nullable|numeric|min:0',
+                    'max_song_skips' => 'nullable|numeric|min:0',
                 ]);
             } else {
                 $message = "Subscription Created Successfully";
@@ -67,6 +68,7 @@ class SubscriptionController extends BaseController
                     'currency' => 'required|string',
                     'max_users' => 'required|numeric|min:1',
                     'trial_days' => 'nullable|numeric|min:0',
+                    'max_song_skips' => 'nullable|numeric|min:0',
                 ]);
             }
 
@@ -132,6 +134,7 @@ class SubscriptionController extends BaseController
                     "stripe_price_id" => $stripePriceId,
                     "max_users" => $request->max_users,
                     "trial_days" => $request->trial_days ?? 0,
+                    "max_song_skips" => $request->max_song_skips,
                     "requires_verification" => $request->has('requires_verification') ? 1 : 0,
                     "is_default" => $is_default,
                 ];

@@ -85,6 +85,10 @@
                                 <label for="trial_days">Trial Days</label>
                                 <input type="number" class="modern-input" placeholder="e.g. 30" name="trial_days" id="trial_days" value="{{ $details->trial_days ?? 0 }}">
                             </div>
+                            <div class="col-md-3 modern-form-group">
+                                <label for="max_song_skips">Max Song Skips</label>
+                                <input type="number" class="modern-input" placeholder="e.g. 5" name="max_song_skips" id="max_song_skips" value="{{ $details->max_song_skips ?? '' }}">
+                            </div>
 
 
                             <div class="col-12 mt-6">

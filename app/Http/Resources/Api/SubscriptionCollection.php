@@ -29,6 +29,7 @@ class SubscriptionCollection extends JsonResource
             'features' => $this->subscription?->features,
             'price' => $this->price,
             'interval' => $this->subscription?->interval,
+            'max_song_skips' => $this->subscription?->max_song_skips,
             'started_on' => Carbon::parse($this->started_on)->diffForHumans(),
             'ended_at' => Carbon::parse($this->ended_at)->diffForHumans(),
         ];
