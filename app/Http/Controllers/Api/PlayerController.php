@@ -134,12 +134,12 @@ class PlayerController extends BaseController
                         $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
 
                         if (!empty($artistIds)) {
-                            $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
+                            $baseQuery->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at');
                         } else {
-                            $baseQuery->orderByDesc('play_count');
+                            $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
                         }
                     } else {
-                        $baseQuery->orderByDesc('play_count');
+                        $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
                     }
                     break;
                 case 'artists-you-like':
@@ -154,18 +154,18 @@ class PlayerController extends BaseController
                             $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
 
                             if (!empty($artistIds)) {
-                                $baseQuery->whereIn('user_id', $artistIds)->inRandomOrder();
+                                $baseQuery->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at');
                             } else {
-                                $baseQuery->orderByDesc('play_count');
+                                $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
                             }
                         } else {
-                            $baseQuery->orderByDesc('play_count');
+                            $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
                         }
                     }
                     break;
                 case 'features-songs':
                 case 'features_songs':
-                    $baseQuery->inRandomOrder();
+                    $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
                     break;
                 default:
                     // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
@@ -189,6 +189,22 @@ class PlayerController extends BaseController
 
             // Pagination setup
             $totalBaseRecords = $baseQuery->count();
+
+            // Dynamically calculate page if last_played_song_id is provided
+            if ($request->last_played_song_id) {
+                $allIds = (clone $baseQuery)->pluck('id')->toArray();
+                $lastIndex = array_search($request->last_played_song_id, $allIds);
+                
+                if ($lastIndex !== false) {
+                    if ($request->direction === 'next') {
+                        $page = floor(($lastIndex + 1) / $perPage) + 1;
+                    } elseif ($request->direction === 'prev') {
+                        $page = floor(max(0, $lastIndex - 1) / $perPage) + 1;
+                    } else {
+                        $page = floor($lastIndex / $perPage) + 1;
+                    }
+                }
+            }
 
             // Standard Pagination
             $songs = $baseQuery->paginate($perPage, ['*'], 'page', $page);
@@ -292,9 +308,13 @@ class PlayerController extends BaseController
                     $current = [$items[$foundIndex]];
 
                     if ($request->direction == 'next') {
-                        $localQueue = array_merge($after, $before, $current);
+                        $localQueue = $after;
                     } elseif ($request->direction == 'prev') {
-                        $localQueue = array_merge(array_reverse($before), array_reverse($after), $current);
+                        $localQueue = array_reverse($before);
+                    }
+                } else {
+                    if ($request->direction == 'prev') {
+                        $localQueue = array_reverse($items);
                     }
                 }
             }

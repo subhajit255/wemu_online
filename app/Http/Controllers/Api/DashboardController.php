@@ -83,9 +83,9 @@ class DashboardController extends BaseController
             // 3. Recommended for today
             $recommendedSongs = Song::where('status', 1);
             if (!empty($artistIds)) {
-                $recommendedSongs = $recommendedSongs->whereIn('user_id', $artistIds)->inRandomOrder()->take(5)->get();
+                $recommendedSongs = $recommendedSongs->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
             } else {
-                $recommendedSongs = $recommendedSongs->orderByDesc('play_count')->take(5)->get();
+                $recommendedSongs = $recommendedSongs->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
             }
             $newRelease = Song::orderBy('published_at', 'desc')->take(5)->get();
 
@@ -183,7 +183,7 @@ class DashboardController extends BaseController
                 })->take(5)->get();
 
             // 8. More of what you like / Features songs
-            $moreLike = Song::where('status', 1)->inRandomOrder()->take(5)->get();
+            $moreLike = Song::where('status', 1)->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
 
             $sections = [
                 [
@@ -338,9 +338,9 @@ class DashboardController extends BaseController
                 case 'made-for-you':
                     $query = Song::where('status', 1);
                     if (!empty($artistIds)) {
-                        $query->whereIn('user_id', $artistIds)->inRandomOrder();
+                        $query->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at');
                     } else {
-                        $query->orderByDesc('play_count');
+                        $query->orderByDesc('play_count')->orderByDesc('published_at');
                     }
                     $paginator = $query->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
@@ -378,7 +378,7 @@ class DashboardController extends BaseController
                     ]);
 
                 case 'features-songs':
-                    $paginator = Song::where('status', 1)->inRandomOrder()->paginate($perPage);
+                    $paginator = Song::where('status', 1)->orderByDesc('play_count')->orderByDesc('published_at')->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'popular-radio':
