@@ -100,7 +100,7 @@ class AlbumController extends BaseController
                                 'language_id' => $album->language_id,
                                 'user_id' => $album->user_id,
                                 'status' => $album->status,
-                                'release_date' => $album->release_date,
+                                'published_at' => $album->release_date,
                             ];
 
                             // Handle audio
