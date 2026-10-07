@@ -132,7 +132,7 @@
                                         @foreach([
                                             'Australia','United States','United Kingdom',
                                             'India','Canada','New Zealand','South Africa',
-                                            'Germany','France','Brazil','Nigeria','Kenya'
+                                            'Germany','France','Brazil','Nigeria','Kenya','Honduras','Belize','Guatemala'
                                         ] as $c)
                                             <option value="{{ $c }}"
                                                 {{ (isset($user) && $user->pin == $c) ? 'selected' : '' }}>

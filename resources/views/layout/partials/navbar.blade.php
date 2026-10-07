@@ -213,10 +213,28 @@
                         <input type="text" class="form-control form-control-solid" placeholder="Enter Name"
                             name="admin_name" id="admin_name" value="{{ auth()->user()->name ?? null }}" />
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label>
-                                <span class="label_title">Admin Image</span>
+                    <div class="row mb-8">
+                        <div class="col-md-6 fv-row">
+                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                <span class="required">Email</span>
+                            </label>
+                            <input type="text" class="form-control form-control-solid" placeholder="Enter Email"
+                                name="admin_email" id="admin_email" value="{{ auth()->user()->email ?? null }}" />
+                        </div>
+                        <div class="col-md-6 fv-row">
+                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                <span class="required">Phone Number</span>
+                            </label>
+                            <input type="text" class="form-control form-control-solid"
+                                placeholder="Enter Phone Number" id="admin_mobile_number" name="admin_mobile_number"
+                                value="{{ auth()->user()->mobile_number ?? null }}" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="{{ auth()->user()->user_type == 3 ? 'col-md-4' : 'col-md-12 text-center' }}">
+                            <label class="d-block fw-semibold fs-6 mb-5">
+                                <span class="label_title">{{ auth()->user()->user_type == 3 ? 'Profile Image' : 'Admin Image' }}</span>
                                 <span class="asterisk_sign">*</span>
                             </label>
                             <div class="fv-row">
@@ -248,7 +266,7 @@
                                     <span
                                         class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
                                         data-kt-image-input-action="remove" data-bs-toggle="tooltip"
-                                        title="Remove logo">
+                                        title="Remove image">
                                         <i class="bi bi-x fs-2"></i>
                                     </span>
                                 </div>
@@ -258,20 +276,52 @@
                             </div>
                         </div>
 
+                        @if (auth()->user()->user_type == 3)
                         <div class="col-md-8">
-                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
-                                <span class="required">Email</span>
+                            <label class="d-block fw-semibold fs-6 mb-5">
+                                <span class="label_title">Cover Banner</span>
                             </label>
-                            <input type="text" class="form-control form-control-solid" placeholder="Enter Email"
-                                name="admin_email" id="admin_email" value="{{ auth()->user()->email ?? null }}" />
-
-                            <label class="d-flex align-items-center pt-4 fs-6 fw-semibold mb-2">
-                                <span class="required">Phone Number</span>
-                            </label>
-                            <input type="text" class="form-control form-control-solid"
-                                placeholder="Enter Phone Number" id="admin_mobile_number" name="admin_mobile_number"
-                                value="{{ auth()->user()->mobile_number ?? null }}" />
+                            <div class="fv-row">
+                                <style>
+                                    .image-input-placeholder-cover {
+                                        background-image: url("{{ auth()->user()->profile ? auth()->user()->profile->cover_image_path : asset('assets/media/books/11.png') }}");
+                                        background-size: cover;
+                                        background-position: center;
+                                    }
+                                </style>
+                                <div class="image-input image-input-empty image-input-outline image-input-placeholder-cover w-100"
+                                    data-kt-image-input="true" style="border-radius: 0.475rem;">
+                                    <div class="image-input-wrapper w-100 h-125px" style="border-radius: 0.475rem;"></div>
+                                    <label
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="change" data-bs-toggle="tooltip"
+                                        title="Add cover image">
+                                        <div class="img_edit_btn_icon">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </div>
+                                        <input type="file" name="cover_banner" accept=".png, .jpg, .jpeg"
+                                            id="cover_banner" />
+                                        <input type="hidden" name="cover_remove" />
+                                    </label>
+                                    <span
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="cancel" data-bs-toggle="tooltip"
+                                        title="Cancel image">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </span>
+                                    <span
+                                        class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
+                                        data-kt-image-input-action="remove" data-bs-toggle="tooltip"
+                                        title="Remove cover">
+                                        <i class="bi bi-x fs-2"></i>
+                                    </span>
+                                </div>
+                                <div class="form-text" style="font-size: 10px; color: #000 !important;">Allowed file
+                                    types: png, jpg, jpeg. Optimal size: 1920x1080.
+                                </div>
+                            </div>
                         </div>
+                        @endif
                     </div>
                     <div class="text-center pt-4">
                         <button type="reset" id="admin_update_form_cancel" class="btn btn-light me-3"

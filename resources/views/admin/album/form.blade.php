@@ -140,6 +140,23 @@
                             <div class="form-text mt-3">Only future dates are allowed.</div>
                         </div>
                     </div>
+
+                    <div class="row mb-8">
+                        <div class="col-xl-3">
+                            <div class="fs-6 fw-bold mt-2 mb-3">Add Songs</div>
+                            <div class="text-muted fs-7">You can upload multiple songs into this album right away.</div>
+                        </div>
+                        <div class="col-xl-9">
+                            <div id="songs_container">
+                                <!-- Dynamically added songs will appear here -->
+                            </div>
+                            <button type="button" class="btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary w-100 d-flex justify-content-center align-items-center py-6 mt-3" id="add_song_btn">
+                                <i class="fa-solid fa-plus fs-2 text-primary me-2"></i> 
+                                <span class="fs-4 fw-bold">Add a New Song</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-xl-3"></div>
                         <div class="col-xl-9">
@@ -191,6 +208,62 @@
         // Run on toggle change
         $('#status').on('change', function() {
             toggleReleaseDate();
+        });
+
+        let songIndex = 0;
+        
+        function updateTrackNumbers() {
+            $('.song-entry').each(function(index) {
+                $(this).find('.track-number').text(index + 1);
+            });
+        }
+
+        $('#add_song_btn').on('click', function() {
+            let html = `
+                <div class="song-entry card shadow-sm mb-6 border border-light" style="background-color: #fcfcfc;">
+                    <div class="card-header min-h-50px px-6 d-flex justify-content-between align-items-center border-bottom border-light">
+                        <h4 class="card-title m-0 text-gray-800 fw-bold d-flex align-items-center">
+                            <i class="fa-solid fa-music text-primary me-3"></i> Track <span class="track-number ms-1"></span>
+                        </h4>
+                        <button type="button" class="btn btn-icon btn-sm btn-light-danger remove-song-btn" title="Remove Song">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="card-body px-6 py-5">
+                        <div class="row">
+                            <div class="col-md-12 mb-6">
+                                <label class="form-label fw-bold text-gray-700">Song Title <span class="text-danger">*</span></label>
+                                <input type="text" name="songs[${songIndex}][title]" class="form-control form-control-solid form-control-lg" placeholder="e.g. Bohemian Rhapsody" required>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-gray-700">Audio File <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-solid">
+                                    <span class="input-group-text"><i class="fa-solid fa-volume-high"></i></span>
+                                    <input type="file" name="songs[${songIndex}][audio]" class="form-control form-control-solid" accept=".mp3,.wav,.ogg,.m4a,.aac" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-bold text-gray-700">Song Cover Image</label>
+                                <div class="input-group input-group-solid">
+                                    <span class="input-group-text"><i class="fa-solid fa-image"></i></span>
+                                    <input type="file" name="songs[${songIndex}][image]" class="form-control form-control-solid" accept=".png,.jpg,.jpeg">
+                                </div>
+                                <div class="form-text fs-8 mt-2 text-muted">Defaults to album cover if omitted.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#songs_container').append(html);
+            songIndex++;
+            updateTrackNumbers();
+        });
+
+        $(document).on('click', '.remove-song-btn', function() {
+            $(this).closest('.song-entry').slideUp(300, function() {
+                $(this).remove();
+                updateTrackNumbers();
+            });
         });
 
     });

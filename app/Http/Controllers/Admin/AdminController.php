@@ -44,6 +44,17 @@ class AdminController extends BaseController
                 }
             }
             $data = User::updateOrCreate(['id' => Auth::user()->id], $postData);
+
+            if (Auth::user()->user_type == 3 && !empty($request->cover_banner)) {
+                $image = $request->cover_banner;
+                $type = $image->getClientOriginalExtension();
+                $fileName = time() . '_banner_' . rand(100, 999) . '.' . $type;
+                $image->move(public_path('storage/banner'), $fileName);
+                \App\Models\ArtistProfile::updateOrCreate(
+                    ['user_id' => Auth::user()->id],
+                    ['cover_banner' => $fileName]
+                );
+            }
         }
         $message = "Updated Successfully";
         $data = ['status' => true, 'message' => $message, 'data' => $postData];

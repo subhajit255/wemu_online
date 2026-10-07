@@ -88,6 +88,43 @@ class AlbumController extends BaseController
                     }
                 }
                 $album = Album::updateOrCreate(['id' => $id], $postData);
+
+                if ($request->has('songs') && is_array($request->songs)) {
+                    foreach ($request->songs as $songData) {
+                        if (!empty($songData['title']) && !empty($songData['audio'])) {
+                            $songInsertData = [
+                                'title' => $songData['title'],
+                                'slug' => str::slug($songData['title']) . '-' . time() . rand(100, 999),
+                                'album_id' => $album->id,
+                                'genre_id' => $album->genre_id,
+                                'language_id' => $album->language_id,
+                                'user_id' => $album->user_id,
+                                'status' => $album->status,
+                                'release_date' => $album->release_date,
+                            ];
+
+                            // Handle audio
+                            $audioFile = $songData['audio'];
+                            $audioName = time() . '_' . uniqid() . '.' . $audioFile->getClientOriginalExtension();
+                            $this->uploadOne($audioFile, config('constants.SITE_SONG_UPLOAD_PATH'), $audioName, 'public');
+                            $songInsertData['audio_file'] = $audioName;
+                            $songInsertData['duration'] = $this->getAudioDuration($audioFile) ?? 0;
+
+                            // Handle image
+                            if (!empty($songData['image'])) {
+                                $imageFile = $songData['image'];
+                                $imageName = time() . '_img_' . uniqid() . '.' . $imageFile->getClientOriginalExtension();
+                                $this->uploadOne($imageFile, config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH'), $imageName, 'public');
+                                $songInsertData['cover_image'] = $imageName;
+                            } else {
+                                $songInsertData['cover_image'] = $album->cover_image;
+                            }
+
+                            \App\Models\Song::create($songInsertData);
+                        }
+                    }
+                }
+
                 DB::Commit();
             } catch (\Throwable $th) {
                 DB::rollback();
