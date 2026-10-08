@@ -43,7 +43,7 @@
             </div>
 
             <div id="kt_account_profile_details" class="collapse show">
-                <form class="form" method="POST" action="{{ route('artist.profile.update') }}" enctype="multipart/form-data">
+                <form id="profileUpdateForm" class="form formSubmit fileUpload" method="POST" action="{{ route('artist.profile.update') }}" enctype="multipart/form-data">
                     @csrf
                     <div class="card-body border-top p-9">
 
@@ -63,8 +63,8 @@
                                         <div class="image-input-wrapper w-125px h-125px"></div>
                                         <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Change avatar">
                                             <i class="fa-solid fa-pen fs-7"></i>
-                                            <input type="file" name="profile_image" accept=".png, .jpg, .jpeg" />
-                                            <input type="hidden" name="avatar_remove" />
+                                            <input type="file" name="profile_image" id="profile_image" accept=".png, .jpg, .jpeg" />
+                                            <input type="hidden" name="avatar_remove" id="avatar_remove" />
                                         </label>
                                         <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Cancel avatar">
                                             <i class="fa-solid fa-xmark fs-3"></i>
@@ -93,8 +93,8 @@
                                         <div class="image-input-wrapper w-100 h-125px" style="border-radius: 0.475rem;"></div>
                                         <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Change cover">
                                             <i class="fa-solid fa-pen fs-7"></i>
-                                            <input type="file" name="cover_banner" accept=".png, .jpg, .jpeg" />
-                                            <input type="hidden" name="cover_remove" />
+                                            <input type="file" name="cover_banner" id="cover_banner" accept=".png, .jpg, .jpeg" />
+                                            <input type="hidden" name="cover_remove" id="cover_remove" />
                                         </label>
                                         <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Cancel cover">
                                             <i class="fa-solid fa-xmark fs-3"></i>
@@ -111,12 +111,12 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Full Name</label>
-                                <input type="text" name="name" class="form-control form-control-lg form-control-solid" placeholder="Full Name" value="{{ old('name', $user->name) }}" />
+                                <input type="text" name="name" id="name" class="form-control form-control-lg form-control-solid" placeholder="Full Name" value="{{ old('name', $user->name) }}" />
                                 @error('name')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Stage Name</label>
-                                <input type="text" name="stage_name" class="form-control form-control-lg form-control-solid" placeholder="Stage Name" value="{{ old('stage_name', $profile->display_name) }}" />
+                                <input type="text" name="stage_name" id="stage_name" class="form-control form-control-lg form-control-solid" placeholder="Stage Name" value="{{ old('stage_name', $profile->display_name) }}" />
                                 @error('stage_name')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -124,12 +124,12 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Email Address</label>
-                                <input type="email" name="email" class="form-control form-control-lg form-control-solid" placeholder="Email" value="{{ old('email', $user->email) }}" />
+                                <input type="email" name="email" id="email" class="form-control form-control-lg form-control-solid" placeholder="Email" value="{{ old('email', $user->email) }}" />
                                 @error('email')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Phone Number</label>
-                                <input type="text" name="mobile" class="form-control form-control-lg form-control-solid" placeholder="Phone Number" value="{{ old('mobile', $user->mobile_number) }}" />
+                                <input type="text" name="mobile" id="mobile" class="form-control form-control-lg form-control-solid" placeholder="Phone Number" value="{{ old('mobile', $user->mobile_number) }}" />
                                 @error('mobile')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -137,12 +137,12 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Country</label>
-                                <input type="text" name="country" class="form-control form-control-lg form-control-solid" placeholder="Country" value="{{ old('country', $profile->country) }}" />
+                                <input type="text" name="country" id="country" class="form-control form-control-lg form-control-solid" placeholder="Country" value="{{ old('country', $profile->country) }}" />
                                 @error('country')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Years of Active</label>
-                                <input type="number" name="years_of_active" class="form-control form-control-lg form-control-solid" placeholder="Years" value="{{ old('years_of_active', $profile->years_of_active) }}" />
+                                <input type="number" name="years_of_active" id="years_of_active" class="form-control form-control-lg form-control-solid" placeholder="Years" value="{{ old('years_of_active', $profile->years_of_active) }}" />
                                 @error('years_of_active')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -150,7 +150,7 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label required fw-semibold fs-6">Primary Genre</label>
-                                <select name="primary_genre_id" class="form-select form-select-solid" data-control="select2" data-hide-search="false">
+                                <select name="primary_genre_id" id="primary_genre_id" class="form-select form-select-solid" data-control="select2" data-hide-search="false">
                                     <option value="">Select Genre</option>
                                     @foreach($genres as $genre)
                                     <option value="{{ $genre->id }}" {{ old('primary_genre_id', $profile->primary_genre_id) == $genre->id ? 'selected' : '' }}>{{ $genre->title }}</option>
@@ -160,7 +160,7 @@
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Sub Genre</label>
-                                <select name="sub_genre_id" class="form-select form-select-solid" data-control="select2" data-hide-search="false">
+                                <select name="sub_genre_id" id="sub_genre_id" class="form-select form-select-solid" data-control="select2" data-hide-search="false">
                                     <option value="">Select Sub Genre (Optional)</option>
                                     @foreach($genres as $genre)
                                     <option value="{{ $genre->id }}" {{ old('sub_genre_id', $profile->sub_genre_id) == $genre->id ? 'selected' : '' }}>{{ $genre->title }}</option>
@@ -173,12 +173,12 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Label / Company</label>
-                                <input type="text" name="label" class="form-control form-control-lg form-control-solid" placeholder="Label Name" value="{{ old('label', $profile->label) }}" />
+                                <input type="text" name="label" id="label" class="form-control form-control-lg form-control-solid" placeholder="Label Name" value="{{ old('label', $profile->label) }}" />
                                 @error('label')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Website URL</label>
-                                <input type="url" name="website" class="form-control form-control-lg form-control-solid" placeholder="https://..." value="{{ old('website', $profile->website) }}" />
+                                <input type="url" name="website" id="website" class="form-control form-control-lg form-control-solid" placeholder="https://..." value="{{ old('website', $profile->website) }}" />
                                 @error('website')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -186,7 +186,7 @@
                         <div class="row mb-6">
                             <div class="col-lg-12 fv-row">
                                 <label class="col-form-label required fw-semibold fs-6">Bio</label>
-                                <textarea name="bio" class="form-control form-control-lg form-control-solid" rows="4" placeholder="Tell us about yourself...">{{ old('bio', $profile->bio) }}</textarea>
+                                <textarea name="bio" id="bio" class="form-control form-control-lg form-control-solid" rows="4" placeholder="Tell us about yourself...">{{ old('bio', $profile->bio) }}</textarea>
                                 @error('bio')<div class="text-danger mt-1 fs-7">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -202,37 +202,37 @@
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Instagram</label>
-                                <input type="url" name="instagram_url" class="form-control form-control-lg form-control-solid" placeholder="https://instagram.com/..." value="{{ old('instagram_url', $socials->instagram_url) }}" />
+                                <input type="url" name="instagram_url" id="instagram_url" class="form-control form-control-lg form-control-solid" placeholder="https://instagram.com/..." value="{{ old('instagram_url', $socials->instagram_url) }}" />
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">YouTube</label>
-                                <input type="url" name="youtube_url" class="form-control form-control-lg form-control-solid" placeholder="https://youtube.com/..." value="{{ old('youtube_url', $socials->youtube_url) }}" />
+                                <input type="url" name="youtube_url" id="youtube_url" class="form-control form-control-lg form-control-solid" placeholder="https://youtube.com/..." value="{{ old('youtube_url', $socials->youtube_url) }}" />
                             </div>
                         </div>
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">TikTok</label>
-                                <input type="url" name="tiktok_url" class="form-control form-control-lg form-control-solid" placeholder="https://tiktok.com/..." value="{{ old('tiktok_url', $socials->tiktok_url) }}" />
+                                <input type="url" name="tiktok_url" id="tiktok_url" class="form-control form-control-lg form-control-solid" placeholder="https://tiktok.com/..." value="{{ old('tiktok_url', $socials->tiktok_url) }}" />
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Facebook</label>
-                                <input type="url" name="facebook_url" class="form-control form-control-lg form-control-solid" placeholder="https://facebook.com/..." value="{{ old('facebook_url', $socials->facebook_url) }}" />
+                                <input type="url" name="facebook_url" id="facebook_url" class="form-control form-control-lg form-control-solid" placeholder="https://facebook.com/..." value="{{ old('facebook_url', $socials->facebook_url) }}" />
                             </div>
                         </div>
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Twitter</label>
-                                <input type="url" name="twitter_url" class="form-control form-control-lg form-control-solid" placeholder="https://twitter.com/..." value="{{ old('twitter_url', $socials->twitter_url) }}" />
+                                <input type="url" name="twitter_url" id="twitter_url" class="form-control form-control-lg form-control-solid" placeholder="https://twitter.com/..." value="{{ old('twitter_url', $socials->twitter_url) }}" />
                             </div>
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Spotify</label>
-                                <input type="url" name="spotify_url" class="form-control form-control-lg form-control-solid" placeholder="https://spotify.com/..." value="{{ old('spotify_url', $socials->spotify_url) }}" />
+                                <input type="url" name="spotify_url" id="spotify_url" class="form-control form-control-lg form-control-solid" placeholder="https://spotify.com/..." value="{{ old('spotify_url', $socials->spotify_url) }}" />
                             </div>
                         </div>
                         <div class="row mb-6">
                             <div class="col-lg-6 fv-row mb-6">
                                 <label class="col-form-label fw-semibold fs-6">Apple Music</label>
-                                <input type="url" name="apple_music_url" class="form-control form-control-lg form-control-solid" placeholder="https://music.apple.com/..." value="{{ old('apple_music_url', $socials->apple_music_url) }}" />
+                                <input type="url" name="apple_music_url" id="apple_music_url" class="form-control form-control-lg form-control-solid" placeholder="https://music.apple.com/..." value="{{ old('apple_music_url', $socials->apple_music_url) }}" />
                             </div>
                         </div>
                     </div>
@@ -248,16 +248,4 @@
 </div>
 @endsection
 
-@push('script')
-<script>
-    $(document).ready(function() {
-        @if(Session::has('success'))
-            toastr.success("{{ Session::get('success') }}");
-        @endif
 
-        @if(Session::has('error'))
-            toastr.error("{{ Session::get('error') }}");
-        @endif
-    });
-</script>
-@endpush
