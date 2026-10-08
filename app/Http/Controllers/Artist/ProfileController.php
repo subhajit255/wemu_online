@@ -104,12 +104,13 @@ class ProfileController extends BaseController
             );
 
             DB::commit();
-
-            // return redirect()->back()->with('success', 'Profile updated successfully.');
-            return $this->responseJson(true, 200, "Profile updated successfully.", []);
+            // return $this->responseJson(true, 200, "Profile updated successfully.", []);
+            $data = ['status' => true, 'message' => 'Profile updated successfully.', 'data' => [], 'url' => route('artist.profile.index')];
+            return response($data);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseJson(false, 500, "Something went wrong. Please try again later.", []);
+            $data = ['status' => false, 'message' => 'Something went wrong. Please try again later.', 'data' => [], 'url' => route('artist.profile.index')];
+            return response($data);
         }
     }
 }
