@@ -106,10 +106,10 @@ class ProfileController extends BaseController
             DB::commit();
 
             // return redirect()->back()->with('success', 'Profile updated successfully.');
-            return $this->responseJson(200, true, "Profile updated successfully.", []);
+            return $this->responseJson(true, 200, "Profile updated successfully.", []);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->responseJson(500, false, "Something went wrong. Please try again later.", []);
+            return $this->responseJson(false, 500, "Something went wrong. Please try again later.", []);
         }
     }
 }
