@@ -10,6 +10,7 @@ use App\Models\SocialLink;
 use App\Models\Genre;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends BaseController
 {
@@ -30,8 +31,8 @@ class ProfileController extends BaseController
         $request->validate([
             'name' => 'required|string|max:255',
             'stage_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'mobile' => 'required|unique:users,mobile_number,'.$user->id,
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)->whereNull('deleted_at')],
+            'mobile' => ['required', 'numeric', Rule::unique('users', 'mobile_number')->ignore($user->id)->whereNull('deleted_at')],
             'country' => 'required|string|max:100',
             'bio' => 'required|string|max:5000',
             'primary_genre_id' => 'required|exists:genres,id',
