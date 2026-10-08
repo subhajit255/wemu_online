@@ -147,9 +147,11 @@
                 </div>
                 <div class="separator my-2"></div>
                 <div class="menu-item px-5">
-                    <a href="javascript:void(0)" class="menu-link px-5" data-bs-toggle="modal"
-                        data-bs-target="#admin_update_form">My
-                        Profile</a>
+                    @if(auth()->user() && auth()->user()->user_type == 3)
+                        <a href="{{ route('artist.profile.index') }}" class="menu-link px-5">My Profile</a>
+                    @else
+                        <a href="javascript:void(0)" class="menu-link px-5" data-bs-toggle="modal" data-bs-target="#admin_update_form">My Profile</a>
+                    @endif
                 </div>
                 <div class="menu-item px-5">
                     <a href="javascript:void(0)" class="menu-link px-5" data-bs-toggle="modal"

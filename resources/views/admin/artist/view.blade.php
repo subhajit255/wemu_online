@@ -38,7 +38,7 @@
                 // Check cover banner image
                 $coverBanner = asset('assets/media/misc/pattern-4.jpg');
                 if($detail->profile && $detail->profile->cover_banner) {
-                    $bannerPath = 'storage/profile/' . $detail->profile->cover_banner;
+                    $bannerPath = 'storage/banner/' . $detail->profile->cover_banner;
                     if(file_exists(public_path($bannerPath))) {
                         $coverBanner = asset($bannerPath);
                     }

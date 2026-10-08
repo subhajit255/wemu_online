@@ -53,6 +53,10 @@ Route::as('artist.')->group(function () {
             Route::get('settings', 'index')->name('settings.index');
             Route::post('settings', 'update')->name('settings.update');
         });
+        Route::controller(\App\Http\Controllers\Artist\ProfileController::class)->group(function () {
+            Route::get('profile', 'index')->name('profile.index');
+            Route::post('profile', 'update')->name('profile.update');
+        });
         Route::controller(\App\Http\Controllers\Artist\PromotionController::class)->group(function () {
             Route::get('promotion', 'index')->name('promotion.index');
         });
