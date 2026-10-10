@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Resources\AuthResource;
+use \App\Models\Song;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\ArtistResource;
+use App\Http\Resources\Api\PaginateAlbumCollection;
 use App\Http\Resources\Api\PaginateArtistCollection;
+use App\Http\Resources\AuthResource;
+use App\Models\Album;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ArtistController extends BaseController
@@ -49,10 +52,10 @@ class ArtistController extends BaseController
             $artists = User::whereHas('roles', function ($q) {
                 $q->where('slug', 'artist');
             })
-            ->when($request->filled('keyword'), function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->keyword . '%');
-            })
-            ->whereNull('added_by')->paginate($perPage);
+                ->when($request->filled('keyword'), function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->keyword . '%');
+                })
+                ->whereNull('added_by')->paginate($perPage);
             return $this->responseJson(true, 200, 'Artists fetched successfully', new PaginateArtistCollection($artists));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
@@ -126,13 +129,64 @@ class ArtistController extends BaseController
 
         try {
             $perPage = $request->per_page ?? 15;
-            $songs = \App\Models\Song::where('user_id', $id)
+            $songs = Song::where('user_id', $id)
                 ->where('status', 1)
                 ->with(['album', 'genre', 'artist'])
                 ->orderBy('published_at', 'desc')
                 ->paginate($perPage);
 
             return $this->responseJson(true, 200, 'Artist songs fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($songs));
+        } catch (\Throwable $th) {
+            logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
+        }
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/artist/albums/{id}",
+     *     summary="Get artist albums",
+     *     tags={"Artist"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (default: 15)",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Response(response=200, description="Artist albums fetched successfully")
+     * )
+     */
+    public function artistAlbums($id, Request $request)
+    {
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|exists:users,id',
+        ]);
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), (object)[]);
+        }
+        try {
+            $perPage = $request->per_page ?? 15;
+            $albums = Album::where('user_id', $id)
+                ->where('status', 1)
+                ->with(['user', 'genre', 'category'])
+                ->orderBy('release_date', 'desc')
+                ->paginate($perPage);
+
+            return $this->responseJson(true, 200, 'Artist albums fetched successfully', new PaginateAlbumCollection($albums));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
