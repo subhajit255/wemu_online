@@ -45,7 +45,8 @@ class SubscriptionPurchasedMail extends Mailable implements ShouldQueue
             with: [
                 'name' => $this->user->name ?? $this->user->first_name ?? 'Listener',
                 'plan_name' => $this->subscriptionDetails['plan_name'] ?? 'WEMU Premium',
-                'valid_through' => $this->subscriptionDetails['valid_through'] ?? now()->addMonth()->format('F d, Y'),
+                'start_date' => $this->subscriptionDetails['start_date'] ?? now()->format('F d, Y'),
+                'end_date' => $this->subscriptionDetails['end_date'] ?? now()->addMonth()->format('F d, Y'),
                 'order_ref' => $this->subscriptionDetails['order_ref'] ?? uniqid('wemu_sub_'),
                 'order_date' => $this->subscriptionDetails['order_date'] ?? now()->format('M d, Y - h:i A'),
                 'plan_price' => $this->subscriptionDetails['plan_price'] ?? '$12.99/mo',

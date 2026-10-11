@@ -239,8 +239,12 @@
                         <td class="summary-value" style="font-weight: 500;">Active Premium Membership</td>
                     </tr>
                     <tr>
-                        <td class="summary-label">Valid Through:</td>
-                        <td class="summary-value">{{ $valid_through ?? 'November 24, 2026' }}</td>
+                        <td class="summary-label">Start Date:</td>
+                        <td class="summary-value">{{ $start_date ?? now()->format('F d, Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="summary-label">End Date:</td>
+                        <td class="summary-value">{{ $end_date ?? now()->addMonth()->format('F d, Y') }}</td>
                     </tr>
                 </table>
             </div>
@@ -274,7 +278,7 @@
 
             <!-- Info Box -->
             <div class="info-box">
-                {{ $plan_description ?? 'Unlimited ad-free music, valid for 1 month.' }}
+                {!! strip_tags($plan_description ?? 'Unlimited ad-free music, valid for 1 month.') !!}
             </div>
 
             <!-- Included Section -->

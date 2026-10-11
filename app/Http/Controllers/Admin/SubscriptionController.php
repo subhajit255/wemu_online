@@ -97,7 +97,7 @@ class SubscriptionController extends BaseController
                         'slug' => Str::slug($request->name),
                         'available_for' => $request->available_for == 1 ? 'user' : 'artist',
                         'max_users' => $request->max_users ?? 1,
-                        'trial_days' => $request->trial_days ?? 0,
+                        'trial_days' => $request->trial_days ?? ($existingSubscription->trial_days ?? 0),
                         'requires_verification' => $request->has('requires_verification') ? 'yes' : 'no',
                     ];
 
@@ -129,7 +129,7 @@ class SubscriptionController extends BaseController
                     "stripe_product_id" => $stripeProductId,
                     "stripe_price_id" => $stripePriceId,
                     "max_users" => $request->max_users,
-                    "trial_days" => $request->trial_days ?? 0,
+                    "trial_days" => $request->trial_days ?? ($existingSubscription->trial_days ?? 0),
                     "max_song_skips" => $request->max_song_skips,
                     "requires_verification" => $request->has('requires_verification') ? 1 : 0,
                 ];

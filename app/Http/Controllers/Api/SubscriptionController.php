@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use Carbon\Carbon;
-use App\Traits\StripeTrait;
-use Illuminate\Http\Request;
-use App\Models\Subscription;
-use App\Models\UserSubscription;
+use \App\Mail\SubscriptionPurchasedMail;
+use \Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\BaseController;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use App\Http\Resources\Api\SubscriptionCollection;
+use App\Models\Subscription;
 use App\Models\Transaction;
+use App\Models\UserSubscription;
+use App\Traits\StripeTrait;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SubscriptionController extends BaseController
 {
@@ -105,13 +107,8 @@ class SubscriptionController extends BaseController
             // 2. Attach Payment Method and Set Default
             $this->attachPaymentMethodToCustomer($user->stripe_id, $request->payment_method_id);
 
-            // 3. Create Stripe Subscription
-            $stripeParams = [];
-            if ($subscription->trial_days && $subscription->trial_days > 0) {
-                $stripeParams['trial_end'] = now()->addDays($subscription->trial_days)->timestamp;
-            }
-
-            $stripeSubscription = $this->createSubscription($user->stripe_id, $subscription->stripe_price_id, $stripeParams);
+            // 3. Create Stripe Subscription (starts immediately from purchase time)
+            $stripeSubscription = $this->createSubscription($user->stripe_id, $subscription->stripe_price_id);
 
             // 5. Create local UserSubscription (Pending or Active)
             $isActive = in_array($stripeSubscription->status, ['active', 'trialing']);
@@ -130,8 +127,20 @@ class SubscriptionController extends BaseController
                 'stripe_status' => $stripeSubscription->status,
                 'current_period_start' => $currentPeriodStart,
                 'current_period_end' => $currentPeriodEnd,
+                'started_on' => $currentPeriodStart->toDateString(),
+                'ended_at' => $currentPeriodEnd->toDateString(),
+                'ends_at' => $currentPeriodEnd,
                 'status' => $isActive ? 1 : 0,
             ]);
+
+            // Update user subscription_type based on plan max_users
+            $subType = 'individual';
+            if ($subscription->max_users == 2) {
+                $subType = 'duo';
+            } elseif ($subscription->max_users > 2) {
+                $subType = 'family';
+            }
+            $user->update(['subscription_type' => $subType]);
 
             // 6. Log Transaction
             $paymentIntent = null;
@@ -149,23 +158,38 @@ class SubscriptionController extends BaseController
                 'amount' => $subscription->price, // Storing amount from local subscription plan
                 'currency' => config('services.stripe.currency', 'usd'),
                 'payment_status' => $isActive ? 'completed' : 'pending',
-                'description' => 'Subscription purchase: ' . $subscription->title,
+                'description' => 'Subscription purchase: ' . ($subscription->name ?? $subscription->title ?? 'WEMU Premium'),
             ]);
 
             DB::commit();
 
             if ($isActive) {
                 try {
+                    $intervalText = '/mo';
+                    if ($subscription->interval) {
+                        $intervalText = '/' . ($subscription->interval_count > 1 ? $subscription->interval_count . ' ' : '') . $subscription->interval;
+                    }
+                    $currencySymbol = '$';
+                    if ($subscription->currency === 'EUR') {
+                        $currencySymbol = '€';
+                    } elseif ($subscription->currency === 'GBP') {
+                        $currencySymbol = '£';
+                    } elseif ($subscription->currency === 'INR') {
+                        $currencySymbol = '₹';
+                    }
+                    $formattedPrice = $currencySymbol . number_format($subscription->price, 2);
+
                     $subscriptionDetails = [
-                        'plan_name' => $subscription->title ?? 'WEMU Premium',
-                        'valid_through' => $currentPeriodEnd->format('F d, Y'),
+                        'plan_name' => $subscription->name ?? $subscription->title ?? 'WEMU Premium',
+                        'start_date' => $currentPeriodStart->format('F d, Y'),
+                        'end_date' => $currentPeriodEnd->format('F d, Y'),
                         'order_ref' => $transactionId ?? $stripeSubscription->id,
-                        'order_date' => now()->format('M d, Y - h:i A'),
-                        'plan_price' => '$' . number_format($subscription->price, 2) . '/mo',
-                        'total_paid' => '$' . number_format($subscription->price, 2),
-                        'plan_description' => $subscription->description ?? 'Unlimited ad-free music.',
+                        'order_date' => $currentPeriodStart->format('M d, Y - h:i A'),
+                        'plan_price' => $formattedPrice . $intervalText,
+                        'total_paid' => $formattedPrice,
+                        'plan_description' => $subscription->description ?? 'Unlimited ad-free music, valid for ' . ($subscription->interval_count > 1 ? $subscription->interval_count . ' ' : '') . ($subscription->interval ?? 'month') . '.',
                     ];
-                    \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\SubscriptionPurchasedMail($user, $subscriptionDetails));
+                    Mail::to($user->email)->queue(new SubscriptionPurchasedMail($user, $subscriptionDetails));
                 } catch (\Exception $e) {
                     logger('Subscription Purchased Mail Error: ' . $e->getMessage());
                 }
@@ -185,7 +209,7 @@ class SubscriptionController extends BaseController
             ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
             DB::rollBack();
-            
+
             // Log Failed Transaction
             try {
                 Transaction::create([
@@ -223,28 +247,27 @@ class SubscriptionController extends BaseController
         DB::beginTransaction();
         try {
             $user = auth()->user();
-            
+
             // Get current active subscription
             $activeSubscription = UserSubscription::where(['user_id' => $user->id, 'status' => 1])->first();
-            
+
             if (!$activeSubscription) {
                 return $this->responseJson(false, 404, 'No active subscription found', []);
             }
-            
+
             // Cancel in Stripe if Stripe ID exists
             if ($activeSubscription->stripe_id) {
                 $this->cancelSubscription($activeSubscription->stripe_id);
             }
-            
+
             // Update local subscription status
             $activeSubscription->update([
                 'status' => 0,
                 'stripe_status' => 'canceled'
             ]);
-            
+
             DB::commit();
             return $this->responseJson(true, 200, 'Subscription canceled successfully. You are now on the Free plan.', []);
-            
         } catch (\Stripe\Exception\ApiErrorException $e) {
             DB::rollBack();
             return $this->responseJson(false, 400, $e->getMessage(), []);

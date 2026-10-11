@@ -38,7 +38,7 @@
                                 <label for="tagline">Tagline</label>
                                 <input type="text" class="modern-input" placeholder="e.g. Up to 6 Premium accounts" name="tagline" id="tagline" value="{{ $details->tagline ?? null }}">
                             </div>
-                            <div class="col-md-3 modern-form-group">
+                            <div class="col-md-4 modern-form-group">
                                 <label for="available_for">Audience <span class="text-danger">*</span></label>
                                 <select name="available_for" id="available_for" class="modern-input modern-select">
                                     <option value="">Select Audience</option>
@@ -46,7 +46,7 @@
                                     <option value="2" {{ !empty($details) && $details->available_for == 2 ? 'selected' : null }}>Artist</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 modern-form-group">
+                            <div class="col-md-4 modern-form-group">
                                 <label for="interval">Billing Interval <span class="text-danger">*</span></label>
                                 <select name="interval" id="interval" class="modern-input modern-select">
                                     <option value="">Select Interval</option>
@@ -55,7 +55,7 @@
                                     <option value="week" {{ !empty($details) && $details->interval == 'week' ? 'selected' : null }}>Weekly</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 modern-form-group">
+                            <div class="col-md-4 modern-form-group">
                                 <label for="interval_count">Interval Count <span class="text-danger">*</span></label>
                                 <input type="number" class="modern-input" placeholder="e.g. 1" name="interval_count" id="interval_count" value="{{ $details->interval_count ?? 1 }}">
                             </div>
@@ -67,7 +67,7 @@
                                     <input type="text" class="modern-input number-only" placeholder="0.00" name="price" id="price" value="{{ $details->price ?? null }}">
                                 </div>
                             </div>
-                            <div class="col-md-3 modern-form-group">
+                            <div class="col-md-6 modern-form-group">
                                 <label for="currency">Currency <span class="text-danger">*</span></label>
                                 <select name="currency" id="currency" class="modern-input modern-select">
                                     <option value="USD" {{ !empty($details) && $details->currency == 'USD' ? 'selected' : null }}>USD ($)</option>
@@ -77,15 +77,11 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3 modern-form-group">
+                            <div class="col-md-6 modern-form-group">
                                 <label for="max_users">Max Users <span class="text-danger">*</span></label>
                                 <input type="number" class="modern-input" placeholder="1 for Individual, 2 for Duo" name="max_users" id="max_users" value="{{ $details->max_users ?? 1 }}">
                             </div>
-                            <div class="col-md-3 modern-form-group">
-                                <label for="trial_days">Trial Days</label>
-                                <input type="number" class="modern-input" placeholder="e.g. 30" name="trial_days" id="trial_days" value="{{ $details->trial_days ?? 0 }}">
-                            </div>
-                            <div class="col-md-3 modern-form-group">
+                            <div class="col-md-6 modern-form-group">
                                 <label for="max_song_skips">Max Song Skips</label>
                                 <input type="number" class="modern-input" placeholder="e.g. 5" name="max_song_skips" id="max_song_skips" value="{{ $details->max_song_skips ?? '' }}">
                                 <small class="text-muted">Leave blank for unlimited skips.</small>
