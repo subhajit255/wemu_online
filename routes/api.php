@@ -189,3 +189,8 @@ Route::post('/cron/publish-scheduled-albums', function () {
         'message' => 'Scheduled albums command executed successfully.'
     ]);
 });
+
+Route::get('/debug-auth', fn() => [
+    'header' => request()->header('Authorization'),
+    'bearer' => request()->bearerToken(),
+]);
