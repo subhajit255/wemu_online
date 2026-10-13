@@ -440,7 +440,7 @@
                 <a href="javascript:void(0)" class="text-muted text-hover-primary fs-8 fw-semibold" data-bs-toggle="modal" data-bs-target="#admin_update_form">View Profile</a>
             </div>
             <div class="cursor-pointer">
-                <a action="{{ route('admin.logout') }}" class='logOut' title="Logout">
+                <a action="{{ url('/logout') }}" class='logOut' title="Logout">
                     <i class="fa fa-sign-out" aria-hidden="true" style="font-size: 1.25rem; color: #9ca3af;"></i>
                 </a>
             </div>

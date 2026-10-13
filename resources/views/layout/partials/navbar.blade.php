@@ -159,7 +159,7 @@
                 </div>
                 <div class="separator my-2"></div>
                 <div class="menu-item px-5">
-                    <a action="{{ route('admin.logout') }}" class="menu-link px-5 logOut">Sign Out</a>
+                    <a action="{{ url('/logout') }}" class="menu-link px-5 logOut">Sign Out</a>
                 </div>
             </div>
         </div>
