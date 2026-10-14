@@ -109,7 +109,7 @@
                 </div>
 
                 <!-- Audience Accordion -->
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.user.*') || request()->routeIs('admin.artist.*')) ? 'here show' : '' }}">
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.user.*') || request()->routeIs('admin.artist.*') || request()->routeIs('admin.delete.*')) ? 'here show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="fa-solid fa-users fs-5"></i></span>
                         <span class="menu-title">Audience</span>
@@ -130,6 +130,14 @@
                                     <span class="bullet bullet-dot"></span>
                                 </span>
                                 <span class="menu-title">Artists</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ (request()->routeIs('admin.delete.account') || request()->routeIs('admin.delete.user')) ? 'active' : '' }}" href="{{ route('admin.delete.account') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Delete User</span>
                             </a>
                         </div>
                     </div>

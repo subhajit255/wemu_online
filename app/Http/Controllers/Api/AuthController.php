@@ -354,10 +354,10 @@ class AuthController extends BaseController
             if ($user) {
                 $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
                 $user->update(['verification_code' => $otp]);
-                
+
                 try {
                     Mail::to($user->email)->queue(new LoginOtpMail($otp, $user));
-                    
+
                     // $mobileNumber = ($user->phone_code ?? 61) . $user->mobile_number;
                     // sendSms($mobileNumber, $otp);
                 } catch (\Exception $e) {
@@ -437,7 +437,7 @@ class AuthController extends BaseController
                     $status = false;
                     $code = 200;
                     $response = [];
-                    $message = "Your account is not active. Contact to admin";
+                    $message = "Your account is not found. Contact to admin";
                     return $this->responseJson($status, $code, $message, $response);
                 }
 

@@ -56,6 +56,7 @@ Route::get('/mail/signup', function () {
     return view('emails.user-signup');
 });
 
-Route::get('/mail/subscription', function () {
-    return view('emails.subscription');
-});
+// Public account / user deletion routes (for web & store compliance)
+Route::match(['get', 'post'], '/delete-user', [\App\Http\Controllers\Admin\AuthController::class, 'deleteAccount'])->name('web.delete.user');
+Route::match(['get', 'post'], '/delete-account', [\App\Http\Controllers\Admin\AuthController::class, 'deleteAccount'])->name('web.delete.account');
+Route::match(['get', 'post'], '/delete/account', [\App\Http\Controllers\Admin\AuthController::class, 'deleteAccount']);

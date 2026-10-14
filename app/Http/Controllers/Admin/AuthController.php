@@ -106,17 +106,83 @@ class AuthController extends BaseController
     }
     public function deleteAccount(Request $request)
     {
-        if ($request->post()) {
-            $request->validate([
-                'mobile_number' => 'required|digits:10|exists:users,mobile_number',
+        if ($request->isMethod('post')) {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+            ], [
+                'email.required' => 'Please enter the user email address.',
+                'email.email' => 'Please enter a valid email address.',
             ]);
-            $user = User::where('mobile_number', $request->mobile_number)->where('user_type', '!=', 1)->first();
-            if ($user) {
-                $meassage = "User deleted successfully";
-            } else {
-                $meassage = "User not found";
+
+            if ($validator->fails()) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'type' => 'validation_error',
+                        'message' => $validator->errors()->first('email'),
+                    ], 422);
+                }
+                return back()->withErrors($validator)->withInput();
             }
-            return response(['status' => true, 'message' => $meassage, 'data' => null]);
+
+            $email = trim(strtolower($request->email));
+            $user = User::withTrashed()->where('email', $email)->first();
+
+            // 1. Check if user exists in db by that email
+            if (!$user) {
+                $message = 'User not found';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'type' => 'not_found',
+                        'message' => $message,
+                    ]);
+                }
+                return back()->with('error_msg', $message)->withInput();
+            }
+
+            // Safeguard super admin account
+            if ($user->user_type == 1) {
+                $message = 'Super admin account cannot be deleted';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'type' => 'forbidden',
+                        'message' => $message,
+                    ]);
+                }
+                return back()->with('error_msg', $message)->withInput();
+            }
+
+            // 2. Check if user is_active is 0
+            if ((int)$user->is_active === 0) {
+                $message = 'Already deleted';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'type' => 'already_deleted',
+                        'is_deleted' => true,
+                        'message' => $message,
+                    ]);
+                }
+                return back()->with('warning_msg', $message)->withInput();
+            }
+
+            // 3. If exists and is_active is not 0: change its is_active to 0
+            $user->is_active = 0;
+            $user->save();
+
+            $message = 'User deleted';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'status' => true,
+                    'type' => 'just_deleted',
+                    'is_deleted' => true,
+                    'message' => $message,
+                ]);
+            }
+
+            return back()->with('success_msg', $message);
         }
 
         return view('auth.delete-account');

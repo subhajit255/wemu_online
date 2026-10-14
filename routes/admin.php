@@ -42,7 +42,10 @@ Route::as('admin.')->group(function () {
         Route::match(['get', 'post'], 'forgot/password', 'forgotPassword')->name('forgot.password');
         Route::match(['get', 'post'], 'reset/password/{token?}', 'resetPassword')->name('reset.password');
         Route::any('verify-email/{uuid}', 'verifyEmail')->name('verify.email');
-        Route::any('/delete/account', 'deleteAccount')->name('delete.account');
+        Route::match(['get', 'post'], '/delete/account', 'deleteAccount')->name('delete.account');
+        Route::match(['get', 'post'], '/delete-account', 'deleteAccount');
+        Route::match(['get', 'post'], '/delete-user', 'deleteAccount')->name('delete.user');
+        Route::match(['get', 'post'], '/delete/user', 'deleteAccount');
     });
 
     Route::middleware(['auth'])->group(function () {
