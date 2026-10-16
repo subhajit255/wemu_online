@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('task-remainder:cron')->daily();
         $schedule->command('songs:publish-scheduled')->everyTenMinutes();
         $schedule->command('albums:publish-scheduled')->everyFifteenMinutes();
-        // $schedule->command('email-queue:process --chunk=30')->everyMinute()->withoutOverlapping()->runInBackground();
+        $schedule->command('email-queue:process --chunk=30')->everyMinute()->withoutOverlapping()->runInBackground();
     }
 
     /**
