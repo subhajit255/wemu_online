@@ -12,15 +12,16 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('send-push:cron')->everyMinute();
-        $schedule->command('notification-clear:cron')->daily();
-        $schedule->command('income-recurring:cron')->daily();
-        $schedule->command('expense-recurring:cron')->daily();
-        $schedule->command('expense-remainder:cron')->daily();
-        $schedule->command('goal-remainder:cron')->daily();
-        $schedule->command('task-remainder:cron')->daily();
-        $schedule->command('songs:publish-scheduled')->everyMinute();
-        $schedule->command('albums:publish-scheduled')->daily();
+        // $schedule->command('send-push:cron')->everyMinute();
+        // $schedule->command('notification-clear:cron')->daily();
+        // $schedule->command('income-recurring:cron')->daily();
+        // $schedule->command('expense-recurring:cron')->daily();
+        // $schedule->command('expense-remainder:cron')->daily();
+        // $schedule->command('goal-remainder:cron')->daily();
+        // $schedule->command('task-remainder:cron')->daily();
+        $schedule->command('songs:publish-scheduled')->everyTenMinutes();
+        $schedule->command('albums:publish-scheduled')->everyFifteenMinutes();
+        // $schedule->command('email-queue:process --chunk=30')->everyMinute()->withoutOverlapping()->runInBackground();
     }
 
     /**
@@ -28,8 +29,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
         require base_path('routes/console.php');
     }
 }
-
