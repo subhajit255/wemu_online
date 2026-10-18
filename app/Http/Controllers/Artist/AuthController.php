@@ -22,6 +22,7 @@ use App\Traits\StripeTrait;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LoginOtpMail;
+use Illuminate\Validation\Rule;
 
 class AuthController extends BaseController
 {
@@ -139,8 +140,8 @@ class AuthController extends BaseController
                     $request->validate([
                         'stage_name' => 'required|string|max:255',
                         'name'       => 'required|string|max:255',
-                        'email'      => 'required|email|unique:users,email',
-                        'mobile'     => 'required|unique:users,mobile_number',
+                        'email'      => ['required', 'email', Rule::unique('users', 'email')->whereNull('deleted_at')],
+                        'mobile'     => ['required', Rule::unique('users', 'mobile_number')->whereNull('deleted_at')],
                         'password'   => 'required|string|min:6|confirmed',
                         'country'    => 'required|string|max:100',
                         'agree_terms' => 'required|accepted',

@@ -2,24 +2,27 @@
 
 namespace App\Http\Controllers\Ajax;
 
+use \App\Models\Album;
+use \App\Models\Song;
+use App\Http\Controllers\BaseController;
+use App\Models\Attribute;
+use App\Models\Banner;
+use App\Models\Broadcast;
+use App\Models\Category;
 use App\Models\Cms;
 use App\Models\Coupon;
 use App\Models\Faq;
+use App\Models\Feature;
 use App\Models\Item;
 use App\Models\News;
-use App\Models\User;
-use App\Models\Banner;
-use App\Models\Feature;
 use App\Models\Product;
-use App\Models\Category;
-use App\Models\Attribute;
-use App\Models\Broadcast;
-use App\Models\UserIncome;
 use App\Models\ProductImage;
-use App\Models\Subscription;
-use Illuminate\Http\Request;
 use App\Models\ServiceFrequency;
-use App\Http\Controllers\BaseController;
+use App\Models\Subscription;
+use App\Models\SupportArticle;
+use App\Models\User;
+use App\Models\UserIncome;
+use Illuminate\Http\Request;
 
 class AjaxController extends BaseController
 {
@@ -116,6 +119,14 @@ class AjaxController extends BaseController
                     $data->delete();
                     $message = 'FAQ Deleted';
                     break;
+                case 'support_articles':
+                    $id = uuidtoid($request->uuid, $table);
+                    $data = SupportArticle::find($id);
+                    if ($data) {
+                        $data->delete();
+                        $message = 'Support Article Deleted';
+                    }
+                    break;
                 case 'coupons':
                     $id = uuidtoid($request->uuid, $table);
                     $data = Coupon::find($id);
@@ -126,8 +137,8 @@ class AjaxController extends BaseController
                     $id = $request->uuid; // Genres use standard ID, not UUID
                     $data = \App\Models\Genre::find($id);
                     if ($data) {
-                        $songsCount = \App\Models\Song::where('genre_id', $id)->count();
-                        $albumsCount = \App\Models\Album::where('genre_id', $id)->count();
+                        $songsCount = Song::where('genre_id', $id)->count();
+                        $albumsCount = Album::where('genre_id', $id)->count();
                         if ($songsCount > 0 || $albumsCount > 0) {
                             return $this->responseJson(false, 400, "Cannot delete genre. It is associated with songs or albums.");
                         }
@@ -191,6 +202,13 @@ class AjaxController extends BaseController
                     $id = uuidtoid($request->uuid, $table);
                     $data = Faq::find($id);
                     $data->update(['is_active' => $request->status]);
+                    break;
+                case 'support_articles':
+                    $id = uuidtoid($request->uuid, $table);
+                    $data = SupportArticle::find($id);
+                    if ($data) {
+                        $data->update(['is_active' => $request->status]);
+                    }
                     break;
                 case 'banners':
                     $id = uuidtoid($request->uuid, $table);

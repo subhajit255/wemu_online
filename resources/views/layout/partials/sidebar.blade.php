@@ -196,7 +196,7 @@
                 </div>
 
                 <!-- Help & Support -->
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.help.support') || request()->routeIs('admin.cms.*')) ? 'here show' : '' }}">
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ (request()->routeIs('admin.help.support') || request()->routeIs('admin.cms.*') || request()->routeIs('admin.support-article.*')) ? 'here show' : '' }}">
                     <span class="menu-link">
                         <span class="menu-icon"><i class="fa-solid fa-life-ring fs-5"></i></span>
                         <span class="menu-title">Help & Support</span>
@@ -209,6 +209,14 @@
                                     <span class="bullet bullet-dot"></span>
                                 </span>
                                 <span class="menu-title">User Queries</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ request()->routeIs('admin.support-article.*') ? 'active' : '' }}" href="{{ route('admin.support-article.list') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Support Articles</span>
                             </a>
                         </div>
                         <div class="menu-item">

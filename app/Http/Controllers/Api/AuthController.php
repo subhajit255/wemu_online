@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AuthController extends BaseController
 {
@@ -80,9 +81,18 @@ class AuthController extends BaseController
     public function signup(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile_number' => 'required|numeric|digits_between:8,13|unique:users,mobile_number',
+            'mobile_number' => [
+                'required',
+                'numeric',
+                'digits_between:8,13',
+                Rule::unique('users', 'mobile_number')->whereNull('deleted_at'),
+            ],
             'phone_code' => 'required|numeric',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
             'name' => 'required|string',
             'password' => 'required|min:6|string',
             'confirm_password' => 'required|same:password',
@@ -666,7 +676,11 @@ class AuthController extends BaseController
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::exists('users', 'email')->whereNull('deleted_at'),
+            ],
         ]);
         if ($validator->fails()) {
             $status = false;

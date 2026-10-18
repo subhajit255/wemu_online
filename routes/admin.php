@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\ServiceFrequencyController;
+use App\Http\Controllers\Admin\SupportArticleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -148,6 +149,12 @@ Route::as('admin.')->group(function () {
             Route::get('list', 'index')->name('list')->can('view-faq');
             Route::any('add', 'add')->name('add')->can('add-faq');
             Route::any('edit/{uuid}', 'add')->name('edit')->can('edit-faq');
+        });
+        Route::controller(SupportArticleController::class)->as('support-article.')->prefix('support-article')->group(function () {
+            Route::get('list', 'index')->name('list');
+            Route::post('add', 'add')->name('add');
+            Route::get('edit/{uuid}', 'edit')->name('edit');
+            Route::post('delete/{uuid?}', 'delete')->name('delete');
         });
         Route::controller(BannerController::class)->as('banner.')->prefix('banner')->group(function () {
             Route::get('list', 'index')->name('list');
