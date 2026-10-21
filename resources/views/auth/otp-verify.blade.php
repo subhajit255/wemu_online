@@ -350,11 +350,11 @@
     @if(isset($verificationCode))
     <script>
         console.log("Verification Code:", "{{ $verificationCode }}");
-        $(window).on('load', function() {
-            setTimeout(function() {
-                alert("Verification Code: {{ $verificationCode }}");
-            }, 600);
-        });
+        // $(window).on('load', function() {
+        //     setTimeout(function() {
+        //         alert("Verification Code: {{ $verificationCode }}");
+        //     }, 600);
+        // });
     </script>
     @endif
 </body>
