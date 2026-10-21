@@ -644,7 +644,7 @@ class SongController extends BaseController
 
             if ($isEmpty) {
                 $artistIds = [];
-                if (auth('sanctum')->check() || auth('api')->check() || auth()->check()) {
+                if (auth('api')->check() || auth()->check()) {
                     $userId = auth()->id();
                     $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
                     $chosenArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();

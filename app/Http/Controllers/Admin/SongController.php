@@ -16,7 +16,7 @@ use App\Traits\UploadAble;
 class SongController extends BaseController
 {
     use UploadAble;
-    
+
     public function index(Request $request)
     {
         $currentDateTime = date('Y-m-d H:i:s');
@@ -48,7 +48,7 @@ class SongController extends BaseController
                 'title'       => 'required|string',
                 'user_id'     => 'required|exists:users,id',
                 'genre_id'    => 'required|exists:genres,id',
-                'album_id'    => 'required|exists:albums,id',
+                'album_id'    => 'nullable',
                 'language_id' => 'required|exists:languages,id',
                 'artist_name' => 'required|string',
                 'lyrics'      => 'nullable|string',
@@ -57,7 +57,7 @@ class SongController extends BaseController
                 'background'  => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,mp4',
                 'is_explicit' => 'required|in:0,1',
             ];
-            
+
             $request->validate($rules);
             $message = !empty($id) ? "Song Updated Successfully" : "Song Created Successfully";
 
@@ -67,7 +67,7 @@ class SongController extends BaseController
                     "title"            => $request->title,
                     "slug"             => Str::slug($request->title),
                     "user_id"          => $request->user_id,
-                    "album_id"         => $request->album_id,
+                    "album_id"         => $request->album_id ?? null,
                     "genre_id"         => $request->genre_id,
                     "language_id"      => $request->language_id,
                     "artist_name"      => $request->artist_name,
@@ -103,7 +103,7 @@ class SongController extends BaseController
                     $fileName = uniqid() . '.' . $audio->getClientOriginalExtension();
                     $duration = $this->getAudioDuration($audio);
                     if ($duration) {
-                        $postData['duration'] = $duration; 
+                        $postData['duration'] = $duration;
                     }
                     $uploaded = $this->uploadOne($audio, config('constants.SITE_SONG_UPLOAD_PATH'), $fileName, 'public');
                     if ($uploaded) {
@@ -132,7 +132,7 @@ class SongController extends BaseController
                         $postData['background'] = $uploaded;
                     }
                 }
-                
+
                 $song = Song::updateOrCreate(['id' => $id], $postData);
                 DB::commit();
             } catch (\Throwable $th) {
@@ -173,7 +173,7 @@ class SongController extends BaseController
     public function destroy($id)
     {
         $song = Song::findOrFail($id);
-        
+
         // Delete related files
         if ($song->cover_image) {
             $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->cover_image);
@@ -184,9 +184,9 @@ class SongController extends BaseController
         if ($song->background) {
             $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->background);
         }
-        
+
         $song->delete();
-        
+
         return redirect()->back()->with('success', 'Song deleted successfully.');
     }
 }

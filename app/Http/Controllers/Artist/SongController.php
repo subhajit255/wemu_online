@@ -62,7 +62,7 @@ class SongController extends BaseController
                 $request->validate([
                     'title'       => 'required|string',
                     'genre_id'    => 'required|exists:genres,id',
-                    'album_id'    => 'required|exists:albums,id',
+                    'album_id'    => 'nullable',
                     'language_id' => 'required|exists:languages,id',
                     'artist_name' => 'required|string',
                     'lyrics'      => 'nullable|string',
@@ -77,7 +77,7 @@ class SongController extends BaseController
                 $request->validate([
                     'title'       => 'required|string',
                     'genre_id'    => 'required|exists:genres,id',
-                    'album_id'    => 'required|exists:albums,id',
+                    'album_id'    => 'nullable',
                     'language_id' => 'required|exists:languages,id',
                     'artist_name' => 'required|string',
                     'lyrics'      => 'nullable|string',
@@ -96,7 +96,7 @@ class SongController extends BaseController
                     "title"            => $request->title,
                     "slug"             => Str::slug($request->title),
                     "user_id"          => auth()->user()->id,
-                    "album_id"         => $request->album_id,
+                    "album_id"         => $request->album_id ?? null,
                     "genre_id"         => $request->genre_id,
                     "language_id"      => $request->language_id,
                     "artist_name"      => $request->artist_name,
@@ -211,7 +211,7 @@ class SongController extends BaseController
     public function destroy($id)
     {
         $song = Song::findOrFail($id);
-        
+
         // Delete related files
         if ($song->cover_image) {
             $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->cover_image);
@@ -222,9 +222,9 @@ class SongController extends BaseController
         if ($song->background) {
             $this->deleteOne(config('constants.SITE_SONG_COVER_IMAGE_UPLOAD_PATH') . '/' . $song->background);
         }
-        
+
         $song->delete();
-        
+
         return redirect()->back()->with('success', 'Song deleted successfully.');
     }
 }

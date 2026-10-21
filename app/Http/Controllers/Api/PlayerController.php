@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use \App\Http\Resources\Api\SongResource;
+use \App\Models\Genre;
+use \Illuminate\Support\Str;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\Api\PaginateSongCollection;
 use App\Models\Album;
@@ -169,10 +171,10 @@ class PlayerController extends BaseController
                     break;
                 default:
                     // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
-                    if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you')) {
-                        $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
-                        $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
-                            return \Illuminate\Support\Str::slug($g->title) === $genreSlug;
+                    if (Str::endsWith($sourceType, '-for-you')) {
+                        $genreSlug = Str::replaceLast('-for-you', '', $sourceType);
+                        $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                            return Str::slug($g->title) === $genreSlug;
                         });
 
                         if ($genre) {
@@ -194,7 +196,7 @@ class PlayerController extends BaseController
             if ($request->last_played_song_id) {
                 $allIds = (clone $baseQuery)->pluck('id')->toArray();
                 $lastIndex = array_search($request->last_played_song_id, $allIds);
-                
+
                 if ($lastIndex !== false) {
                     if ($request->direction === 'next') {
                         $page = floor(($lastIndex + 1) / $perPage) + 1;
@@ -227,10 +229,10 @@ class PlayerController extends BaseController
                 $excludedSongIds = collect($items)->pluck('id')->toArray();
 
                 // Context-based recommendations
-                if (\Illuminate\Support\Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you') {
-                    $genreSlug = \Illuminate\Support\Str::replaceLast('-for-you', '', $sourceType);
-                    $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
-                        return \Illuminate\Support\Str::slug($g->title) === $genreSlug;
+                if (Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you') {
+                    $genreSlug = Str::replaceLast('-for-you', '', $sourceType);
+                    $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                        return Str::slug($g->title) === $genreSlug;
                     });
                     if ($genre) {
                         $recommendQuery->where('genre_id', $genre->id);
