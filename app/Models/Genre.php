@@ -16,4 +16,8 @@ class Genre extends Model
     {
         return $this->belongsTo(Genre::class, 'parent_id');
     }
+    public function songs()
+    {
+        return $this->hasMany(Song::class);
+    }
 }

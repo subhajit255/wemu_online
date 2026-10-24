@@ -5,6 +5,7 @@ use \App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CmsController;
+use App\Http\Controllers\Api\CommonController;
 use App\Http\Controllers\Api\HelpAndSupportController;
 use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\PlayerController;
@@ -54,6 +55,11 @@ Route::controller(AuthController::class)->group(function () {
 });
 Route::controller(CmsController::class)->group(function () {
     Route::get('/pages', 'cmsPages')->name('pages');
+});
+
+Route::controller(CommonController::class)->group(function () {
+    Route::match(['get', 'post'], '/get-error', 'getError')->name('get.error');
+    Route::match(['get', 'post'], '/common/get-error', 'getError')->name('common.get-error');
 });
 
 Route::controller(MasterController::class)->group(function () {

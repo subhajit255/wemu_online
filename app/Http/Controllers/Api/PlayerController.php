@@ -179,6 +179,50 @@ class PlayerController extends BaseController
 
                         if ($genre) {
                             $baseQuery->where('genre_id', $genre->id);
+
+                            $userId = auth('api')->id() ?? 0;
+                            if ($userId > 0) {
+                                $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
+                                $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
+                                $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
+
+                                $likedSongIds = SongLike::where('user_id', $userId)
+                                    ->whereHas('song', fn($q) => $q->where('genre_id', $genre->id))
+                                    ->pluck('song_id')
+                                    ->toArray();
+
+                                $playedSongIds = PlayHistory::where('user_id', $userId)
+                                    ->whereHas('song', fn($q) => $q->where('genre_id', $genre->id))
+                                    ->pluck('song_id')
+                                    ->toArray();
+
+                                $genreArtistIds = !empty($artistIds)
+                                    ? Song::where('genre_id', $genre->id)->whereIn('user_id', $artistIds)->pluck('user_id')->unique()->toArray()
+                                    : [];
+
+                                $hasLiked = !empty($likedSongIds);
+                                $hasArtists = !empty($genreArtistIds);
+                                $hasPlayed = !empty($playedSongIds);
+
+                                if ($hasLiked || $hasArtists || $hasPlayed) {
+                                    $likedList = $hasLiked ? implode(',', array_map('intval', $likedSongIds)) : '0';
+                                    $artistList = $hasArtists ? implode(',', array_map('intval', $genreArtistIds)) : '0';
+                                    $playedList = $hasPlayed ? implode(',', array_map('intval', $playedSongIds)) : '0';
+
+                                    $scoreRaw = "(
+                                        (CASE WHEN id IN ({$likedList}) THEN 50 ELSE 0 END) +
+                                        (CASE WHEN user_id IN ({$artistList}) THEN 30 ELSE 0 END) +
+                                        (CASE WHEN id IN ({$playedList}) THEN 20 ELSE 0 END)
+                                    )";
+
+                                    $baseQuery->orderByRaw("{$scoreRaw} DESC");
+                                }
+                            }
+
+                            $baseQuery->orderByDesc('play_count')
+                                ->orderByDesc('likes_count')
+                                ->orderByDesc('published_at')
+                                ->orderByDesc('id');
                         } else {
                             $baseQuery->whereRaw('1 = 0'); // Empty if genre not found
                         }

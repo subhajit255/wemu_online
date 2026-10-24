@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use \App\Http\Resources\Api\PaginateSongCollection;
+use \App\Models\Genre;
+use \App\Models\SongLike;
 use \Illuminate\Support\Facades\Cache;
 use \Illuminate\Support\Facades\Http;
 use \Illuminate\Support\Facades\Validator;
@@ -108,16 +110,24 @@ class DashboardController extends BaseController
                 })->sortByDesc('count')->take(3)->pluck('genre');
             }
             if ($topGenres->isEmpty()) {
-                $topGenres = \App\Models\Genre::where('is_active', 1)->inRandomOrder()->take(2)->get();
+                $topGenres = Genre::where('is_active', 1)
+                    ->whereHas('songs', function ($q) {
+                        $q->where('status', 1);
+                    })
+                    ->withCount(['songs' => function ($q) {
+                        $q->where('status', 1);
+                    }])
+                    ->orderByDesc('songs_count')
+                    ->take(2)
+                    ->get();
             }
 
             $dynamicGenreSections = [];
             foreach ($topGenres as $genre) {
                 if (!$genre) continue;
-                $genreSongs = Song::where('status', 1)
-                    ->where('genre_id', $genre->id)
-                    ->take(5)->get();
-
+                $genreSongs = $this->getGenreForYouSongsQuery($genre->id, $userId ?? 0, $artistIds)
+                    ->take(5)
+                    ->get();
                 if ($genreSongs->isNotEmpty()) {
                     $dynamicGenreSections[] = [
                         'title_in_english' => $genre->title . ' for you',
@@ -420,14 +430,15 @@ class DashboardController extends BaseController
                 default:
                     if (Str::endsWith($typeId, '-for-you')) {
                         $genreSlug = Str::replaceLast('-for-you', '', $typeId);
-                        $genre = \App\Models\Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
+                        $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
                             return Str::slug($g->title) === $genreSlug;
                         });
 
                         if ($genre) {
-                            $paginator = Song::where('status', 1)
-                                ->where('genre_id', $genre->id)
+                            // Uses exact same query and ranking as Dashboard, with pagination
+                            $paginator = $this->getGenreForYouSongsQuery($genre->id, $userId, $artistIds)
                                 ->paginate($perPage);
+
                             return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
                         }
                     }
@@ -439,5 +450,74 @@ class DashboardController extends BaseController
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
             return $this->responseJson(false, 500, 'Something went wrong', (object)[]);
         }
+    }
+
+    /**
+     * Get Spotify-like personalized query for dynamic genre 'For You' section.
+     * Handles both active users (with history/likes) and cold-start new users.
+     *
+     * @param int $genreId
+     * @param int $userId
+     * @param array $artistIds
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private function getGenreForYouSongsQuery(int $genreId, int $userId = 0, array $artistIds = [])
+    {
+        $query = Song::with(['artist', 'album', 'genre'])
+            ->where('status', 1)
+            ->where('genre_id', $genreId);
+
+        if ($userId > 0) {
+            // 1. Songs liked by this user in this genre
+            $likedSongIds = SongLike::where('user_id', $userId)
+                ->whereHas('song', fn($q) => $q->where('genre_id', $genreId))
+                ->pluck('song_id')
+                ->toArray();
+
+            // 2. Songs played by this user in this genre
+            $playedSongIds = PlayHistory::where('user_id', $userId)
+                ->whereHas('song', fn($q) => $q->where('genre_id', $genreId))
+                ->pluck('song_id')
+                ->toArray();
+
+            // 3. Songs by artists followed/preferred by this user in this genre
+            $genreArtistIds = !empty($artistIds)
+                ? Song::where('genre_id', $genreId)->whereIn('user_id', $artistIds)->pluck('user_id')->unique()->toArray()
+                : [];
+
+            $hasLiked = !empty($likedSongIds);
+            $hasArtists = !empty($genreArtistIds);
+            $hasPlayed = !empty($playedSongIds);
+
+            // Active user branch: If the user has any interaction or preferred artists in this genre
+            if ($hasLiked || $hasArtists || $hasPlayed) {
+                $likedList = $hasLiked ? implode(',', array_map('intval', $likedSongIds)) : '0';
+                $artistList = $hasArtists ? implode(',', array_map('intval', $genreArtistIds)) : '0';
+                $playedList = $hasPlayed ? implode(',', array_map('intval', $playedSongIds)) : '0';
+
+                // Spotify scoring:
+                // +50 for user-liked tracks
+                // +30 for tracks from followed/preferred artists
+                // +20 for previously played tracks
+                $scoreRaw = "(
+                    (CASE WHEN id IN ({$likedList}) THEN 50 ELSE 0 END) +
+                    (CASE WHEN user_id IN ({$artistList}) THEN 30 ELSE 0 END) +
+                    (CASE WHEN id IN ({$playedList}) THEN 20 ELSE 0 END)
+                )";
+
+                return $query->orderByRaw("{$scoreRaw} DESC")
+                    ->orderByDesc('play_count')
+                    ->orderByDesc('likes_count')
+                    ->orderByDesc('published_at')
+                    ->orderByDesc('id');
+            }
+        }
+
+        // Cold-start branch (new users with 0 likes/history/artists or guest users):
+        // Ranks by genre's top hits, highest likes, and newest releases
+        return $query->orderByDesc('play_count')
+            ->orderByDesc('likes_count')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
     }
 }
