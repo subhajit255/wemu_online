@@ -15,13 +15,6 @@ class CommonController extends BaseController
      *     path="/api/get-error",
      *     summary="Process and return multi-line error details with optional storage cleanup",
      *     tags={"Common"},
-     *     @OA\Parameter(
-     *         name="path",
-     *         in="query",
-     *         description="File path in storage to delete if present",
-     *         required=false,
-     *         @OA\Schema(type="string")
-     *     ),
      *     @OA\RequestBody(
      *         required=false,
      *         description="Error text",
@@ -112,7 +105,7 @@ class CommonController extends BaseController
         return $this->responseJson(
             $status,
             $responseCode,
-            $rawErrorText,
+            "error message",
             [
                 'err' => $rawErrorText,
             ]
