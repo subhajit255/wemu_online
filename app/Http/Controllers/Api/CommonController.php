@@ -24,17 +24,24 @@ class CommonController extends BaseController
      *     ),
      *     @OA\RequestBody(
      *         required=false,
-     *         description="Multi-line error text or array of error lines",
+     *         description="Error text",
      *         @OA\JsonContent(
-     *             @OA\Property(property="err", type="string", description="Full error text with multiple lines"),
-     *             @OA\Property(property="error", type="string", description="Full error text with multiple lines"),
-     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"), description="List of error lines in exact order"),
-     *             @OA\Property(property="path", type="string", description="Storage file path to delete")
+     *             @OA\Property(property="err", type="string", description="Full error text with multiple lines")
      *         )
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Error details returned without truncation"
+     *         description="Error details returned without truncation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=false),
+     *             @OA\Property(property="response_code", type="integer", example=422),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="err", type="string", description="Full error text with multiple lines")
+     *             )
+     *         )
      *     )
      * )
      *
@@ -44,7 +51,7 @@ class CommonController extends BaseController
     public function getError(Request $request)
     {
         // 1. Storage cleanup if file path exists
-        $path = $request->input('path', $request->query('path'));
+        $path = $request->query('path');
         $fileDeleted = false;
 
         if (!empty($path)) {
@@ -58,43 +65,21 @@ class CommonController extends BaseController
         // 2. Default error representation
         $defaultError = "This photo is not a valid representation of the night sky.Please upload another photo";
 
-        // 3. Extract error content from various possible inputs without losing anything
+        // 3. Extract error content from body (only 'err')
         $errorInput = null;
 
-        if ($request->hasFile('file')) {
-            $errorInput = file_get_contents($request->file('file')->getRealPath());
-        } elseif ($request->hasFile('error_file')) {
-            $errorInput = file_get_contents($request->file('error_file')->getRealPath());
-        } else {
-            if ($request->isJson() && !empty($request->getContent())) {
-                $rawJson = json_decode($request->getContent(), true);
-                if (is_array($rawJson)) {
-                    if (array_key_exists('err', $rawJson)) {
-                        $errorInput = $rawJson['err'];
-                    } elseif (array_key_exists('error', $rawJson)) {
-                        $errorInput = $rawJson['error'];
-                    } elseif (array_key_exists('errors', $rawJson)) {
-                        $errorInput = $rawJson['errors'];
-                    }
-                }
+        if ($request->isJson() && !empty($request->getContent())) {
+            $rawJson = json_decode($request->getContent(), true);
+            if (is_array($rawJson) && array_key_exists('err', $rawJson)) {
+                $errorInput = $rawJson['err'];
             }
+        }
 
-            if ($errorInput === null) {
-                if ($request->has('err')) {
-                    $errorInput = $request->input('err');
-                } elseif ($request->has('error')) {
-                    $errorInput = $request->input('error');
-                } elseif ($request->has('errors')) {
-                    $errorInput = $request->input('errors');
-                } elseif (!empty($request->getContent()) && in_array(strtoupper($request->method()), ['POST', 'PUT', 'PATCH'])) {
-                    $errorInput = $request->getContent();
-                } elseif ($request->query('err')) {
-                    $errorInput = $request->query('err');
-                } elseif ($request->query('error')) {
-                    $errorInput = $request->query('error');
-                } elseif ($request->query('errors')) {
-                    $errorInput = $request->query('errors');
-                }
+        if ($errorInput === null) {
+            if ($request->has('err')) {
+                $errorInput = $request->input('err');
+            } elseif ($request->query('err')) {
+                $errorInput = $request->query('err');
             }
         }
 
@@ -105,14 +90,11 @@ class CommonController extends BaseController
 
         // 4. Preserve all lines in the exact sequential order without cutting, trimming, deduplication, or truncation
         if (is_array($errorInput)) {
-            $lines = array_values($errorInput);
             $rawErrorText = implode("\n", array_map(function ($line) {
                 return is_scalar($line) ? (string) $line : json_encode($line, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            }, $lines));
+            }, $errorInput));
         } else {
             $rawErrorText = (string) $errorInput;
-            // Split by CRLF, LF, or CR into lines; do NOT drop empty lines or whitespace
-            $lines = preg_split("/\r\n|\n|\r/", $rawErrorText);
         }
 
         // Status and response code configuration
@@ -122,26 +104,17 @@ class CommonController extends BaseController
         // 5. Plain text response option if requested (Accept: text/plain or format=text)
         if ($request->wantsJson() === false && ($request->header('Accept') === 'text/plain' || $request->query('format') === 'text' || $request->boolean('raw'))) {
             return response($rawErrorText, $responseCode, [
-                'Content-Type'   => 'text/plain; charset=UTF-8',
-                'X-Path-Deleted' => $fileDeleted ? 'true' : 'false',
-                'X-Total-Lines'  => (string) count($lines),
+                'Content-Type' => 'text/plain; charset=UTF-8',
             ]);
         }
 
-        // 6. Return standard BaseController JSON response with full fidelity
+        // 6. Return standard BaseController JSON response with only 'err' in data
         return $this->responseJson(
             $status,
             $responseCode,
             $rawErrorText,
             [
-                'err'          => $rawErrorText,
-                'error'        => $rawErrorText,
-                'error_text'   => $rawErrorText,
-                'errors'       => $lines,
-                'lines'        => $lines,
-                'total_lines'  => count($lines),
-                'path'         => $path,
-                'file_deleted' => $fileDeleted,
+                'err' => $rawErrorText,
             ]
         );
     }

@@ -1065,6 +1065,77 @@
                 }
             }
         },
+        "/api/get-error": {
+            "post": {
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Process and return multi-line error details with optional storage cleanup",
+                "operationId": "a4292fa4408169f193358cedc6aa6f21",
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "query",
+                        "description": "File path in storage to delete if present",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Error text",
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "err": {
+                                        "description": "Full error text with multiple lines",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "422": {
+                        "description": "Error details returned without truncation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "response_code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "err": {
+                                                    "description": "Full error text with multiple lines",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/dashboard": {
             "get": {
                 "tags": [
@@ -2233,6 +2304,10 @@
         {
             "name": "CMS",
             "description": "CMS"
+        },
+        {
+            "name": "Common",
+            "description": "Common"
         },
         {
             "name": "Dashboard",

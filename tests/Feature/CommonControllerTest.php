@@ -31,12 +31,7 @@ class CommonControllerTest extends TestCase
                 'response_code' => 422,
                 'message' => 'This photo is not a valid representation of the night sky.Please upload another photo',
                 'data' => [
-                    'file_deleted' => true,
-                    'path' => 'test_uploads/star_photo.jpg',
-                    'total_lines' => 1,
-                    'errors' => [
-                        'This photo is not a valid representation of the night sky.Please upload another photo'
-                    ]
+                    'err' => 'This photo is not a valid representation of the night sky.Please upload another photo',
                 ]
             ]);
 
@@ -65,18 +60,13 @@ class CommonControllerTest extends TestCase
         $largeErrorText = implode("\n", $expectedLines);
 
         $response = $this->postJson('/api/get-error', [
-            'error' => $largeErrorText
+            'err' => $largeErrorText
         ]);
 
         $response->assertStatus(422);
 
-        $responseData = $response->json('data');
-        $this->assertCount(500, $responseData['errors']);
-        $this->assertEquals(500, $responseData['total_lines']);
-
-        // Check exact match and order of all 500 lines
-        $this->assertSame($expectedLines, $responseData['errors']);
-        $this->assertSame($largeErrorText, $responseData['error_text']);
+        $this->assertSame($largeErrorText, $response->json('data.err'));
+        $this->assertSame($largeErrorText, $response->json('message'));
     }
 
     /**
@@ -91,11 +81,11 @@ class CommonControllerTest extends TestCase
         ];
 
         $response = $this->postJson('/api/get-error', [
-            'errors' => $inputLines
+            'err' => $inputLines
         ]);
 
         $response->assertStatus(422);
-        $this->assertSame($inputLines, $response->json('data.errors'));
+        $this->assertSame(implode("\n", $inputLines), $response->json('data.err'));
     }
 
     /**
@@ -105,42 +95,15 @@ class CommonControllerTest extends TestCase
     {
         $rawError = "Line A\nLine B\nLine C";
 
-        $response = $this->call('POST', '/api/get-error?format=text', [], [], [], [
+        $response = $this->postJson('/api/get-error?format=text', [
+            'err' => $rawError,
+        ], [
             'HTTP_ACCEPT' => 'text/plain',
-            'CONTENT_TYPE' => 'text/plain',
-        ], $rawError);
+        ]);
 
         $response->assertStatus(422);
         $this->assertSame($rawError, $response->getContent());
         $this->assertSame('text/plain; charset=UTF-8', $response->headers->get('Content-Type'));
-    }
-
-    /**
-     * Test uploading an error log file.
-     */
-    public function test_uploaded_file_error_lines_preserved(): void
-    {
-        $logContent = "Log 1: Initializing\nLog 2: Error calculating asterism\nLog 3: Finished with error";
-        $file = UploadedFile::fake()->createWithContent('error.log', $logContent);
-
-        $response = $this->post('/api/get-error', [
-            'file' => $file
-        ], [
-            'Accept' => 'application/json'
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJson([
-                'status' => false,
-                'data' => [
-                    'errors' => [
-                        'Log 1: Initializing',
-                        'Log 2: Error calculating asterism',
-                        'Log 3: Finished with error'
-                    ],
-                    'total_lines' => 3
-                ]
-            ]);
     }
 
     /**
@@ -149,7 +112,7 @@ class CommonControllerTest extends TestCase
     public function test_custom_response_code_and_status(): void
     {
         $response = $this->postJson('/api/get-error', [
-            'error' => "Fatal error occurred",
+            'err' => "Fatal error occurred",
             'response_code' => 500,
             'status' => false,
         ]);
@@ -159,6 +122,9 @@ class CommonControllerTest extends TestCase
                 'status' => false,
                 'response_code' => 500,
                 'message' => 'Fatal error occurred',
+                'data' => [
+                    'err' => 'Fatal error occurred',
+                ],
             ]);
     }
 
@@ -167,15 +133,14 @@ class CommonControllerTest extends TestCase
      */
     public function test_get_request_with_query_param_error(): void
     {
-        $response = $this->getJson('/api/get-error?error=Custom+error+message');
+        $response = $this->getJson('/api/get-error?err=Custom+error+message');
 
         $response->assertStatus(422)
             ->assertJson([
                 'status' => false,
                 'message' => 'Custom error message',
                 'data' => [
-                    'total_lines' => 1,
-                    'errors' => ['Custom error message']
+                    'err' => 'Custom error message',
                 ]
             ]);
     }
@@ -198,12 +163,6 @@ class CommonControllerTest extends TestCase
                 'message' => $multilineError,
                 'data' => [
                     'err' => $multilineError,
-                    'total_lines' => 3,
-                    'errors' => [
-                        'Line 1: this is error text',
-                        'Line 2: sky invalid',
-                        'Line 3: please upload another photo'
-                    ]
                 ]
             ]);
     }
