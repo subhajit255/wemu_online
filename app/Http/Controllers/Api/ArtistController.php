@@ -132,7 +132,7 @@ class ArtistController extends BaseController
             $songs = Song::where('user_id', $id)
                 ->where('status', 1)
                 ->with(['album', 'genre', 'artist'])
-                ->orderBy('published_at', 'desc')
+                ->orderBy('play_count', 'desc')
                 ->paginate($perPage);
 
             return $this->responseJson(true, 200, 'Artist songs fetched successfully', new \App\Http\Resources\Api\PaginateSongCollection($songs));
