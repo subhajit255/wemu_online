@@ -15,6 +15,7 @@ use App\Models\Song;
 use App\Models\SongLike;
 use App\Models\User;
 use App\Models\UserPreference;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -129,20 +130,9 @@ class PlayerController extends BaseController
                     break;
                 case 'made-for-you':
                 case 'made_for_you':
-                    if (auth('api')->check()) {
-                        $userId = auth('api')->id();
-                        $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
-                        $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
-                        $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
-
-                        if (!empty($artistIds)) {
-                            $baseQuery->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at');
-                        } else {
-                            $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
-                        }
-                    } else {
-                        $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
-                    }
+                    $userId = auth('api')->id();
+                    $seed = RecommendationService::resolveSeed($request->seed, $userId);
+                    $baseQuery = RecommendationService::getMadeForYouQuery($userId, $seed);
                     break;
                 case 'artists-you-like':
                 case 'artists_you_like':
@@ -167,62 +157,22 @@ class PlayerController extends BaseController
                     break;
                 case 'features-songs':
                 case 'features_songs':
-                    $baseQuery->orderByDesc('play_count')->orderByDesc('published_at');
+                    $userId = auth('api')->id();
+                    $seed = RecommendationService::resolveSeed($request->seed, $userId);
+                    $baseQuery = RecommendationService::getFeaturedSongsQuery($userId, $seed);
                     break;
                 default:
                     // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
-                    if (Str::endsWith($sourceType, '-for-you')) {
+                    if (Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you' && $sourceType !== 'made_for_you') {
                         $genreSlug = Str::replaceLast('-for-you', '', $sourceType);
                         $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
                             return Str::slug($g->title) === $genreSlug;
                         });
 
                         if ($genre) {
-                            $baseQuery->where('genre_id', $genre->id);
-
-                            $userId = auth('api')->id() ?? 0;
-                            if ($userId > 0) {
-                                $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
-                                $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
-                                $artistIds = array_unique(array_merge($followedArtistIds, $preferredArtistIds));
-
-                                $likedSongIds = SongLike::where('user_id', $userId)
-                                    ->whereHas('song', fn($q) => $q->where('genre_id', $genre->id))
-                                    ->pluck('song_id')
-                                    ->toArray();
-
-                                $playedSongIds = PlayHistory::where('user_id', $userId)
-                                    ->whereHas('song', fn($q) => $q->where('genre_id', $genre->id))
-                                    ->pluck('song_id')
-                                    ->toArray();
-
-                                $genreArtistIds = !empty($artistIds)
-                                    ? Song::where('genre_id', $genre->id)->whereIn('user_id', $artistIds)->pluck('user_id')->unique()->toArray()
-                                    : [];
-
-                                $hasLiked = !empty($likedSongIds);
-                                $hasArtists = !empty($genreArtistIds);
-                                $hasPlayed = !empty($playedSongIds);
-
-                                if ($hasLiked || $hasArtists || $hasPlayed) {
-                                    $likedList = $hasLiked ? implode(',', array_map('intval', $likedSongIds)) : '0';
-                                    $artistList = $hasArtists ? implode(',', array_map('intval', $genreArtistIds)) : '0';
-                                    $playedList = $hasPlayed ? implode(',', array_map('intval', $playedSongIds)) : '0';
-
-                                    $scoreRaw = "(
-                                        (CASE WHEN id IN ({$likedList}) THEN 50 ELSE 0 END) +
-                                        (CASE WHEN user_id IN ({$artistList}) THEN 30 ELSE 0 END) +
-                                        (CASE WHEN id IN ({$playedList}) THEN 20 ELSE 0 END)
-                                    )";
-
-                                    $baseQuery->orderByRaw("{$scoreRaw} DESC");
-                                }
-                            }
-
-                            $baseQuery->orderByDesc('play_count')
-                                ->orderByDesc('likes_count')
-                                ->orderByDesc('published_at')
-                                ->orderByDesc('id');
+                            $userId = auth('api')->id();
+                            $seed = RecommendationService::resolveSeed($request->seed, $userId);
+                            $baseQuery = RecommendationService::getGenreForYouQuery($genre->id, $userId, $seed);
                         } else {
                             $baseQuery->whereRaw('1 = 0'); // Empty if genre not found
                         }

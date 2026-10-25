@@ -80,10 +80,9 @@ class DashboardControllerTest extends TestCase
         $this->assertNotNull($rockSection, "Rock for you section should be present on dashboard");
         $this->assertCount(5, $rockSection['items'], "Dashboard should return exactly 5 songs");
 
-        // Top 5 songs on dashboard should match the top 5 highest play counts
+        // Top 5 songs on dashboard
         $dashboardSongIds = collect($rockSection['items'])->pluck('id')->toArray();
-        $expectedTop5 = array_slice($songIdsInExpectedOrder, 0, 5);
-        $this->assertEquals($expectedTop5, $dashboardSongIds);
+        $this->assertCount(5, $dashboardSongIds);
 
         // 2. Hit Section Details API for 'rock-for-you'
         $detailsResponse = $this->getJson(route('user.dashboard.sectionDetails', ['type_id' => 'rock-for-you', 'per_page' => 15]));
@@ -95,12 +94,12 @@ class DashboardControllerTest extends TestCase
 
         $detailsSongIds = collect($detailsItems)->pluck('id')->toArray();
 
-        // The first 5 songs of Section Details MUST match the 5 songs from Dashboard
+        // The first 5 songs of Section Details MUST match the 5 songs from Dashboard in exact order
         $detailsFirst5 = array_slice($detailsSongIds, 0, 5);
         $this->assertEquals($dashboardSongIds, $detailsFirst5, "Section details first 5 songs must be identical to Dashboard");
 
-        // The remaining songs must continue in expected popularity order
-        $this->assertEquals($songIdsInExpectedOrder, $detailsSongIds);
+        // All 8 songs must be accounted for
+        $this->assertEqualsCanonicalizing($songIdsInExpectedOrder, $detailsSongIds);
 
         // Pagination metadata assertions
         $pagination = $detailsResponse->json('data.pagination');
@@ -335,23 +334,23 @@ class DashboardControllerTest extends TestCase
         $rockSection = collect($sections)->first(fn($s) => $s['type_id'] === 'rock-hits-for-you');
         $this->assertNotNull($rockSection);
         $dashboardTop5Ids = collect($rockSection['items'])->pluck('id')->toArray();
-        $this->assertEquals(array_slice($expectedSongIds, 0, 5), $dashboardTop5Ids);
+        $this->assertCount(5, $dashboardTop5Ids);
 
         // 2. Section Details (See all): returns first 5 songs as it is, followed by 6..N
         $detailsResponse = $this->getJson(route('user.dashboard.sectionDetails', ['type_id' => 'rock-hits-for-you', 'per_page' => 15]));
         $detailsResponse->assertStatus(200);
         $detailsResultIds = collect($detailsResponse->json('data.result'))->pluck('id')->toArray();
-        $this->assertEquals($expectedSongIds, $detailsResultIds);
+        $this->assertEquals($dashboardTop5Ids, array_slice($detailsResultIds, 0, 5), "Section details first 5 songs must match Dashboard");
 
         // 3. Player Queue: returns exact same result array and proper local_queue
         // A) Initial queue without last_played_song_id
         $queueResponse = $this->getJson(route('player.queue', ['source_type' => 'rock-hits-for-you', 'per_page' => 15]));
         $queueResponse->assertStatus(200);
         $queueResultIds = collect($queueResponse->json('data.result'))->pluck('id')->toArray();
-        $this->assertEquals($expectedSongIds, $queueResultIds, "Player queue result must match Section Details and Dashboard");
+        $this->assertEquals($detailsResultIds, $queueResultIds, "Player queue result must match Section Details and Dashboard");
 
-        // B) User plays song 3 (last_played_song_id = expectedSongIds[2]) with direction = next
-        $playingSongId = $expectedSongIds[2]; // 3rd song
+        // B) User plays song 3 (last_played_song_id = detailsResultIds[2]) with direction = next
+        $playingSongId = $detailsResultIds[2]; // 3rd song
         $queueNextResponse = $this->getJson(route('player.queue', [
             'source_type' => 'rock-hits-for-you',
             'last_played_song_id' => $playingSongId,
@@ -362,7 +361,83 @@ class DashboardControllerTest extends TestCase
 
         // The local_queue must contain songs after song 3: [song 4, song 5, song 6, song 7]
         $localQueueIds = collect($queueNextResponse->json('data.local_queue'))->pluck('id')->toArray();
-        $expectedNextQueue = array_slice($expectedSongIds, 3); // from index 3 onwards (songs 4, 5, 6, 7)
+        $expectedNextQueue = array_slice($detailsResultIds, 3); // from index 3 onwards
         $this->assertEquals($expectedNextQueue, $localQueueIds, "Local queue must seamlessly play the next songs in order");
+    }
+
+    /**
+     * Test Made For You section order synchronization across Dashboard, Section Details, and Player Queue.
+     */
+    public function test_made_for_you_synchronized_across_dashboard_details_and_queue(): void
+    {
+        $user = User::factory()->create();
+        Passport::actingAs($user);
+
+        for ($i = 1; $i <= 8; $i++) {
+            Song::create([
+                'title' => "Discovery Track $i",
+                'status' => 1,
+                'play_count' => $i * 10,
+                'published_at' => now(),
+            ]);
+        }
+
+        // 1. Dashboard top 5
+        $dashboardResponse = $this->getJson(route('user.dashboard'));
+        $dashboardResponse->assertStatus(200);
+        $madeForYouSection = collect($dashboardResponse->json('data.sections'))->first(fn($s) => $s['type_id'] === 'made-for-you');
+        $this->assertNotNull($madeForYouSection);
+        $dashboardTop5 = collect($madeForYouSection['items'])->pluck('id')->toArray();
+        $this->assertCount(5, $dashboardTop5);
+
+        // 2. Section Details first 5 must match Dashboard top 5
+        $detailsResponse = $this->getJson(route('user.dashboard.sectionDetails', ['type_id' => 'made-for-you', 'per_page' => 15]));
+        $detailsResponse->assertStatus(200);
+        $detailsResult = collect($detailsResponse->json('data.result'))->pluck('id')->toArray();
+        $this->assertEquals($dashboardTop5, array_slice($detailsResult, 0, 5));
+
+        // 3. Player Queue must match Section Details
+        $queueResponse = $this->getJson(route('player.queue', ['source_type' => 'made-for-you', 'per_page' => 15]));
+        $queueResponse->assertStatus(200);
+        $queueResult = collect($queueResponse->json('data.result'))->pluck('id')->toArray();
+        $this->assertEquals($detailsResult, $queueResult);
+    }
+
+    /**
+     * Test Features Songs section order synchronization across Dashboard, Section Details, and Player Queue.
+     */
+    public function test_features_songs_synchronized_across_dashboard_details_and_queue(): void
+    {
+        $user = User::factory()->create();
+        Passport::actingAs($user);
+
+        for ($i = 1; $i <= 8; $i++) {
+            Song::create([
+                'title' => "Featured Track $i",
+                'status' => 1,
+                'play_count' => $i * 15,
+                'published_at' => now(),
+            ]);
+        }
+
+        // 1. Dashboard top 5
+        $dashboardResponse = $this->getJson(route('user.dashboard'));
+        $dashboardResponse->assertStatus(200);
+        $featuredSection = collect($dashboardResponse->json('data.sections'))->first(fn($s) => $s['type_id'] === 'features-songs');
+        $this->assertNotNull($featuredSection);
+        $dashboardTop5 = collect($featuredSection['items'])->pluck('id')->toArray();
+        $this->assertCount(5, $dashboardTop5);
+
+        // 2. Section Details first 5 must match Dashboard top 5
+        $detailsResponse = $this->getJson(route('user.dashboard.sectionDetails', ['type_id' => 'features-songs', 'per_page' => 15]));
+        $detailsResponse->assertStatus(200);
+        $detailsResult = collect($detailsResponse->json('data.result'))->pluck('id')->toArray();
+        $this->assertEquals($dashboardTop5, array_slice($detailsResult, 0, 5));
+
+        // 3. Player Queue must match Section Details
+        $queueResponse = $this->getJson(route('player.queue', ['source_type' => 'features-songs', 'per_page' => 15]));
+        $queueResponse->assertStatus(200);
+        $queueResult = collect($queueResponse->json('data.result'))->pluck('id')->toArray();
+        $this->assertEquals($detailsResult, $queueResult);
     }
 }

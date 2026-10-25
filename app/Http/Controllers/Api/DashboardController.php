@@ -21,6 +21,7 @@ use App\Models\Song;
 use App\Models\StreamLog;
 use App\Models\User;
 use App\Models\UserPreference;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +39,8 @@ class DashboardController extends BaseController
     public function index(Request $request)
     {
         try {
-            $userId = auth()->id();
+            $userId = auth()->id() ?? auth('api')->id();
+            $seed = RecommendationService::resolveSeed($request->seed, $userId);
 
             // 1. Recents (Songs)
             $recentSongsList = PlayHistory::with(['song.artist', 'song.album', 'song.genre'])
@@ -82,13 +84,8 @@ class DashboardController extends BaseController
                 $artistsYouLike = User::whereHas('profile')->inRandomOrder()->take(5)->get(); // Fallback
             }
 
-            // 3. Recommended for today
-            $recommendedSongs = Song::where('status', 1);
-            if (!empty($artistIds)) {
-                $recommendedSongs = $recommendedSongs->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
-            } else {
-                $recommendedSongs = $recommendedSongs->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
-            }
+            // 3. Recommended for today (Made for you - dynamic Spotify style)
+            $recommendedSongs = RecommendationService::getMadeForYouQuery($userId, $seed)->take(5)->get();
             $newRelease = Song::orderBy('published_at', 'desc')->take(5)->get();
 
             // 4. Popular radio (Taking top artists based on followers or just random top artists)
@@ -98,16 +95,13 @@ class DashboardController extends BaseController
             $topMixes = PlayList::where('is_public', 1)->inRandomOrder()->take(5)->get();
 
             // 6. Dynamic Spotify-like Genre Mixes (or Fallback to Sad Songs)
+            $taste = RecommendationService::getUserTasteProfile($userId);
             $topGenres = collect();
-            if ($recentSongsList->isNotEmpty()) {
-                $topGenres = $recentSongsList->map(function ($song) {
-                    return $song->genre;
-                })->filter()->groupBy('id')->map(function ($group) {
-                    return [
-                        'genre' => $group->first(),
-                        'count' => $group->count()
-                    ];
-                })->sortByDesc('count')->take(3)->pluck('genre');
+            if (!empty($taste['top_genre_ids'])) {
+                $topGenres = Genre::where('is_active', 1)
+                    ->whereIn('id', $taste['top_genre_ids'])
+                    ->take(3)
+                    ->get();
             }
             if ($topGenres->isEmpty()) {
                 $topGenres = Genre::where('is_active', 1)
@@ -125,7 +119,7 @@ class DashboardController extends BaseController
             $dynamicGenreSections = [];
             foreach ($topGenres as $genre) {
                 if (!$genre) continue;
-                $genreSongs = $this->getGenreForYouSongsQuery($genre->id, $userId ?? 0, $artistIds)
+                $genreSongs = RecommendationService::getGenreForYouQuery($genre->id, $userId, $seed)
                     ->take(5)
                     ->get();
                 if ($genreSongs->isNotEmpty()) {
@@ -133,7 +127,8 @@ class DashboardController extends BaseController
                         'title_in_english' => $genre->title . ' for you',
                         'title_in_spanish' => $genre->title . ' para ti',
                         'type' => 'song',
-                        'items' => SongResource::collection($genreSongs)
+                        'items' => SongResource::collection($genreSongs),
+                        'seed' => $seed
                     ];
                 }
             }
@@ -192,15 +187,16 @@ class DashboardController extends BaseController
                     }
                 })->take(5)->get();
 
-            // 8. More of what you like / Features songs
-            $moreLike = Song::where('status', 1)->orderByDesc('play_count')->orderByDesc('published_at')->take(5)->get();
+            // 8. More of what you like / Features songs (Personalized & Dynamic)
+            $moreLike = RecommendationService::getFeaturedSongsQuery($userId, $seed)->take(5)->get();
 
             $sections = [
                 [
                     'title_in_english' => 'Made for you',
                     'title_in_spanish' => 'Hecho para ti',
                     'type' => 'song',
-                    'items' => SongResource::collection($recommendedSongs)
+                    'items' => SongResource::collection($recommendedSongs),
+                    'seed' => $seed
                 ],
                 [
                     'title_in_english' => 'New Release',
@@ -224,7 +220,8 @@ class DashboardController extends BaseController
                     'title_in_english' => 'Features songs',
                     'title_in_spanish' => 'Canciones destacadas',
                     'type' => 'song',
-                    'items' => SongResource::collection($moreLike)
+                    'items' => SongResource::collection($moreLike),
+                    'seed' => $seed
                 ],
                 [
                     'title_in_english' => 'Popular radio',
@@ -259,9 +256,13 @@ class DashboardController extends BaseController
             foreach ($sections as &$section) {
                 $section['type_id'] = Str::slug($section['title_in_english']);
                 $section['is_seeall'] = isset($section['items']) && count($section['items']) >= 5;
+                if (!isset($section['seed'])) {
+                    $section['seed'] = $seed;
+                }
             }
             unset($section); // break the reference with the last element
             $data = [
+                'seed' => $seed,
                 'sections' => $sections
             ];
 
@@ -312,8 +313,9 @@ class DashboardController extends BaseController
             }
 
             $typeId = $request->type_id;
-            $userId = auth()->id() ?? 0;
+            $userId = auth()->id() ?? auth('api')->id() ?? 0;
             $perPage = $request->per_page ?? 15;
+            $seed = RecommendationService::resolveSeed($request->seed, $userId);
 
             $followedArtistIds = ArtistFollower::where('user_id', $userId)->pluck('artist_id')->toArray();
             $preferredArtistIds = UserPreference::where('user_id', $userId)->pluck('artist_id')->toArray();
@@ -346,13 +348,8 @@ class DashboardController extends BaseController
 
             switch ($typeId) {
                 case 'made-for-you':
-                    $query = Song::where('status', 1);
-                    if (!empty($artistIds)) {
-                        $query->whereIn('user_id', $artistIds)->orderByDesc('play_count')->orderByDesc('published_at');
-                    } else {
-                        $query->orderByDesc('play_count')->orderByDesc('published_at');
-                    }
-                    $paginator = $query->paginate($perPage);
+                    $paginator = RecommendationService::getMadeForYouQuery($userId, $seed)
+                        ->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'new-release':
@@ -388,7 +385,8 @@ class DashboardController extends BaseController
                     ]);
 
                 case 'features-songs':
-                    $paginator = Song::where('status', 1)->orderByDesc('play_count')->orderByDesc('published_at')->paginate($perPage);
+                    $paginator = RecommendationService::getFeaturedSongsQuery($userId, $seed)
+                        ->paginate($perPage);
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
 
                 case 'popular-radio':
@@ -428,7 +426,7 @@ class DashboardController extends BaseController
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginatePlayListResource($paginator));
 
                 default:
-                    if (Str::endsWith($typeId, '-for-you')) {
+                    if (Str::endsWith($typeId, '-for-you') && $typeId !== 'made-for-you') {
                         $genreSlug = Str::replaceLast('-for-you', '', $typeId);
                         $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
                             return Str::slug($g->title) === $genreSlug;
@@ -436,7 +434,7 @@ class DashboardController extends BaseController
 
                         if ($genre) {
                             // Uses exact same query and ranking as Dashboard, with pagination
-                            $paginator = $this->getGenreForYouSongsQuery($genre->id, $userId, $artistIds)
+                            $paginator = RecommendationService::getGenreForYouQuery($genre->id, $userId, $seed)
                                 ->paginate($perPage);
 
                             return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
@@ -454,7 +452,7 @@ class DashboardController extends BaseController
 
     /**
      * Get Spotify-like personalized query for dynamic genre 'For You' section.
-     * Handles both active users (with history/likes) and cold-start new users.
+     * Delegates to RecommendationService to ensure exact consistency across all endpoints.
      *
      * @param int $genreId
      * @param int $userId
@@ -463,61 +461,7 @@ class DashboardController extends BaseController
      */
     private function getGenreForYouSongsQuery(int $genreId, int $userId = 0, array $artistIds = [])
     {
-        $query = Song::with(['artist', 'album', 'genre'])
-            ->where('status', 1)
-            ->where('genre_id', $genreId);
-
-        if ($userId > 0) {
-            // 1. Songs liked by this user in this genre
-            $likedSongIds = SongLike::where('user_id', $userId)
-                ->whereHas('song', fn($q) => $q->where('genre_id', $genreId))
-                ->pluck('song_id')
-                ->toArray();
-
-            // 2. Songs played by this user in this genre
-            $playedSongIds = PlayHistory::where('user_id', $userId)
-                ->whereHas('song', fn($q) => $q->where('genre_id', $genreId))
-                ->pluck('song_id')
-                ->toArray();
-
-            // 3. Songs by artists followed/preferred by this user in this genre
-            $genreArtistIds = !empty($artistIds)
-                ? Song::where('genre_id', $genreId)->whereIn('user_id', $artistIds)->pluck('user_id')->unique()->toArray()
-                : [];
-
-            $hasLiked = !empty($likedSongIds);
-            $hasArtists = !empty($genreArtistIds);
-            $hasPlayed = !empty($playedSongIds);
-
-            // Active user branch: If the user has any interaction or preferred artists in this genre
-            if ($hasLiked || $hasArtists || $hasPlayed) {
-                $likedList = $hasLiked ? implode(',', array_map('intval', $likedSongIds)) : '0';
-                $artistList = $hasArtists ? implode(',', array_map('intval', $genreArtistIds)) : '0';
-                $playedList = $hasPlayed ? implode(',', array_map('intval', $playedSongIds)) : '0';
-
-                // Spotify scoring:
-                // +50 for user-liked tracks
-                // +30 for tracks from followed/preferred artists
-                // +20 for previously played tracks
-                $scoreRaw = "(
-                    (CASE WHEN id IN ({$likedList}) THEN 50 ELSE 0 END) +
-                    (CASE WHEN user_id IN ({$artistList}) THEN 30 ELSE 0 END) +
-                    (CASE WHEN id IN ({$playedList}) THEN 20 ELSE 0 END)
-                )";
-
-                return $query->orderByRaw("{$scoreRaw} DESC")
-                    ->orderByDesc('play_count')
-                    ->orderByDesc('likes_count')
-                    ->orderByDesc('published_at')
-                    ->orderByDesc('id');
-            }
-        }
-
-        // Cold-start branch (new users with 0 likes/history/artists or guest users):
-        // Ranks by genre's top hits, highest likes, and newest releases
-        return $query->orderByDesc('play_count')
-            ->orderByDesc('likes_count')
-            ->orderByDesc('published_at')
-            ->orderByDesc('id');
+        $seed = request()->seed ? (int)request()->seed : null;
+        return RecommendationService::getGenreForYouQuery($genreId, $userId, $seed);
     }
 }
