@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\BaseController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use App\Mail\ResetPasswordOtpMail;
 
 class AuthController extends BaseController
 {
@@ -43,55 +45,176 @@ class AuthController extends BaseController
 
     public function forgotPassword(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'email' => 'required|email',
+            ]);
 
-        $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->whereNull('deleted_at')->first();
 
-        if (!$user) {
-            $data = ['status' => true, 'message' => 'User Not Found', 'data' => $user ?? null];
-        } else {
-            $token = Str::random(60);
-            $user->update(['remember_token' => $token]);
-            $resetLink = route('admin.reset.password', $token);
+            if (!$user || !in_array($user->user_type, [1, 2])) {
+                return response([
+                    'status' => false,
+                    'message' => 'No admin account found with that email address.',
+                ]);
+            }
 
-            // Mail::send('mail.reset-password', ['link' => $resetLink], function ($message) use ($request) {
-            //     $message->to($request->email);
-            //     $message->subject('Reset Password Link');
-            // });
-            $data = ['status' => true, 'message' => 'Check your email for resetting your password', 'data' => $user ?? null];
+            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->update(['verification_code' => $otp]);
+
+            session([
+                'reset_password_user_id' => $user->id,
+                'reset_password_email' => $user->email,
+            ]);
+            session()->forget('reset_password_verified');
+
+            try {
+                Mail::to($user->email)->send(new ResetPasswordOtpMail($otp, $user));
+            } catch (\Exception $e) {
+                logger('Error sending admin password reset OTP mail: ' . $e->getMessage());
+            }
+
+            return response([
+                'status' => true,
+                'message' => 'A verification code has been sent to your email.',
+                'url' => route('admin.forgot.password.verify.otp'),
+                'otp' => config('app.debug') ? $otp : null,
+            ]);
         }
 
-        return response($data);
+        session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+
+        return view('auth.forgot-password');
+    }
+
+    public function forgotPasswordVerifyOtp(Request $request)
+    {
+        $userId = session('reset_password_user_id');
+        if (!$userId) {
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'Session expired. Please start over.',
+                    'url' => route('admin.forgot.password'),
+                ]);
+            }
+            return redirect()->route('admin.forgot.password');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'User not found. Please try again.',
+                    'url' => route('admin.forgot.password'),
+                ]);
+            }
+            return redirect()->route('admin.forgot.password');
+        }
+
+        if ($request->isMethod('post')) {
+            if ($request->input('action') === 'resend') {
+                $newOtp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                $user->update(['verification_code' => $newOtp]);
+
+                try {
+                    Mail::to($user->email)->send(new ResetPasswordOtpMail($newOtp, $user));
+                } catch (\Exception $e) {
+                    logger('Error resending admin password reset OTP: ' . $e->getMessage());
+                }
+
+                return response([
+                    'status' => true,
+                    'message' => 'A new verification code has been sent to your email.',
+                    'otp' => config('app.debug') ? $newOtp : null,
+                ]);
+            }
+
+            $request->validate([
+                'otp' => 'required|numeric|digits:6',
+            ]);
+
+            if ($user->verification_code && $user->verification_code == $request->otp) {
+                session(['reset_password_verified' => true]);
+
+                return response([
+                    'status' => true,
+                    'message' => 'OTP verified successfully.',
+                    'url' => route('admin.reset.password'),
+                ]);
+            }
+
+            return response([
+                'status' => false,
+                'message' => 'Invalid or expired OTP. Please try again.',
+            ]);
+        }
+
+        $email = $user->email;
+        $verificationCode = config('app.debug') ? $user->verification_code : null;
+
+        return view('auth.forgot-password-otp', compact('email', 'verificationCode'));
     }
 
     public function resetPassword(Request $request)
     {
-        $token = '';
-        $linkExpire = true;
-        $user = User::where('remember_token', $request->reset_token)->first();
-        if ($request->post()) {
-            $request->validate([
-                'new_password' => 'required|min:8',
-                'password_confirmation' => 'required|min:8|same:new_password',
-            ]);
-            DB::beginTransaction();
-            try {
-                $update = $user->update(['remember_token' => null, 'password' => bcrypt($request->new_password)]);
-                DB::commit();
-                $data = ['status' => true, 'message' => 'Password Reset Successfully. Please Login.', 'data' => $user ?? null, 'url' => route('admin.login')];
-            } catch (\Throwable $th) {
-                DB::rollBack();
-                $data = ['status' => true, 'message' => 'Something Went Wrong', 'data' => $user ?? null, 'url' => route('admin.login')];
+        $userId = session('reset_password_user_id');
+        $isVerified = session('reset_password_verified');
+
+        if (!$userId || !$isVerified) {
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'Session expired or unverified. Please start over.',
+                    'url' => route('admin.forgot.password'),
+                ]);
             }
-            return response($data);
+            return redirect()->route('admin.forgot.password');
         }
-        if (!empty($user)) {
-            $linkExpire = false;
+
+        $user = User::find($userId);
+        if (!$user) {
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'User not found.',
+                    'url' => route('admin.forgot.password'),
+                ]);
+            }
+            return redirect()->route('admin.forgot.password');
         }
-        $token = $request->token;
-        return view('auth.login', compact('token', 'linkExpire'));
+
+        if ($request->isMethod('post')) {
+            if ($request->has('new_password') && !$request->has('password')) {
+                $request->merge(['password' => $request->new_password]);
+            }
+            if ($request->has('confirm_password') && !$request->has('password_confirmation')) {
+                $request->merge(['password_confirmation' => $request->confirm_password]);
+            }
+
+            $request->validate([
+                'password' => 'required|string|min:6|confirmed',
+            ]);
+
+            $user->update([
+                'password' => Hash::make($request->password),
+                'verification_code' => null,
+                'remember_token' => null,
+            ]);
+
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+
+            return response([
+                'status' => true,
+                'message' => 'Password reset successfully! Please log in with your new password.',
+                'url' => route('admin.login'),
+            ]);
+        }
+
+        return view('auth.reset-password');
     }
 
     public function verifyEmail(Request $request)

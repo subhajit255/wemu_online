@@ -293,9 +293,15 @@
                 </button>
 
                 <div class="action-links d-flex flex-column gap-3 mt-4">
-                    <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#forgot_password_form">
+                    @if(Route::currentRouteName() == 'admin.login')
+                    <a href="{{ route('admin.forgot.password') }}">
                         Forgot Password?
                     </a>
+                    @else
+                    <a href="{{ route('artist.forgot.password') }}">
+                        Forgot Password?
+                    </a>
+                    @endif
                     @if(Route::currentRouteName() !== 'admin.login')
                     <span style="color: rgba(255,255,255,0.4);">
                         Don't have an account?
@@ -415,7 +421,7 @@
                 </div>
                 <div class="modal-body scroll-y px-10 px-lg-15 pt-0 pb-15">
                     <form id="admin_forgot_password_form" class="form formSubmit"
-                        action="{{ route('admin.forgot.password') }}" enctype='multipart/form-data'>
+                        action="{{ Route::currentRouteName() == 'admin.login' ? route('admin.forgot.password') : route('artist.forgot.password') }}" enctype='multipart/form-data'>
                         @csrf
                         <div class="mb-13 text-center">
                             <h1 class="mb-3">Forgot Password</h1>

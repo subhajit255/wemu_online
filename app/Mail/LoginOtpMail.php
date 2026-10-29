@@ -39,11 +39,13 @@ class LoginOtpMail extends Mailable
      */
     public function content(): Content
     {
+        $roleName = ($this->user->user_type ?? 0) == 3 ? 'Artist' : (($this->user->user_type ?? 0) <= 2 ? 'Admin' : 'User');
         return new Content(
             view: 'emails.login-otp',
             with: [
                 'otp' => $this->otp,
-                'name' => $this->user->name ?? $this->user->first_name ?? 'Artist',
+                'name' => $this->user->name ?? $this->user->first_name ?? $roleName,
+                'roleName' => $roleName,
             ],
         );
     }

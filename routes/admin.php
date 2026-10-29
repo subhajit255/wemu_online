@@ -40,8 +40,11 @@ Route::as('admin.')->group(function () {
     Route::controller(AuthController::class)->group(function () {
         Route::match(['get', 'post'], 'login', 'login')->name('login');
         Route::match(['get', 'post'], 'logout', 'logout')->name('logout');
-        Route::match(['get', 'post'], 'forgot/password', 'forgotPassword')->name('forgot.password');
-        Route::match(['get', 'post'], 'reset/password/{token?}', 'resetPassword')->name('reset.password');
+        Route::match(['get', 'post'], 'forgot-password', 'forgotPassword')->name('forgot.password');
+        Route::match(['get', 'post'], 'forgot/password', 'forgotPassword');
+        Route::match(['get', 'post'], 'forgot-password/verify-otp', 'forgotPasswordVerifyOtp')->name('forgot.password.verify.otp');
+        Route::match(['get', 'post'], 'reset-password', 'resetPassword')->name('reset.password');
+        Route::match(['get', 'post'], 'reset/password/{token?}', 'resetPassword');
         Route::any('verify-email/{uuid}', 'verifyEmail')->name('verify.email');
         Route::match(['get', 'post'], '/delete/account', 'deleteAccount')->name('delete.account');
         Route::match(['get', 'post'], '/delete-account', 'deleteAccount');

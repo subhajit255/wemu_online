@@ -792,7 +792,7 @@
         clearInterval(otpTimer);
         var secs = 30;
         $('#timerText').show();
-        $('#resendBtn').addClass('disabled');
+        $('#resendBtn').prop('disabled', true).addClass('disabled');
         tick();
         otpTimer = setInterval(function() {
             secs--;
@@ -800,7 +800,7 @@
             if (secs <= 0) {
                 clearInterval(otpTimer);
                 $('#timerText').hide();
-                $('#resendBtn').removeClass('disabled');
+                $('#resendBtn').prop('disabled', false).removeClass('disabled');
             }
         }, 1000);
 
@@ -811,8 +811,11 @@
     }
 
     function resendOtp() {
+        if ($('#resendBtn').prop('disabled') || $('#resendBtn').hasClass('disabled')) return;
         var userId = $('#userIdInput').val();
         if (!userId) { toastr.warning('No account found. Please complete Step 1.'); return; }
+
+        $('#resendBtn').prop('disabled', true).addClass('disabled');
 
         $.ajax({
             type: 'POST',
@@ -821,12 +824,14 @@
             success: function(r) {
                 if (r.otp) {
                     console.log('OTP:', r.otp);
-                    setTimeout(function() { alert('OTP: ' + r.otp); }, 500);
                 }
                 toastr.success('A new verification code has been sent!');
                 startTimer();
             },
-            error: function() { toastr.error('Failed to resend code.'); }
+            error: function() {
+                toastr.error('Failed to resend code.');
+                $('#resendBtn').prop('disabled', false).removeClass('disabled');
+            }
         });
     }
 
@@ -897,7 +902,6 @@
                     if (resp.next_step) goStep(resp.next_step);
                     if (resp.otp) {
                         console.log('OTP:', resp.otp);  // dev only
-                        setTimeout(function() { alert('OTP: ' + resp.otp); }, 500);
                     }
                 } else {
                     toastr.error(resp.message || 'Something went wrong.');

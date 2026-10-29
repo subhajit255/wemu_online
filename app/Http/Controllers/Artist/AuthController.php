@@ -22,6 +22,7 @@ use App\Traits\StripeTrait;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LoginOtpMail;
+use App\Mail\ResetPasswordOtpMail;
 use Illuminate\Validation\Rule;
 
 class AuthController extends BaseController
@@ -613,6 +614,179 @@ class AuthController extends BaseController
         }
 
         return view('auth.otp-verify', compact('verificationCode'));
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+
+            $user = User::where('email', $request->email)->whereNull('deleted_at')->first();
+
+            if (!$user || ($user->user_type != 3 && !$user->roles()->where('slug', 'artist')->exists())) {
+                return response([
+                    'status' => false,
+                    'message' => 'No artist account found with that email address.',
+                ]);
+            }
+
+            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $user->update(['verification_code' => $otp]);
+
+            session([
+                'reset_password_user_id' => $user->id,
+                'reset_password_email' => $user->email,
+            ]);
+            session()->forget('reset_password_verified');
+
+            try {
+                Mail::to($user->email)->send(new ResetPasswordOtpMail($otp, $user));
+            } catch (\Exception $e) {
+                logger('Error sending password reset OTP mail: ' . $e->getMessage());
+            }
+
+            return response([
+                'status' => true,
+                'message' => 'A verification code has been sent to your email.',
+                'url' => route('artist.forgot.password.verify.otp'),
+                'otp' => config('app.debug') ? $otp : null,
+            ]);
+        }
+
+        session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+
+        return view('auth.forgot-password');
+    }
+
+    public function forgotPasswordVerifyOtp(Request $request)
+    {
+        $userId = session('reset_password_user_id');
+        if (!$userId) {
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'Session expired. Please start over.',
+                    'url' => route('artist.forgot.password'),
+                ]);
+            }
+            return redirect()->route('artist.forgot.password');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'User not found. Please try again.',
+                    'url' => route('artist.forgot.password'),
+                ]);
+            }
+            return redirect()->route('artist.forgot.password');
+        }
+
+        if ($request->isMethod('post')) {
+            if ($request->input('action') === 'resend') {
+                $newOtp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+                $user->update(['verification_code' => $newOtp]);
+
+                try {
+                    Mail::to($user->email)->send(new ResetPasswordOtpMail($newOtp, $user));
+                } catch (\Exception $e) {
+                    logger('Error resending password reset OTP: ' . $e->getMessage());
+                }
+
+                return response([
+                    'status' => true,
+                    'message' => 'A new verification code has been sent to your email.',
+                    'otp' => config('app.debug') ? $newOtp : null,
+                ]);
+            }
+
+            $request->validate([
+                'otp' => 'required|numeric|digits:6',
+            ]);
+
+            if ($user->verification_code && $user->verification_code == $request->otp) {
+                session(['reset_password_verified' => true]);
+
+                return response([
+                    'status' => true,
+                    'message' => 'OTP verified successfully.',
+                    'url' => route('artist.reset.password'),
+                ]);
+            }
+
+            return response([
+                'status' => false,
+                'message' => 'Invalid or expired OTP. Please try again.',
+            ]);
+        }
+
+        $email = $user->email;
+        $verificationCode = config('app.debug') ? $user->verification_code : null;
+
+        return view('auth.forgot-password-otp', compact('email', 'verificationCode'));
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $userId = session('reset_password_user_id');
+        $isVerified = session('reset_password_verified');
+
+        if (!$userId || !$isVerified) {
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'Session expired or unverified. Please start over.',
+                    'url' => route('artist.forgot.password'),
+                ]);
+            }
+            return redirect()->route('artist.forgot.password');
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+            if ($request->ajax() || $request->isMethod('post')) {
+                return response([
+                    'status' => false,
+                    'message' => 'User not found.',
+                    'url' => route('artist.forgot.password'),
+                ]);
+            }
+            return redirect()->route('artist.forgot.password');
+        }
+
+        if ($request->isMethod('post')) {
+            if ($request->has('new_password') && !$request->has('password')) {
+                $request->merge(['password' => $request->new_password]);
+            }
+            if ($request->has('confirm_password') && !$request->has('password_confirmation')) {
+                $request->merge(['password_confirmation' => $request->confirm_password]);
+            }
+
+            $request->validate([
+                'password' => 'required|string|min:6|confirmed',
+            ]);
+
+            $user->update([
+                'password' => Hash::make($request->password),
+                'verification_code' => null,
+            ]);
+
+            session()->forget(['reset_password_user_id', 'reset_password_email', 'reset_password_verified']);
+
+            return response([
+                'status' => true,
+                'message' => 'Password changed successfully! You can now log in with your new password.',
+                'url' => route('artist.login'),
+            ]);
+        }
+
+        return view('auth.reset-password');
     }
 
     public function dashboard()

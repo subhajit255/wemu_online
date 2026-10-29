@@ -113,8 +113,8 @@
 
         <!-- Content -->
         <div class="content">
-            <h2>Hello, {{ $name ?? 'Artist' }} 👋</h2>
-            <p>You requested to securely log in to your WEMU Artist account. Please use the verification code below to complete your login.</p>
+            <h2>Hello, {{ $name ?? 'User' }} 👋</h2>
+            <p>You requested to securely log in to your WEMU {{ !empty($roleName) ? $roleName . ' ' : '' }}account. Please use the verification code below to complete your login.</p>
 
             <!-- OTP Box -->
             <div class="otp-box">

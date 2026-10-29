@@ -132,13 +132,20 @@
             cursor: pointer;
             text-decoration: none;
             margin-left: 5px;
-            transition: color 0.2s;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 13px;
         }
-        #resendBtn:hover { color: #c4b5fd; }
-        #resendBtn.disabled {
-            color: rgba(255,255,255,0.28);
-            pointer-events: none;
-            cursor: not-allowed;
+        #resendBtn:hover:not(:disabled) { color: #c4b5fd; text-decoration: underline; }
+        #resendBtn.disabled,
+        #resendBtn:disabled {
+            color: rgba(255,255,255,0.28) !important;
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.4 !important;
+            text-decoration: none !important;
         }
 
         .btn-submit {
@@ -228,7 +235,7 @@
 
                 <div class="timer-row">
                     <span id="timerText">Resend code in <strong id="timerCount">00:30</strong></span>
-                    <a id="resendBtn" class="disabled" onclick="resendOtp()">Resend</a>
+                    <button type="button" id="resendBtn" class="disabled" disabled onclick="resendOtp()">Resend</button>
                 </div>
 
                 <button type="submit" id="kt_otp_submit" class="btn-submit">
@@ -306,7 +313,7 @@
             clearInterval(otpTimer);
             var secs = 30;
             $('#timerText').show();
-            $('#resendBtn').addClass('disabled');
+            $('#resendBtn').prop('disabled', true).addClass('disabled');
             tick();
             otpTimer = setInterval(function() {
                 secs--;
@@ -314,7 +321,7 @@
                 if (secs <= 0) {
                     clearInterval(otpTimer);
                     $('#timerText').hide();
-                    $('#resendBtn').removeClass('disabled');
+                    $('#resendBtn').prop('disabled', false).removeClass('disabled');
                 }
             }, 1000);
 
@@ -325,7 +332,8 @@
         }
 
         function resendOtp() {
-            if ($('#resendBtn').hasClass('disabled')) return;
+            if ($('#resendBtn').prop('disabled') || $('#resendBtn').hasClass('disabled')) return;
+            $('#resendBtn').prop('disabled', true).addClass('disabled');
             
             $.ajax({
                 type: 'POST',
@@ -336,25 +344,23 @@
                         toastr.success(r.message || 'A new verification code has been sent!');
                         if (r.otp) {
                             console.log('OTP:', r.otp);
-                            setTimeout(function() { alert('OTP: ' + r.otp); }, 500);
                         }
                         startTimer();
                     } else {
                         toastr.error(r.message || 'Failed to resend code.');
+                        $('#resendBtn').prop('disabled', false).removeClass('disabled');
                     }
                 },
-                error: function() { toastr.error('Failed to resend code.'); }
+                error: function() {
+                    toastr.error('Failed to resend code.');
+                    $('#resendBtn').prop('disabled', false).removeClass('disabled');
+                }
             });
         }
     </script>
     @if(isset($verificationCode))
     <script>
         console.log("Verification Code:", "{{ $verificationCode }}");
-        // $(window).on('load', function() {
-        //     setTimeout(function() {
-        //         alert("Verification Code: {{ $verificationCode }}");
-        //     }, 600);
-        // });
     </script>
     @endif
 </body>

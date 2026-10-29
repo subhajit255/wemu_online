@@ -24,6 +24,11 @@ Route::as('artist.')->group(function () {
         Route::match(['get', 'post'], 'register', 'register')->name('register');
         Route::get('register/checkout-success', 'checkoutSuccess')->name('register.checkout.success');
         Route::match(['get', 'post'], 'otp-verify', 'otpVerify')->name('otp.verify');
+        Route::match(['get', 'post'], 'forgot-password', 'forgotPassword')->name('forgot.password');
+        Route::match(['get', 'post'], 'forgot/password', 'forgotPassword');
+        Route::match(['get', 'post'], 'forgot-password/verify-otp', 'forgotPasswordVerifyOtp')->name('forgot.password.verify.otp');
+        Route::match(['get', 'post'], 'reset-password', 'resetPassword')->name('reset.password');
+        Route::match(['get', 'post'], 'reset/password', 'resetPassword');
         Route::match(['get', 'post'], 'logout', 'logout')->name('logout');
         Route::get('dashboard', 'dashboard')->name('dashboard');
         Route::post('reverify', 'reverifySubmit')->name('reverify.submit');
