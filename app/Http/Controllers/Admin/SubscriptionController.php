@@ -84,10 +84,17 @@ class SubscriptionController extends BaseController
                         $stripePriceId = $existingSubscription->stripe_price_id;
                         $stripeProductId = $existingSubscription->stripe_product_id;
 
-                        if (!empty($stripePriceId) && !empty($stripeProductId)) {
-                            $pricingChanged = false;
-                        } else {
+                        // Check if any Stripe-relevant parameter actually changed
+                        $isPriceChanged = (float)$existingSubscription->price !== (float)$request->price;
+                        $isCurrencyChanged = strtolower($existingSubscription->currency ?? '') !== strtolower($request->currency ?? '');
+                        $isIntervalChanged = ($existingSubscription->interval ?? '') !== ($request->interval ?? '');
+                        $isIntervalCountChanged = (int)($existingSubscription->interval_count ?? 1) !== (int)($request->interval_count ?? 1);
+                        $isNameChanged = ($existingSubscription->name ?? '') !== ($request->name ?? '');
+
+                        if ($isPriceChanged || $isCurrencyChanged || $isIntervalChanged || $isIntervalCountChanged || $isNameChanged || empty($stripePriceId) || empty($stripeProductId) || $request->has('force_new_stripe_price')) {
                             $pricingChanged = true;
+                        } else {
+                            $pricingChanged = false;
                         }
                     }
                 }

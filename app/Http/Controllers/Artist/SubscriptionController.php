@@ -126,7 +126,11 @@ class SubscriptionController extends Controller
                 $subscription->stripe_price_id,
                 route('artist.subscription.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
                 route('artist.subscription.plans'),
-                [],
+                [
+                    'user_id' => (string) $user->id,
+                    'subscription_id' => (string) $subscription->id,
+                    'source' => 'artist_plan_switch',
+                ],
                 $subscriptionData
             );
 
@@ -149,12 +153,34 @@ class SubscriptionController extends Controller
         try {
             $session = $stripe->checkout->sessions->retrieve($sessionId);
             $user = auth()->user();
+
+            if (!$user && isset($session->customer)) {
+                $user = \App\Models\User::where('stripe_id', $session->customer)->first();
+                if ($user) {
+                    auth()->login($user);
+                }
+            }
+
+            if (!$user && isset($session->metadata->user_id)) {
+                $user = \App\Models\User::find($session->metadata->user_id);
+                if ($user) {
+                    auth()->login($user);
+                }
+            }
+
+            if (!$user) {
+                return redirect()->route('artist.login')->with('error', 'Session expired. Please log in.');
+            }
             
             if ($session->payment_status === 'paid' || $session->status === 'complete') {
                 $subscriptionId = $session->subscription;
                 $stripeSubscription = $stripe->subscriptions->retrieve($subscriptionId);
                 
-                $planId = session('pending_subscription_plan_id');
+                $planId = session('pending_subscription_plan_id') ?? ($session->metadata->subscription_id ?? null);
+                if (!$planId && isset($stripeSubscription->items->data[0]->price->id)) {
+                    $matchedSub = Subscription::where('stripe_price_id', $stripeSubscription->items->data[0]->price->id)->first();
+                    $planId = $matchedSub?->id;
+                }
                 $localSubscription = Subscription::find($planId);
                 
                 if ($localSubscription) {
@@ -195,7 +221,7 @@ class SubscriptionController extends Controller
                                 $endDate = (clone $baseDate)->addDays($intervalCount);
                             }
                         } else {
-                            $endDate = $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null;
+                            $endDate = $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end);
                         }
 
                         UserSubscription::create([
@@ -215,18 +241,21 @@ class SubscriptionController extends Controller
 
                         $transactionId = $session->payment_intent ?? $session->invoice ?? $sessionId;
 
-                        DB::table('transactions')->insert([
-                            'user_id' => $user->id,
-                            'transaction_id' => $transactionId,
-                            'payment_type' => 'stripe',
-                            'amount' => $session->amount_total / 100,
-                            'currency' => strtoupper($session->currency),
-                            'payment_status' => 'completed',
-                            'payment_details' => json_encode($session->toArray()),
-                            'description' => 'Subscription payment for ' . $localSubscription->name,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
+                        DB::table('transactions')->updateOrInsert(
+                            ['transaction_id' => $transactionId],
+                            [
+                                'user_id' => $user->id,
+                                'payment_type' => 'stripe',
+                                'amount' => $session->amount_total / 100,
+                                'currency' => strtoupper($session->currency),
+                                'payment_status' => 'completed',
+                                'idempotency_key' => $session->id,
+                                'payment_details' => json_encode($session->toArray()),
+                                'description' => 'Subscription payment for ' . $localSubscription->name,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]
+                        );
                         
                         $user->update(['subscription_type' => $localSubscription->id]);
                         session()->forget('pending_subscription_plan_id');

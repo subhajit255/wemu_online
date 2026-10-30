@@ -100,7 +100,9 @@ class SubscriptionController extends BaseController
 
             // 1. Create or get Stripe Customer
             if (!$user->stripe_id) {
-                $customer = $this->createCustomer($user->email, $user->name);
+                $customer = $this->createCustomer($user->email, $user->name, [
+                    'metadata' => ['user_id' => (string) $user->id]
+                ]);
                 $user->update(['stripe_id' => $customer->id]);
             }
 
@@ -108,7 +110,12 @@ class SubscriptionController extends BaseController
             $this->attachPaymentMethodToCustomer($user->stripe_id, $request->payment_method_id);
 
             // 3. Create Stripe Subscription (starts immediately from purchase time)
-            $stripeSubscription = $this->createSubscription($user->stripe_id, $subscription->stripe_price_id);
+            $stripeSubscription = $this->createSubscription($user->stripe_id, $subscription->stripe_price_id, [
+                'metadata' => [
+                    'user_id' => (string) $user->id,
+                    'subscription_id' => (string) $subscription->id,
+                ],
+            ]);
 
             // 5. Create local UserSubscription (Pending or Active)
             $isActive = in_array($stripeSubscription->status, ['active', 'trialing']);
@@ -150,16 +157,22 @@ class SubscriptionController extends BaseController
                 $transactionId = $paymentIntent->id;
             }
 
-            Transaction::create([
-                'user_id' => $user->id,
-                'transaction_id' => $transactionId ?? $stripeSubscription->id,
-                'payment_type' => 'subscription',
-                'payment_method_id' => $request->payment_method_id,
-                'amount' => $subscription->price, // Storing amount from local subscription plan
-                'currency' => config('services.stripe.currency', 'usd'),
-                'payment_status' => $isActive ? 'completed' : 'pending',
-                'description' => 'Subscription purchase: ' . ($subscription->name ?? $subscription->title ?? 'WEMU Premium'),
-            ]);
+            $txIdentifier = $transactionId ?? $stripeSubscription->id;
+            Transaction::updateOrInsert(
+                ['transaction_id' => $txIdentifier],
+                [
+                    'user_id' => $user->id,
+                    'payment_type' => 'subscription',
+                    'payment_method_id' => $request->payment_method_id,
+                    'amount' => $subscription->price, // Storing amount from local subscription plan
+                    'currency' => strtoupper($subscription->currency ?? config('services.stripe.currency', 'usd')),
+                    'payment_status' => $isActive ? 'completed' : 'pending',
+                    'idempotency_key' => $txIdentifier,
+                    'description' => 'Subscription purchase: ' . ($subscription->name ?? $subscription->title ?? 'WEMU Premium'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
             DB::commit();
 

@@ -463,7 +463,12 @@ class AuthController extends BaseController
                                     $user->stripe_id,
                                     $subscription->stripe_price_id,
                                     route('artist.register.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
-                                    route('artist.register') . '?reset=0'
+                                    route('artist.register') . '?reset=0',
+                                    [
+                                        'user_id' => (string) $user->id,
+                                        'subscription_id' => (string) $subscription->id,
+                                        'source' => 'artist_registration',
+                                    ]
                                 );
 
                                 return response([
@@ -1023,7 +1028,12 @@ class AuthController extends BaseController
                 $stripeSubscription = $stripe->subscriptions->retrieve($subscriptionId);
 
                 // Get the local subscription record
-                $localSubscription = \App\Models\Subscription::find($user->subscription_type);
+                $planId = $user->subscription_type ?? ($session->metadata->subscription_id ?? null);
+                if (!$planId && isset($stripeSubscription->items->data[0]->price->id)) {
+                    $matchedSub = \App\Models\Subscription::where('stripe_price_id', $stripeSubscription->items->data[0]->price->id)->first();
+                    $planId = $matchedSub?->id;
+                }
+                $localSubscription = \App\Models\Subscription::find($planId);
 
                 if ($localSubscription) {
                     $existing = \Illuminate\Support\Facades\DB::table('user_subscriptions')
@@ -1031,6 +1041,24 @@ class AuthController extends BaseController
                         ->first();
 
                     if (!$existing) {
+                        $periodStart = \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start);
+                        $periodEnd = \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end);
+                        $endDate = $periodEnd;
+
+                        if ($localSubscription->interval) {
+                            $intervalCount = $localSubscription->interval_count > 0 ? $localSubscription->interval_count : 1;
+                            $baseDate = $stripeSubscription->trial_end ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->trial_end) : now();
+                            if ($localSubscription->interval === 'month') {
+                                $endDate = (clone $baseDate)->addMonths($intervalCount);
+                            } elseif ($localSubscription->interval === 'year') {
+                                $endDate = (clone $baseDate)->addYears($intervalCount);
+                            } elseif ($localSubscription->interval === 'week') {
+                                $endDate = (clone $baseDate)->addWeeks($intervalCount);
+                            } elseif ($localSubscription->interval === 'day') {
+                                $endDate = (clone $baseDate)->addDays($intervalCount);
+                            }
+                        }
+
                         \Illuminate\Support\Facades\DB::table('user_subscriptions')->insert([
                             'uuid' => \Webpatser\Uuid\Uuid::generate(4)->string,
                             'user_id' => $user->id,
@@ -1038,9 +1066,9 @@ class AuthController extends BaseController
                             'stripe_id' => $subscriptionId,
                             'stripe_status' => $stripeSubscription->status,
                             'trial_ends_at' => $stripeSubscription->trial_end ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->trial_end) : null,
-                            'current_period_start' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start),
-                            'current_period_end' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end),
-                            'ends_at' => $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
+                            'current_period_start' => $periodStart,
+                            'current_period_end' => $periodEnd,
+                            'ends_at' => $endDate,
                             'status' => in_array($stripeSubscription->status, ['active', 'trialing']) ? 1 : 0,
                             'transaction_id' => $session->payment_intent ?? $session->invoice ?? $sessionId,
                             'started_on' => now(),
@@ -1051,22 +1079,28 @@ class AuthController extends BaseController
                         // Try to get payment intent or invoice
                         $transactionId = $session->payment_intent ?? $session->invoice ?? $sessionId;
 
-                        \Illuminate\Support\Facades\DB::table('transactions')->insert([
-                            'user_id' => $user->id,
-                            'transaction_id' => $transactionId,
-                            'payment_type' => 'stripe',
-                            'amount' => $session->amount_total / 100,
-                            'currency' => strtoupper($session->currency),
-                            'payment_status' => 'completed',
-                            'payment_details' => json_encode($session->toArray()),
-                            'description' => 'Subscription payment for ' . $localSubscription->name,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
+                        \Illuminate\Support\Facades\DB::table('transactions')->updateOrInsert(
+                            ['transaction_id' => $transactionId],
+                            [
+                                'user_id' => $user->id,
+                                'payment_type' => 'stripe',
+                                'amount' => $session->amount_total / 100,
+                                'currency' => strtoupper($session->currency),
+                                'payment_status' => 'completed',
+                                'idempotency_key' => $session->id,
+                                'payment_details' => json_encode($session->toArray()),
+                                'description' => 'Subscription payment for ' . $localSubscription->name,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]
+                        );
                     }
                 }
 
-                $user->update(['completed_steps' => 8]);
+                $user->update([
+                    'subscription_type' => $localSubscription?->id ?? $user->subscription_type,
+                    'completed_steps' => 8
+                ]);
                 return redirect()->route('artist.register')->with('success', 'Payment successful! Please accept the terms to complete registration.');
             }
         } catch (\Exception $e) {

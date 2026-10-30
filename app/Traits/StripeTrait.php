@@ -48,6 +48,8 @@ trait StripeTrait
             'items' => [
                 ['price' => $priceId],
             ],
+            'payment_behavior' => 'default_incomplete',
+            'payment_settings' => ['save_default_payment_method' => 'on_subscription'],
             // Expand the latest invoice and payment intent to handle initial 3DS auth if required
             'expand' => ['latest_invoice.payment_intent'],
         ], $params);
@@ -72,8 +74,8 @@ trait StripeTrait
         $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
 
         $price = $stripe->prices->create([
-            'currency' => $currency,
-            'unit_amount' => (int) ($amount * 100), // Stripe expects amounts in cents
+            'currency' => strtolower($currency),
+            'unit_amount' => (int) round($amount * 100), // Stripe expects amounts in cents
             'recurring' => [
                 'interval' => $interval,
                 'interval_count' => $intervalCount,
