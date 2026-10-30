@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\BaseController;
+use App\Models\SupportArticle;
+use App\Models\UserQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\BaseController;
-use App\Models\UserQuery;
 use Illuminate\Support\Facades\Validator;
 
 class HelpAndSupportController extends BaseController
@@ -16,22 +17,91 @@ class HelpAndSupportController extends BaseController
      *     summary="Get support articles",
      *     tags={"Help & Support"},
      *     security={{"bearerAuth": {}}},
-     *     @OA\Response(response=200, description="Articles fetched successfully")
+     *     @OA\Parameter(
+     *         name="category",
+     *         in="query",
+     *         description="Filter articles by category name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search keyword for question or answer",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response=200, description="Articles fetched successfully"),
+     *     @OA\Response(response=500, description="Internal server error")
      * )
      */
     public function supportArticles(Request $request)
     {
         try {
-            $allCategories = config("constants.SUPPORT_ARTICLE");
+            $query = SupportArticle::active();
+
+            if ($request->filled('category')) {
+                $query->where('category', trim($request->category));
+            }
+
+            $search = $request->input('search') ?? $request->input('keyword');
+            if (!empty($search)) {
+                $searchTerm = trim($search);
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('question', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('answer', 'like', '%' . $searchTerm . '%');
+                });
+            }
+
+            $articles = $query->orderBy('sort_order', 'asc')
+                ->orderBy('id', 'asc')
+                ->get();
+
+            // Fallback: If DB table is empty and no specific filters were applied, run seeder
+            if ($articles->isEmpty() && !$request->filled('category') && empty($search)) {
+                if (SupportArticle::count() === 0 && class_exists(\Database\Seeders\SupportArticleSeeder::class)) {
+                    try {
+                        (new \Database\Seeders\SupportArticleSeeder())->run();
+                        $articles = SupportArticle::active()
+                            ->orderBy('sort_order', 'asc')
+                            ->orderBy('id', 'asc')
+                            ->get();
+                    } catch (\Throwable $seederException) {
+                        logger()->warning('SupportArticleSeeder auto-run error: ' . $seederException->getMessage());
+                    }
+                }
+            }
+
+            // Group articles by category preserving standard display order
+            $defaultCategoryOrder = ['Payment & billing', 'Manage your account', 'Security & privacy'];
+            $grouped = $articles->groupBy('category')->sortBy(function ($items, $category) use ($defaultCategoryOrder) {
+                $index = array_search($category, $defaultCategoryOrder, true);
+                return $index === false ? 999 : $index;
+            });
+
             $response = [];
-            foreach ($allCategories as $key => $value) {
+            foreach ($grouped as $category => $items) {
                 $response[] = [
-                    "category" => $key,
-                    "articles" => $value
+                    'category' => $category,
+                    'articles' => $items->map(function ($article) {
+                        return [
+                            'id' => $article->id,
+                            'uuid' => $article->uuid,
+                            'category' => $article->category,
+                            'question' => $article->question,
+                            'answer' => $article->answer,
+                            'sort_order' => $article->sort_order,
+                        ];
+                    })->values()->all(),
                 ];
             }
-            return $this->responseJson(true, 200, "Success", $response);
-        } catch (\Exception $e) {
+
+            return $this->responseJson(true, 200, "Articles fetched successfully", $response);
+        } catch (\Throwable $e) {
+            logger()->error('Support articles API error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return $this->responseJson(false, 500, "something went wrong");
         }
     }

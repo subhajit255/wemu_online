@@ -1072,17 +1072,6 @@
                 ],
                 "summary": "Process and return multi-line error details with optional storage cleanup",
                 "operationId": "a4292fa4408169f193358cedc6aa6f21",
-                "parameters": [
-                    {
-                        "name": "path",
-                        "in": "query",
-                        "description": "File path in storage to delete if present",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
                 "requestBody": {
                     "description": "Error text",
                     "required": false,
@@ -1211,9 +1200,32 @@
                 ],
                 "summary": "Get support articles",
                 "operationId": "4b7335e379e1163992895b4400af06db",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter articles by category name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search keyword for question or answer",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Articles fetched successfully"
+                    },
+                    "500": {
+                        "description": "Internal server error"
                     }
                 },
                 "security": [
