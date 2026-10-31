@@ -7,17 +7,12 @@
             <h1 class="page-heading d-flex text-dark fw-bold fs-3 flex-column justify-content-center my-0">
                 Admin Dashboard
             </h1>
-            <span class="text-muted fs-7 my-1 pt-1">Welcome back, {{ auth()->user()->name ?? 'Administrator' }} 👑</span>
+            <span class="text-muted fs-7 my-1 pt-1">Welcome back, {{ auth()->user()->name ?? 'Administrator' }}</span>
         </div>
         <div class="d-flex align-items-center gap-2 gap-lg-3">
             <span class="badge badge-light-success d-flex align-items-center gap-2 fs-7 py-2 px-3 me-2">
                 <span class="glow-dot-online"></span> WEMU Servers: Online
             </span>
-            <select class="form-select form-select-sm form-select-solid dashboard-select" style="width: 130px;">
-                <option value="1">This Month</option>
-                <option value="2">Last Month</option>
-                <option value="3">This Year</option>
-            </select>
         </div>
     </div>
 </div>
@@ -152,7 +147,7 @@
                                         <stop offset="100%" stop-color="var(--bs-primary, #4f46e5)" stop-opacity="0.0" />
                                     </linearGradient>
                                 </defs>
-                                
+
                                 <!-- Y-Axis Grid Lines & Labels -->
                                 @php
                                     $ySteps = [
@@ -184,7 +179,7 @@
                                         </text>
                                         <title>Exact Revenue: ${{ number_format($point['revenue'], 2) }}</title>
                                     </g>
-                                    
+
                                     <!-- X-Axis Label -->
                                     <text x="{{ $point['x'] }}" y="235" fill="var(--bs-gray-500, #9ca3af)" font-size="11" font-weight="500" text-anchor="{{ $index == 0 ? 'start' : ($index == count($chartPoints) - 1 ? 'end' : 'middle') }}">
                                         {{ $point['label'] }}
@@ -489,7 +484,7 @@
 
         // Rejection Modal Logic
         let rejectModal = new bootstrap.Modal(document.getElementById('rejectArtistModal'));
-        
+
         $('.reject-artist-btn').click(function() {
             let uuid = $(this).data('uuid');
             $('#rejectArtistUuid').val(uuid);
@@ -500,7 +495,7 @@
         $('#confirmRejectBtn').click(function() {
             let uuid = $('#rejectArtistUuid').val();
             let reason = $('#rejectionReason').val().trim();
-            
+
             if (!reason) {
                 Swal.fire('Warning', 'Rejection reason is required', 'warning');
                 return;

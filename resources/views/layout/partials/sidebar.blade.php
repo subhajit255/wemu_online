@@ -8,7 +8,7 @@
         background-color: #0F172A !important; /* Deep Slate / Navy */
         border-right: 1px solid #1E293B !important;
     }
-    
+
     .custom-dark-sidebar .menu-item .menu-link {
         color: #94A3B8;
         padding-left: 20px;
@@ -31,7 +31,7 @@
         color: #6366f1 !important; /* Wemu Indigo */
         font-weight: 600;
     }
-    
+
     /* Modify default logo text/border for this dark sidebar */
     .custom-dark-sidebar .app-sidebar-logo {
         border-bottom: 1px solid #1E293B !important;
@@ -39,7 +39,7 @@
     .custom-dark-sidebar .app-sidebar-logo-default {
         color: #F8FAFC !important; /* White text for logo */
     }
-    
+
     .artist-profile-sidebar {
         text-align: center;
         padding: 30px 20px 20px 20px;
@@ -130,14 +130,6 @@
                                     <span class="bullet bullet-dot"></span>
                                 </span>
                                 <span class="menu-title">Artists</span>
-                            </a>
-                        </div>
-                        <div class="menu-item">
-                            <a class="menu-link {{ (request()->routeIs('admin.delete.account') || request()->routeIs('admin.delete.user')) ? 'active' : '' }}" href="{{ route('admin.delete.account') }}">
-                                <span class="menu-bullet">
-                                    <span class="bullet bullet-dot"></span>
-                                </span>
-                                <span class="menu-title">Delete User</span>
                             </a>
                         </div>
                     </div>
@@ -274,9 +266,9 @@
 
                 <!-- Artist Profile at the Top -->
                 <div class="artist-profile-sidebar">
-                    <img class="onerror-image" 
+                    <img class="onerror-image"
                          data-onerror-image="{{ $sidebarUser->image_path }}"
-                         src="{{ $sidebarUser->image_path }}" 
+                         src="{{ $sidebarUser->image_path }}"
                          alt="Artist Avatar">
                     <div class="artist-name">{{ $sidebarUser->name ?: 'Artist Name' }}</div>
                 </div>
