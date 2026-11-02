@@ -43,7 +43,7 @@ class SongController extends BaseController
             $query->where('title', 'like', '%' . $request->title . '%');
         }
 
-        $songs = $query->latest()->paginate(10);
+        $songs = $query->paginate(10);
         $postReleases = Song::whereIn('user_id', $teamIds)
             ->where('status', 0)
             ->where('published_at', '>', $currentDateTime)

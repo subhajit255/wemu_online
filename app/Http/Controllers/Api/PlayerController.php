@@ -162,17 +162,23 @@ class PlayerController extends BaseController
                     $baseQuery = RecommendationService::getFeaturedSongsQuery($userId, $seed);
                     break;
                 default:
-                    // Support for dynamic Dashboard genres (e.g. 'rock-for-you')
-                    if (Str::endsWith($sourceType, '-for-you') && $sourceType !== 'made-for-you' && $sourceType !== 'made_for_you') {
-                        $genreSlug = Str::replaceLast('-for-you', '', $sourceType);
+                    // Support for dynamic Dashboard genres (e.g. 'rock-for-you' or 'rock_for_you')
+                    $normalizedSourceType = str_replace('_', '-', $sourceType);
+                    if (Str::endsWith($normalizedSourceType, '-for-you') && $normalizedSourceType !== 'made-for-you') {
+                        $genreSlug = Str::replaceLast('-for-you', '', $normalizedSourceType);
                         $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
                             return Str::slug($g->title) === $genreSlug;
                         });
 
+                        if (!$genre && $sourceId) {
+                            $genre = Genre::where('is_active', 1)->find($sourceId);
+                        }
+
                         if ($genre) {
-                            $userId = auth('api')->id();
+                            $userId = auth()->id() ?? auth('api')->id();
                             $seed = RecommendationService::resolveSeed($request->seed, $userId);
                             $baseQuery = RecommendationService::getGenreForYouQuery($genre->id, $userId, $seed);
+                            $isAutoplaySupported = false; // Prevent foreign tracks from breaking exact queue consistency
                         } else {
                             $baseQuery->whereRaw('1 = 0'); // Empty if genre not found
                         }

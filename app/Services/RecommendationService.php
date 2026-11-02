@@ -107,8 +107,10 @@ class RecommendationService
     }
 
     /**
-     * Dynamic genre suggestions query (e.g. "Punta for you", "Rock for you").
-     * Personalized if active user has taste in this genre, or dynamically randomized for cold-start.
+     * Dynamic genre suggestions query (e.g. "Rock for you", "Pop for you").
+     * Totally dynamic & random within the genre (not based on user preference),
+     * deterministic by seed to guarantee identical ordering across Dashboard index,
+     * Section Details ("See All"), and Player Queue without discrepancies.
      *
      * @param int $genreId
      * @param int|null $userId
@@ -118,51 +120,22 @@ class RecommendationService
     public static function getGenreForYouQuery(int $genreId, ?int $userId = null, ?int $seed = null): Builder
     {
         $seedInt = self::resolveSeed($seed, $userId);
+
         $query = Song::with(['artist', 'album', 'genre'])
             ->where('status', 1)
             ->where('genre_id', $genreId);
 
-        if ($userId && $userId > 0) {
-            $taste = self::getUserTasteProfile($userId);
-
-            // Filter taste components specific to this genre
-            $genreLikedSongIds = !empty($taste['liked_song_ids'])
-                ? Song::where('genre_id', $genreId)->whereIn('id', $taste['liked_song_ids'])->pluck('id')->toArray()
-                : [];
-            $genreArtistIds = !empty($taste['affinity_artist_ids'])
-                ? Song::where('genre_id', $genreId)->whereIn('user_id', $taste['affinity_artist_ids'])->pluck('user_id')->unique()->toArray()
-                : [];
-            $genrePlayedSongIds = !empty($taste['played_song_ids'])
-                ? Song::where('genre_id', $genreId)->whereIn('id', $taste['played_song_ids'])->pluck('id')->toArray()
-                : [];
-
-            $hasLiked = !empty($genreLikedSongIds);
-            $hasArtists = !empty($genreArtistIds);
-            $hasPlayed = !empty($genrePlayedSongIds);
-
-            if ($hasLiked || $hasArtists || $hasPlayed) {
-                $likedList = $hasLiked ? implode(',', array_map('intval', $genreLikedSongIds)) : '0';
-                $artistList = $hasArtists ? implode(',', array_map('intval', $genreArtistIds)) : '0';
-                $playedList = $hasPlayed ? implode(',', array_map('intval', $genrePlayedSongIds)) : '0';
-
-                // Spotify affinity scoring:
-                // +50 for user-liked tracks in this genre
-                // +30 for tracks from followed/preferred artists in this genre
-                // +20 for previously played tracks in this genre
-                $scoreRaw = "(
-                    (CASE WHEN id IN ({$likedList}) THEN 50 ELSE 0 END) +
-                    (CASE WHEN user_id IN ({$artistList}) THEN 30 ELSE 0 END) +
-                    (CASE WHEN id IN ({$playedList}) THEN 20 ELSE 0 END)
-                )";
-
-                return $query->orderByRaw("{$scoreRaw} DESC")
-                    ->inRandomOrder($seedInt)
-                    ->orderBy('id', 'asc');
-            }
+        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        if ($driver === 'mysql' || $driver === 'mariadb') {
+            return $query->orderByRaw("CRC32(CONCAT(id, ':', '{$seedInt}')) ASC")
+                ->orderBy('id', 'asc');
         }
 
-        // Cold-start / Guest user: dynamically random within this genre!
-        return $query->inRandomOrder($seedInt)->orderBy('id', 'asc');
+        // Deterministic pseudo-random order across SQLite / other drivers
+        $m = 2147483647;
+        $a = 1103515245;
+        return $query->orderByRaw("abs((id * {$a} + {$seedInt}) % {$m}) ASC")
+            ->orderBy('id', 'asc');
     }
 
     /**

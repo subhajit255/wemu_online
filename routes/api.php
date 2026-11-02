@@ -67,6 +67,7 @@ Route::controller(MasterController::class)->group(function () {
     Route::get('/genres', 'genres')->name('genres');
     Route::post('/song/increase-play-count/{id}', 'songsCountIncrease')->name('song.increase-play-count');
     Route::get('/songs-by-album/{albumId}', 'songsByAlbum')->name('songs.by.album');
+    Route::get('/songs-by-genre/{genreId}', 'songsByGenre')->name('songs.by.genre');
 });
 Route::controller(SubscriptionController::class)->group(function () {
     Route::get('/subscriptions', 'subscriptions')->name('subscriptions');

@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Artist;
 
+use \App\Models\User;
 use App\Http\Controllers\BaseController;
+use App\Models\Album;
+use App\Models\Genre;
+use App\Models\Language;
+use App\Traits\UploadAble;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\Album;
-use App\Models\Language;
-use App\Models\Genre;
-use App\Traits\UploadAble;
 
 class AlbumController extends BaseController
 {
     use UploadAble;
-    
+
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
@@ -32,7 +33,7 @@ class AlbumController extends BaseController
     public function index(Request $request)
     {
         $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
-        $teamIds = \App\Models\User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
 
         $query = Album::whereIn('user_id', $teamIds);
 
@@ -156,7 +157,7 @@ class AlbumController extends BaseController
     public function destroy($id)
     {
         $album = Album::with('songs')->findOrFail($id);
-        
+
         // Delete all associated songs and their files
         foreach ($album->songs as $song) {
             if ($song->cover_image) {

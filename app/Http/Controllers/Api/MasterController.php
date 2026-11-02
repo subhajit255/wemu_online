@@ -217,4 +217,44 @@ class MasterController extends BaseController
             return $this->responseJson(false, 500, 'Something went wrong', []);
         }
     }
+    /**
+     * @OA\Get(
+     *     path="/api/songs-by-genre/{genreId}",
+     *     summary="Get songs by genre",
+     *     tags={"Master"},
+     *     @OA\Parameter(
+     *         name="genreId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Songs fetched successfully")
+     * )
+     */
+    public function songsByGenre($genreId)
+    {
+        $validator = Validator::make(
+            ['genre_id' => $genreId],
+            [
+                'genre_id' => 'required|exists:genres,id',
+            ]
+        );
+        if ($validator->fails()) {
+            return $this->responseJson(false, 422, $validator->errors()->first(), []);
+        }
+        try {
+            $songs = Song::where('genre_id', $genreId)->with('artist', 'album', 'genre')->latest()->paginate(10);
+            return $this->responseJson(true, 200, 'Songs fetched successfully', new PaginateSongCollection($songs));
+        } catch (\Throwable $th) {
+            logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
+            return $this->responseJson(false, 500, 'Something went wrong', []);
+        }
+    }
 }

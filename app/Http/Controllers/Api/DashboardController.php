@@ -94,25 +94,22 @@ class DashboardController extends BaseController
             // 5. Your top mixes (Fetching some public playlists)
             $topMixes = PlayList::where('is_public', 1)->inRandomOrder()->take(5)->get();
 
-            // 6. Dynamic Spotify-like Genre Mixes (or Fallback to Sad Songs)
-            $taste = RecommendationService::getUserTasteProfile($userId);
-            $topGenres = collect();
-            if (!empty($taste['top_genre_ids'])) {
-                $topGenres = Genre::where('is_active', 1)
-                    ->whereIn('id', $taste['top_genre_ids'])
+            // 6. Dynamic Genre Mixes: Totally random genres with active songs (not based on user preference)
+            $genreQuery = Genre::where('is_active', 1)
+                ->whereHas('songs', function ($q) {
+                    $q->where('status', 1);
+                });
+
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'mysql' || $driver === 'mariadb') {
+                $topGenres = $genreQuery->orderByRaw("CRC32(CONCAT(id, ':', '{$seed}')) ASC")
                     ->take(3)
                     ->get();
-            }
-            if ($topGenres->isEmpty()) {
-                $topGenres = Genre::where('is_active', 1)
-                    ->whereHas('songs', function ($q) {
-                        $q->where('status', 1);
-                    })
-                    ->withCount(['songs' => function ($q) {
-                        $q->where('status', 1);
-                    }])
-                    ->orderByDesc('songs_count')
-                    ->take(2)
+            } else {
+                $m = 2147483647;
+                $a = 1103515245;
+                $topGenres = $genreQuery->orderByRaw("abs((id * {$a} + {$seed}) % {$m}) ASC")
+                    ->take(3)
                     ->get();
             }
 
@@ -426,16 +423,18 @@ class DashboardController extends BaseController
                     return $this->responseJson(true, 200, 'Data fetched successfully', new PaginatePlayListResource($paginator));
 
                 default:
-                    if (Str::endsWith($typeId, '-for-you') && $typeId !== 'made-for-you') {
-                        $genreSlug = Str::replaceLast('-for-you', '', $typeId);
+                    $normalizedTypeId = str_replace('_', '-', $typeId);
+                    if (Str::endsWith($normalizedTypeId, '-for-you') && $normalizedTypeId !== 'made-for-you') {
+                        $genreSlug = Str::replaceLast('-for-you', '', $normalizedTypeId);
                         $genre = Genre::where('is_active', 1)->get()->first(function ($g) use ($genreSlug) {
                             return Str::slug($g->title) === $genreSlug;
                         });
 
                         if ($genre) {
+                            $page = $request->page ?? 1;
                             // Uses exact same query and ranking as Dashboard, with pagination
                             $paginator = RecommendationService::getGenreForYouQuery($genre->id, $userId, $seed)
-                                ->paginate($perPage);
+                                ->paginate($perPage, ['*'], 'page', $page);
 
                             return $this->responseJson(true, 200, 'Data fetched successfully', new PaginateSongCollection($paginator));
                         }

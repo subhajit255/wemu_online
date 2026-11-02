@@ -1433,6 +1433,39 @@
                 }
             }
         },
+        "/api/songs-by-genre/{genreId}": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get songs by genre",
+                "operationId": "f533b3b2b4f27b8c905a4066ff912e73",
+                "parameters": [
+                    {
+                        "name": "genreId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Songs fetched successfully"
+                    }
+                }
+            }
+        },
         "/api/player/queue": {
             "get": {
                 "tags": [
