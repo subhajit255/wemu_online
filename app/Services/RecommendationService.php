@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use \Illuminate\Support\Facades\DB;
 use App\Models\ArtistFollower;
 use App\Models\Genre;
 use App\Models\PlayHistory;
@@ -125,7 +126,7 @@ class RecommendationService
             ->where('status', 1)
             ->where('genre_id', $genreId);
 
-        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        $driver = DB::connection()->getDriverName();
         if ($driver === 'mysql' || $driver === 'mariadb') {
             return $query->orderByRaw("CRC32(CONCAT(id, ':', '{$seedInt}')) ASC")
                 ->orderBy('id', 'asc');

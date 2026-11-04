@@ -430,6 +430,10 @@ class DashboardController extends BaseController
                             return Str::slug($g->title) === $genreSlug;
                         });
 
+                        if (!$genre && ($request->filled('source_id') || $request->filled('genre_id'))) {
+                            $genre = Genre::where('is_active', 1)->find($request->source_id ?? $request->genre_id);
+                        }
+
                         if ($genre) {
                             $page = $request->page ?? 1;
                             // Uses exact same query and ranking as Dashboard, with pagination
