@@ -210,7 +210,7 @@ class MasterController extends BaseController
             return $this->responseJson(false, 422, $validator->errors()->first(), []);
         }
         try {
-            $songs = Song::where('album_id', $albumId)->with('artist', 'album', 'genre')->latest()->paginate(10);
+            $songs = Song::where('album_id', $albumId)->with('artist', 'album', 'genre')->paginate(10);
             return $this->responseJson(true, 200, 'Songs fetched successfully', new PaginateSongCollection($songs));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
@@ -250,7 +250,7 @@ class MasterController extends BaseController
             return $this->responseJson(false, 422, $validator->errors()->first(), []);
         }
         try {
-            $songs = Song::where('genre_id', $genreId)->with('artist', 'album', 'genre')->latest()->paginate(10);
+            $songs = Song::where('genre_id', $genreId)->with('artist', 'album', 'genre')->paginate(10);
             return $this->responseJson(true, 200, 'Songs fetched successfully', new PaginateSongCollection($songs));
         } catch (\Throwable $th) {
             logger($th->getMessage() . '--' . $th->getLine() . '--' . $th->getFile());
