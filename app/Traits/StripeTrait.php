@@ -9,6 +9,47 @@ namespace App\Traits;
 trait StripeTrait
 {
     /**
+     * Ensure the user has a valid Stripe customer ID, creating and saving one if missing or invalid.
+     *
+     * @param \App\Models\User $user
+     * @return string Stripe customer ID
+     */
+    public function ensureStripeCustomer(\App\Models\User $user): string
+    {
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+
+        // If stripe_id exists, verify it still exists in the active Stripe account (e.g. test vs live mode)
+        if (!empty($user->stripe_id)) {
+            try {
+                $customer = $stripe->customers->retrieve($user->stripe_id);
+                if (empty($customer->deleted)) {
+                    return $customer->id;
+                }
+            } catch (\Stripe\Exception\InvalidRequestException $e) {
+                // Customer not found in current Stripe account (e.g. switched from test to live mode)
+                logger()->info("Stripe customer {$user->stripe_id} not found in current Stripe account, recreating...");
+            } catch (\Exception $e) {
+                logger()->warning("Could not verify Stripe customer {$user->stripe_id}: " . $e->getMessage());
+            }
+        }
+
+        // Create new customer
+        $customer = $stripe->customers->create(array_filter([
+            'email' => $user->email,
+            'name' => $user->name,
+            'metadata' => [
+                'user_id' => (string) $user->id,
+            ],
+        ]));
+
+        // Immediately persist to users table
+        $user->stripe_id = $customer->id;
+        $user->save();
+
+        return $customer->id;
+    }
+
+    /**
      * Create a Stripe customer.
      *
      * @param string $email

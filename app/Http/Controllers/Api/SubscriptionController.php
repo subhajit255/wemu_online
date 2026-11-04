@@ -98,19 +98,14 @@ class SubscriptionController extends BaseController
                 return $this->responseJson(false, 400, 'This plan is not configured for Stripe billing yet.', []);
             }
 
-            // 1. Create or get Stripe Customer
-            if (!$user->stripe_id) {
-                $customer = $this->createCustomer($user->email, $user->name, [
-                    'metadata' => ['user_id' => (string) $user->id]
-                ]);
-                $user->update(['stripe_id' => $customer->id]);
-            }
+            // 1. Ensure Stripe Customer exists and is persisted to users table
+            $customerId = $this->ensureStripeCustomer($user);
 
             // 2. Attach Payment Method and Set Default
-            $this->attachPaymentMethodToCustomer($user->stripe_id, $request->payment_method_id);
+            $this->attachPaymentMethodToCustomer($customerId, $request->payment_method_id);
 
             // 3. Create Stripe Subscription (starts immediately from purchase time)
-            $stripeSubscription = $this->createSubscription($user->stripe_id, $subscription->stripe_price_id, [
+            $stripeSubscription = $this->createSubscription($customerId, $subscription->stripe_price_id, [
                 'metadata' => [
                     'user_id' => (string) $user->id,
                     'subscription_id' => (string) $subscription->id,

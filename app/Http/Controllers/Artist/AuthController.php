@@ -454,13 +454,10 @@ class AuthController extends BaseController
                                 ->first();
 
                             if (!$existingSub) {
-                                if (!$user->stripe_id) {
-                                    $customer = $this->createCustomer($user->email, $user->name);
-                                    $user->update(['stripe_id' => $customer->id]);
-                                }
+                                $customerId = $this->ensureStripeCustomer($user);
 
                                 $sessionUrl = $this->createCheckoutSession(
-                                    $user->stripe_id,
+                                    $customerId,
                                     $subscription->stripe_price_id,
                                     route('artist.register.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
                                     route('artist.register') . '?reset=0',
@@ -1014,11 +1011,19 @@ class AuthController extends BaseController
             if (!$user) {
                 // Recover user if session cookie was lost during redirect
                 $user = \App\Models\User::where('stripe_id', $session->customer)->first();
+                if (!$user && isset($session->metadata->user_id)) {
+                    $user = \App\Models\User::find($session->metadata->user_id);
+                }
                 if ($user) {
                     auth()->login($user);
                 } else {
                     return redirect()->route('artist.login')->with('error', 'Session expired. Please log in again.');
                 }
+            }
+
+            // Ensure user has stripe_id stored if missing
+            if (empty($user->stripe_id) && !empty($session->customer)) {
+                $user->update(['stripe_id' => $session->customer]);
             }
 
             if ($session->payment_status === 'paid' || $session->status === 'complete') {

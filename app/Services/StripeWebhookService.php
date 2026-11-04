@@ -122,6 +122,11 @@ class StripeWebhookService
                 return;
             }
 
+            // Ensure user has stripe_id stored in users table if missing
+            if (empty($user->stripe_id) && $customerId) {
+                $user->update(['stripe_id' => $customerId]);
+            }
+
             $stripe = new StripeClient(config('services.stripe.secret'));
             $stripeSubscription = $stripe->subscriptions->retrieve($subscriptionId);
 
@@ -281,6 +286,16 @@ class StripeWebhookService
                 // Subscription not yet in local database (e.g. 3DS completed via mobile app or webhook arrived before redirect)
                 $customerId = $invoice->customer ?? null;
                 $user = User::where('stripe_id', $customerId)->first();
+                if (!$user && !empty($invoice->subscription)) {
+                    $userSub = UserSubscription::where('stripe_id', $invoice->subscription)->first();
+                    if ($userSub) {
+                        $user = User::find($userSub->user_id);
+                    }
+                }
+
+                if ($user && empty($user->stripe_id) && $customerId) {
+                    $user->update(['stripe_id' => $customerId]);
+                }
 
                 if ($user) {
                     $stripe = new StripeClient(config('services.stripe.secret'));

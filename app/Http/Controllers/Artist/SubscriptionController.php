@@ -97,10 +97,7 @@ class SubscriptionController extends Controller
         $subscription = Subscription::find($request->plan_id);
 
         if ($subscription->price > 0 && $subscription->stripe_price_id) {
-            if (!$user->stripe_id) {
-                $customer = $this->createCustomer($user->email, $user->name);
-                $user->update(['stripe_id' => $customer->id]);
-            }
+            $customerId = $this->ensureStripeCustomer($user);
 
             // Check if user has an active subscription that ends in the future
             $activeSubscription = UserSubscription::where('user_id', $user->id)
@@ -122,7 +119,7 @@ class SubscriptionController extends Controller
             session(['pending_subscription_plan_id' => $subscription->id]);
 
             $sessionUrl = $this->createCheckoutSession(
-                $user->stripe_id,
+                $customerId,
                 $subscription->stripe_price_id,
                 route('artist.subscription.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
                 route('artist.subscription.plans'),
@@ -170,6 +167,11 @@ class SubscriptionController extends Controller
 
             if (!$user) {
                 return redirect()->route('artist.login')->with('error', 'Session expired. Please log in.');
+            }
+
+            // Ensure user has stripe_id stored if missing
+            if (empty($user->stripe_id) && !empty($session->customer)) {
+                $user->update(['stripe_id' => $session->customer]);
             }
             
             if ($session->payment_status === 'paid' || $session->status === 'complete') {
