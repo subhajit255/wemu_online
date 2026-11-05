@@ -61,7 +61,7 @@ trait StripeTrait
     {
         // Ideally, you'd use config('services.stripe.secret') here instead of hardcoding
         $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
-        
+
         $payload = array_merge(array_filter([
             'email' => $email,
             'name' => $name,
@@ -83,13 +83,13 @@ trait StripeTrait
     public function createSubscription(string $customerId, string $priceId, array $params = [])
     {
         $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
-        
+
         $payload = array_merge([
             'customer' => $customerId,
             'items' => [
                 ['price' => $priceId],
             ],
-            'payment_behavior' => 'default_incomplete',
+            'payment_behavior' => 'allow_incomplete',
             'payment_settings' => ['save_default_payment_method' => 'on_subscription'],
             // Expand the latest invoice and payment intent to handle initial 3DS auth if required
             'expand' => ['latest_invoice.payment_intent'],
@@ -145,7 +145,7 @@ trait StripeTrait
             $customerId,
             ['invoice_settings' => ['default_payment_method' => $paymentMethod->id]]
         );
-        
+
         return $paymentMethod;
     }
 
