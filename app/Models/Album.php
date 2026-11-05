@@ -37,7 +37,7 @@ class Album extends Model
     }
     public function songs()
     {
-        return $this->hasMany(Song::class);
+        return $this->hasMany(Song::class)->orderByRaw('COALESCE(track_number, 999999) asc')->orderBy('id', 'asc');
     }
     public function getImagePathAttribute()
     {

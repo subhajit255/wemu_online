@@ -10,7 +10,7 @@
                 <li class="breadcrumb-item">
                     <span class="bullet bg-gray-400 w-5px h-2px"></span>
                 </li>
-                <li class="breadcrumb-item text-dark">After Hours</li>
+                <li class="breadcrumb-item text-dark">{{ $albumDetails->title }}</li>
             </ul>
         </div>
         <div class="d-flex align-items-center gap-2 gap-lg-3">
@@ -59,18 +59,59 @@
         </div>
 
         <!-- Tracklist Section -->
+        <style>
+            .cursor-move {
+                cursor: grab !important;
+            }
+            .cursor-move:active {
+                cursor: grabbing !important;
+            }
+            .sortable-ghost {
+                opacity: 0.35;
+                background-color: #f1faff !important;
+            }
+            .sortable-chosen {
+                background-color: #f8f9fa !important;
+            }
+            .drag-handle {
+                cursor: grab;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                border-radius: 4px;
+                transition: background-color 0.15s, color 0.15s;
+            }
+            .drag-handle:hover {
+                background-color: #eff2f5;
+                color: #009ef7 !important;
+            }
+            .drag-handle:active {
+                cursor: grabbing;
+            }
+        </style>
         <div class="card clean-metric-card mb-5 mb-xl-10">
-            <div class="card-header border-0 pt-6">
-                <h3 class="card-title align-items-start flex-column">
+            <div class="card-header border-0 pt-6 d-flex justify-content-between align-items-center">
+                <div class="card-title align-items-center d-flex">
                     <span class="card-label fw-bold fs-4 text-dark">Tracklist</span>
-                </h3>
+                    <span class="badge badge-light-primary fw-semibold fs-8 ms-3" title="Drag and drop rows using the grip handle to change track order">
+                        <i class="fa-solid fa-arrows-up-down fs-8 me-1 text-primary"></i> Drag to reorder
+                    </span>
+                </div>
+                <div class="card-toolbar">
+                    <span id="reorder-saving-indicator" style="display: none;" class="text-primary fw-bold fs-7 align-items-center">
+                        <span class="spinner-border spinner-border-sm me-2 text-primary" role="status"></span>
+                        Saving order...
+                    </span>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table align-middle gs-0 gy-4 song-table mb-0">
                         <thead>
                             <tr class="fw-bold text-muted bg-transparent">
-                                <th class="ps-8 min-w-50px w-50px">#</th>
+                                <th class="ps-8 min-w-60px w-60px">#</th>
                                 <th class="min-w-200px">Title</th>
                                 <th class="min-w-100px text-end">Streams</th>
                                 <th class="min-w-150px text-end">Duration</th>
@@ -78,10 +119,17 @@
                                 <th class="min-w-80px text-end pe-8 rounded-end">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tracklist-tbody">
                             @forelse ($albumDetails->songs as $index => $song)
-                            <tr>
-                                <td class="ps-8 text-muted fw-bold">{{ $index + 1 }}</td>
+                            <tr class="sortable-row" data-id="{{ $song->id }}">
+                                <td class="ps-8 text-muted fw-bold">
+                                    <div class="d-flex align-items-center">
+                                        <span class="drag-handle text-gray-400 text-hover-primary cursor-move me-2" title="Drag to reorder">
+                                            <i class="fa-solid fa-grip-vertical fs-6"></i>
+                                        </span>
+                                        <span class="row-index">{{ $index + 1 }}</span>
+                                    </div>
+                                </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="symbol symbol-40px me-3">
@@ -133,7 +181,7 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr>
+                            <tr class="no-songs-row">
                                 <td colspan="6" class="text-center empty-data py-10">No songs found</td>
                             </tr>
                             @endforelse
@@ -146,6 +194,7 @@
     </div>
 </div>
 @push('script')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
     $(document).ready(function() {
         $('.btn-delete').on('click', function(e) {
@@ -165,6 +214,74 @@
                 }
             });
         });
+
+        const tracklistTbody = document.getElementById('tracklist-tbody');
+        if (tracklistTbody && tracklistTbody.querySelectorAll('.sortable-row').length > 1) {
+            new Sortable(tracklistTbody, {
+                handle: '.drag-handle',
+                draggable: '.sortable-row',
+                animation: 180,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: function(evt) {
+                    // Update index numbers visually immediately
+                    const rows = tracklistTbody.querySelectorAll('.sortable-row');
+                    const songIds = [];
+                    rows.forEach((row, idx) => {
+                        const indexEl = row.querySelector('.row-index');
+                        if (indexEl) {
+                            indexEl.textContent = idx + 1;
+                        }
+                        const id = row.getAttribute('data-id');
+                        if (id) {
+                            songIds.push(id);
+                        }
+                    });
+
+                    // If position didn't change, do nothing
+                    if (evt.oldIndex === evt.newIndex) {
+                        return;
+                    }
+
+                    const indicator = $('#reorder-saving-indicator');
+                    indicator.css('display', 'inline-flex');
+
+                    $.ajax({
+                        url: "{{ route('artist.albums.reorderSongs', $albumDetails->id) }}",
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            song_ids: songIds
+                        },
+                        success: function(response) {
+                            indicator.hide();
+                            if (response.status) {
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.success(response.message || 'Track order updated successfully!');
+                                }
+                            } else {
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.error(response.message || 'Failed to update track order.');
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            indicator.hide();
+                            let msg = 'Failed to update track order. Please try again.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error(msg);
+                            }
+                        }
+                    });
+                }
+            });
+        }
     });
 </script>
 @endpush

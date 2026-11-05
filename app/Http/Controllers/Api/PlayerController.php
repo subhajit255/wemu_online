@@ -64,7 +64,9 @@ class PlayerController extends BaseController
 
             switch ($sourceType) {
                 case 'album':
-                    $baseQuery->where('album_id', $sourceId);
+                    $baseQuery->where('album_id', $sourceId)
+                        ->orderByRaw('COALESCE(track_number, 999999) asc')
+                        ->orderBy('id', 'asc');
                     break;
                 case 'artist':
                 case 'popular-radio':

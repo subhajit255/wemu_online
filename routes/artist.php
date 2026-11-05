@@ -45,6 +45,7 @@ Route::as('artist.')->group(function () {
             Route::match(['get', 'post'], 'albums', 'index')->name('albums.index');
             Route::match(['get', 'post'], 'albums/add-or-update/{id?}', 'storeOrUpdate')->name('albums.storeOrUpdate');
             Route::get('albums/{id}', 'show')->name('albums.show');
+            Route::post('albums/{id}/reorder-songs', 'reorderSongs')->name('albums.reorderSongs');
             Route::delete('albums/delete/{id}', 'destroy')->name('albums.destroy');
         });
         Route::controller(AnalyticsController::class)->group(function () {

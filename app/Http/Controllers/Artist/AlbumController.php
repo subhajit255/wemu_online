@@ -7,6 +7,7 @@ use App\Http\Controllers\BaseController;
 use App\Models\Album;
 use App\Models\Genre;
 use App\Models\Language;
+use App\Models\Song;
 use App\Traits\UploadAble;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -150,8 +151,58 @@ class AlbumController extends BaseController
 
     public function show($id)
     {
-        $albumDetails = Album::with('songs')->find($id);
+        $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
+        $albumDetails = Album::with(['songs' => function ($q) {
+            $q->orderByRaw('COALESCE(track_number, 999999) asc')->orderBy('id', 'asc');
+        }])->whereIn('user_id', $teamIds)->findOrFail($id);
+
         return view('artist.album.show', compact('albumDetails'));
+    }
+
+    /**
+     * Reorder songs in an album.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reorderSongs(Request $request, $id)
+    {
+        $request->validate([
+            'song_ids' => 'required|array',
+            'song_ids.*' => 'required|integer|exists:songs,id',
+        ]);
+
+        $mainArtistId = auth()->user()->added_by ?: auth()->user()->id;
+        $teamIds = User::where('id', $mainArtistId)->orWhere('added_by', $mainArtistId)->pluck('id')->toArray();
+
+        $album = Album::whereIn('user_id', $teamIds)->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->song_ids as $index => $songId) {
+                Song::where('id', $songId)
+                    ->where('album_id', $album->id)
+                    ->update(['track_number' => $index + 1]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Song order updated successfully!',
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            logger()->error('Album song reorder failed: ' . $th->getMessage() . ' in ' . $th->getFile() . ':' . $th->getLine());
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update song order. Please try again.',
+            ], 500);
+        }
     }
 
     public function destroy($id)
