@@ -177,9 +177,10 @@ class StripeWebhookService
                 'current_period_start' => $periodStart,
                 'current_period_end' => $periodEnd,
                 'ends_at' => $endDate,
+                'ended_at' => $endDate ? Carbon::parse($endDate)->toDateString() : ($periodEnd ? Carbon::parse($periodEnd)->toDateString() : null),
                 'status' => in_array($stripeSubscription->status, ['active', 'trialing']) ? 1 : 0,
                 'transaction_id' => $session->payment_intent ?? $session->invoice ?? $session->id,
-                'started_on' => now(),
+                'started_on' => $periodStart ? Carbon::parse($periodStart)->toDateString() : now()->toDateString(),
             ]);
 
             $txId = $session->payment_intent ?? $session->invoice ?? $session->id;
@@ -248,6 +249,7 @@ class StripeWebhookService
                     'current_period_start' => $periodStart,
                     'current_period_end' => $periodEnd,
                     'ends_at' => $periodEnd,
+                    'ended_at' => $periodEnd ? Carbon::parse($periodEnd)->toDateString() : null,
                     'status' => 1,
                     'stripe_status' => 'active',
                 ]);
@@ -318,9 +320,10 @@ class StripeWebhookService
                         'current_period_start' => $periodStart,
                         'current_period_end' => $periodEnd,
                         'ends_at' => $periodEnd,
+                        'ended_at' => $periodEnd ? Carbon::parse($periodEnd)->toDateString() : null,
                         'status' => 1,
                         'transaction_id' => $invoice->payment_intent ?? $invoice->id,
-                        'started_on' => now(),
+                        'started_on' => $periodStart ? Carbon::parse($periodStart)->toDateString() : now()->toDateString(),
                     ]);
 
                     Transaction::create([
@@ -439,6 +442,7 @@ class StripeWebhookService
                 'stripe_status' => $isPendingCancel ? 'pending_cancel' : $stripeSubscription->status,
                 'status' => $finalStatus,
                 'ends_at' => $endsAt,
+                'ended_at' => $endsAt ? Carbon::parse($endsAt)->toDateString() : null,
                 'current_period_start' => $periodStart,
                 'current_period_end' => $periodEnd,
                 'trial_ends_at' => $stripeSubscription->trial_end ? Carbon::createFromTimestamp($stripeSubscription->trial_end) : null,

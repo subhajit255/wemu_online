@@ -49,7 +49,30 @@ class SubscriptionController extends BaseController
     public function myCurrentSubscription(Request $request)
     {
         try {
-            $subscription = UserSubscription::where(['user_id' => auth()->user()->id, 'status' => 1])->latest()->first();
+            $today = Carbon::today()->toDateString();
+
+            $subscription = UserSubscription::where('user_id', auth()->user()->id)
+                ->where('status', 1)
+                ->where(function ($q) use ($today) {
+                    $q->whereDate('started_on', '<=', $today)
+                        ->orWhere(function ($sub) use ($today) {
+                            $sub->whereNull('started_on')
+                                ->whereDate('current_period_start', '<=', $today);
+                        });
+                })
+                ->where(function ($q) use ($today) {
+                    $q->whereDate('ended_at', '>=', $today)
+                        ->orWhere(function ($sub) use ($today) {
+                            $sub->whereNull('ended_at')
+                                ->where(function ($s) use ($today) {
+                                    $s->whereDate('ends_at', '>=', $today)
+                                        ->orWhereDate('current_period_end', '>=', $today);
+                                });
+                        });
+                })
+                ->latest()
+                ->first();
+
             return $this->responseJson(true, 200, 'Subscription fetched successfully', $subscription ? new SubscriptionCollection($subscription) : null);
         } catch (\Exception $e) {
             logger($e->getMessage() . '--' . $e->getLine() . '--' . $e->getFile());
